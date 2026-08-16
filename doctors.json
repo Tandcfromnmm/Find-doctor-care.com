@@ -1,0 +1,69 @@
+
+
+
+
+[
+    {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. John Smith",
+        "Department": "Cardiology",
+        "Branch": "COPC",
+        "OP Fee": "₹800",
+        "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "Regular Timings"
+    },
+    {
+        "Starred": "No",
+        "Doctor Name": "Dr. Sarah Johnson",
+        "Department": "Neurology",
+        "Branch": "Hitec City",
+        "OP Fee": "₹1000",
+        "OP Timings": "Mon - Fri 09:00 AM - 1:00 PM Sat 2pm to 5pm",
+        "Leave / Timing Updates": "Regular Timings"
+    },
+     {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Murali",
+        "Department": "Cardiology",
+        "Branch": "Hitech City",
+        "OP Fee": "₹800",
+        "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "On leave 29th sep"
+    },
+     {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Manohar",
+        "Department": "Cardiology",
+        "Branch": "Banjara Hills",
+        "OP Fee": "₹800",
+        "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "Regular Timings"
+    },
+      {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Chowdary",
+        "Department": "Cardiology",
+        "Branch": "Nampally",
+        "OP Fee": "₹800",
+        "OP Timings": "Mon - Sat: 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "On leave 10th sep"
+    },
+      {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Rajesh",
+        "Department": "Cardiology",
+        "Branch": "Malakpet",
+        "OP Fee": "₹800",
+        "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "On leave 19th sep"
+    },
+      {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Naveen",
+        "Department": "Cardiology",
+        "Branch": "Raipur",
+        "OP Fee": "₹800",
+        "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "On leave 21st sep"
+    }
+]
