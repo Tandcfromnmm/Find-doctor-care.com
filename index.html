@@ -712,7 +712,7 @@
             })
             .catch(error => {
                 console.error('Error loading doctor data:', error);
-                document.getElementById('resultsContainer').innerHTML = `<div class="no-results">Unable to load doctors.json file. Make sure it is in the same folder.</div>`;
+                document.getElementById('resultsContainer').innerHTML = `<div class="no-results">Error-found in latest input. Please check all symbols eg:{},"",',',[],''.</div>`;
             });
     }
 
