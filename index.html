@@ -590,7 +590,7 @@
 
 <div class="container">
     <div class="brand-header">
-        <img src="images-removebg-preview.png" alt="Logo" class="logo-image">
+        <img src="1000135014.png" alt="Logo" class="logo-image">
         <div class="brand-title">Find Doctor</div>
     </div>
     
@@ -598,7 +598,7 @@
         <svg class="search-icon" viewBox="0 0 24 24">
             <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
         </svg>
-        <input type="text" id="searchInput" placeholder="Search doctor, spec, credit, call day, or age criteria..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
+        <input type="text" id="searchInput" placeholder="Type name of doctor..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
         <div id="searchSpinner" class="apple-spinner"><div></div></div>
         <div id="suggestionsList" class="suggestions-list"></div>
     </div>
@@ -713,7 +713,20 @@
         hours = hours ? hours : 12;
         minutes = minutes < 10 ? '0' + minutes : minutes;
 
-        return `${hours}:${minutes}${ampm} on 16th Aug 2026`;
+        // Dynamic Date Formatting
+        const day = dateObj.getDate();
+        const getOrdinal = (n) => {
+            const s = ["th", "st", "nd", "rd"];
+            const v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        };
+        const formattedDay = getOrdinal(day);
+
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const month = months[dateObj.getMonth()];
+        const year = dateObj.getFullYear();
+
+        return `${hours}:${minutes}${ampm} on ${formattedDay} ${month} ${year}`;
     }
 
     fetch('doctors.json', { method: 'HEAD' })
@@ -725,13 +738,13 @@
                 const modDate = new Date(lastModifiedHeader);
                 timestampEl.textContent = `Backend Sync: ${formatBackendDate(modDate)}`;
             } else if (timestampEl) {
-                timestampEl.textContent = `Backend Sync: 9:21pm on 16th Aug 2026`;
+                timestampEl.textContent = `Backend Sync: ${formatBackendDate(new Date())}`;
             }
         })
         .catch(() => {
             const timestampEl = document.getElementById('backendTimestamp');
             if (timestampEl) {
-                timestampEl.textContent = `Backend Sync: 9:21pm on 16th Aug 2026`;
+                timestampEl.textContent = `Backend Sync: ${formatBackendDate(new Date())}`;
             }
         });
 
@@ -763,7 +776,6 @@
             row.onclick = () => openModal(doc);
 
             const callDayText = doc["Call Day"] || doc["Call Days"] || doc["Duty Day"] || '';
-            // Updated to check "Age Criteria" first
             const ageText = doc["Age Criteria"] || doc["Age Limit"] || doc["Age Restriction"] || doc["Restrictions"] || doc["Patient Age"] || '';
 
             let subInfoText = `${doc["Department"] || 'Department'}`;
@@ -884,7 +896,6 @@
             card.className = 'doctor-card-minimal';
             card.onclick = () => openModal(doc);
 
-            // Credits mapping
             let creditsValue = doc["Credit Accepted"] || doc["Credits"] || doc["Insurance Accepted"] || "None";
             let creditPillsHTML = '';
             if (creditsValue && creditsValue !== "None") {
@@ -892,11 +903,9 @@
                 creditPillsHTML = creditArray.map(c => `<span class="credit-pill">✓ ${c}</span>`).join('');
             }
 
-            // Call Day mapping
             let callDayValue = doc["Call Day"] || doc["Call Days"] || doc["Duty Day"] || "";
             let callDayHTML = callDayValue ? `<span class="callday-pill">Call day: ${callDayValue}</span>` : '';
 
-            // Age Criteria mapping (Prioritizing "Age Criteria" based on your JSON)
             let ageValue = doc["Age Criteria"] || doc["Age Limit"] || doc["Age Restriction"] || doc["Restrictions"] || doc["Patient Age"] || "";
             let ageHTML = ageValue ? `<span class="age-pill">Age: ${ageValue}</span>` : '';
 
