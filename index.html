@@ -620,6 +620,50 @@
             display: inline-block;
             margin-bottom: 8px;
         }
+
+        /* Queue Preview Item Styles */
+        .preview-item-card {
+            background: #0b132b;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .preview-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .preview-doctor-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+        }
+        .preview-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .preview-btn-sm {
+            padding: 4px 10px;
+            font-size: 11.5px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-edit-sm {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+        .btn-edit-sm:hover { background: rgba(59, 130, 246, 0.35); }
+        .btn-del-sm {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+        .btn-del-sm:hover { background: rgba(239, 68, 68, 0.35); }
     </style>
 </head>
 <body>
@@ -746,9 +790,9 @@
 <div id="passwordModal" class="modal-overlay" onclick="closePasswordOnBg(event)">
     <div class="modal-card" style="max-width: 400px;">
         <button class="modal-close" onclick="closePasswordModal()">✕</button>
-        <h2 class="modal-title">Authorized Access</h2>
+        <h2 class="modal-title">Authorized Person Only</h2>
         <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-            Please enter the reschedule password.
+            Please enter the password to modify schedules.
         </p>
         <div style="display: flex; flex-direction: column; gap: 14px;">
             <input type="password" id="adminPasswordInput" placeholder="Enter password..." onkeydown="handlePasswordKey(event)">
@@ -757,13 +801,13 @@
     </div>
 </div>
 
-<!-- OFFICE UPDATE ADMIN MODAL WITH QUEUE SYSTEM -->
+<!-- OFFICE UPDATE ADMIN MODAL WITH AUTO-QUEUE & PREVIEW -->
 <div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)">
     <div class="modal-card">
         <button class="modal-close" onclick="closeAdminModal()">✕</button>
-        <h2 class="modal-title">Doctor Schedule Update Queue</h2>
+        <h2 class="modal-title">Doctor Schedule Update Panel</h2>
         <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-            Add multiple doctors to your update queue one by one, then download them all in a single file!
+            Every update you save is automatically added to your session queue. Preview or modify items below before downloading the master file!
         </p>
         
         <div style="display: flex; flex-direction: column; gap: 14px;">
@@ -793,13 +837,33 @@
                 <input type="text" id="adminSpecialNote" placeholder="e.g. Special clinic hours">
             </div>
 
-            <button class="admin-secondary-btn" onclick="addToQueue()">➕ Add to Update Queue</button>
+            <button class="admin-secondary-btn" onclick="saveToQueueAction()">💾 Save Update to Queue</button>
             
             <div style="border-top: 1px solid #2d3748; padding-top: 14px; margin-top: 4px;">
-                <div id="queueCounterBadge" class="queue-badge">Queue: 0 doctors waiting</div>
-                <button class="admin-btn" onclick="downloadMasterQueueJSON()">Download updated file</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div id="queueCounterBadge" class="queue-badge" style="margin-bottom: 0;">Queue: 0 updates waiting</div>
+                    <button class="admin-secondary-btn" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 12px;" onclick="openPreviewModal()">👁️ Preview All Updates</button>
+                </div>
+                <button class="admin-btn" onclick="downloadMasterQueueJSON()">Check Modified Info</button>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div id="previewModal" class="modal-overlay" onclick="closePreviewOnBg(event)">
+    <div class="modal-card">
+        <button class="modal-close" onclick="closePreviewModal()">✕</button>
+        <h2 class="modal-title">Queue Preview & Verification</h2>
+        <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
+            Review all queued modifications below. You can modify or remove any entry before downloading.
+        </p>
+        
+        <div id="previewContainerList" style="max-height: 280px; overflow-y: auto; margin-bottom: 16px;">
+            <!-- Rendered dynamically -->
+        </div>
+
+        <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">Verify & Download Master File</button>
     </div>
 </div>
 
@@ -819,7 +883,7 @@
             })
             .catch(error => {
                 console.error('Error loading doctor data:', error);
-                document.getElementById('resultsContainer').innerHTML = `<div class="no-results">Error found in lastest input, check symbols eg:""(){}[]'',:;.</div>`;
+                document.getElementById('resultsContainer').innerHTML = `<div class="no-results">Unable to load doctors.json file. Make sure it is in the same folder.</div>`;
             });
     }
 
@@ -1240,7 +1304,6 @@
                 document.getElementById('adminSearchInput').value = item.doc["Doctor Name"];
                 document.getElementById('adminSelectedDoctorDisplay').value = `${item.doc["Doctor Name"]} (${item.doc["Department"]} - ${item.doc["Branch"]})`;
                 
-                // If already in queue, load from queue, else load from doctorData
                 const existingQueueItem = pendingQueueUpdates[item.idx];
                 if (existingQueueItem) {
                     document.getElementById('adminSpecialDate').value = existingQueueItem["Special Date"] || "";
@@ -1261,13 +1324,12 @@
         suggestionsBox.style.display = 'block';
     }
 
-    function addToQueue() {
+    function saveToQueueAction() {
         if (selectedAdminDoctorIndex === null || selectedAdminDoctorIndex === undefined) {
             alert("Please search and select a doctor first.");
             return;
         }
 
-        // Save into queue object
         pendingQueueUpdates[selectedAdminDoctorIndex] = {
             "Special Date": document.getElementById('adminSpecialDate').value,
             "Special Timings": document.getElementById('adminSpecialTimings').value,
@@ -1276,7 +1338,6 @@
 
         updateQueueBadge();
         
-        // Clear fields for next doctor entry
         selectedAdminDoctorIndex = null;
         document.getElementById('adminSearchInput').value = "";
         document.getElementById('adminSelectedDoctorDisplay').value = "";
@@ -1284,25 +1345,103 @@
         document.getElementById('adminSpecialTimings').value = "";
         document.getElementById('adminSpecialNote').value = "";
 
-        alert("Added to update queue successfully! You can search and add another doctor, or download the final file when ready.");
+        alert("Update saved to queue automatically!");
     }
 
     function updateQueueBadge() {
         const count = Object.keys(pendingQueueUpdates).length;
         const badge = document.getElementById('queueCounterBadge');
         if (badge) {
-            badge.textContent = `Queue: ${count} doctor(s) waiting to be saved`;
+            badge.textContent = `Queue: ${count} update(s) saved`;
         }
+    }
+
+    // PREVIEW MODAL LOGIC
+    function openPreviewModal() {
+        const queueKeys = Object.keys(pendingQueueUpdates);
+        const container = document.getElementById('previewContainerList');
+        container.innerHTML = '';
+
+        if (queueKeys.length === 0) {
+            container.innerHTML = `<div style="color: var(--text-secondary); font-size: 14px; text-align: center; padding: 20px;">No updates saved in queue yet.</div>`;
+        } else {
+            queueKeys.forEach(idx => {
+                const item = pendingQueueUpdates[idx];
+                const doc = doctorData[idx] || {};
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'preview-item-card';
+                cardDiv.innerHTML = `
+                    <div class="preview-item-header">
+                        <span class="preview-doctor-name">${doc["Doctor Name"] || 'Doctor'}</span>
+                        <div class="preview-actions">
+                            <button class="preview-btn-sm btn-edit-sm" onclick="editQueueItem(${idx})">Edit</button>
+                            <button class="preview-btn-sm btn-del-sm" onclick="removeQueueItem(${idx})">Remove</button>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary);">
+                        <div><strong>Branch:</strong> ${doc["Branch"] || 'N/A'} | <strong>Dept:</strong> ${doc["Department"] || 'N/A'}</div>
+                        <div><strong>Date:</strong> ${item["Special Date"] || 'None'}</div>
+                        <div><strong>Timings:</strong> ${item["Special Timings"] || 'Regular'}</div>
+                        <div><strong>Note:</strong> ${item["Special Note"] || 'None'}</div>
+                    </div>
+                `;
+                container.appendChild(cardDiv);
+            });
+        }
+
+        document.getElementById('previewModal').classList.add('active');
+    }
+
+    function closePreviewModal() {
+        document.getElementById('previewModal'].classList.remove('active');
+    }
+
+    function closePreviewOnBg(event) {
+        if (event.target.id === 'previewModal') {
+            closePreviewModal();
+        }
+    }
+
+    function removeQueueItem(idx) {
+        delete pendingQueueUpdates[idx];
+        updateQueueBadge();
+        openPreviewModal(); // Refresh preview list
+    }
+
+    function editQueueItem(idx) {
+        closePreviewModal();
+        closeAdminModal();
+
+        const doc = doctorData[idx];
+        selectedAdminDoctorIndex = idx;
+        document.getElementById('adminSearchInput').value = doc["Doctor Name"];
+        document.getElementById('adminSelectedDoctorDisplay').value = `${doc["Doctor Name"]} (${doc["Department"]} - ${doc["Branch"]})`;
+        
+        const qItem = pendingQueueUpdates[idx];
+        document.getElementById('adminSpecialDate').value = qItem["Special Date"] || "";
+        document.getElementById('adminSpecialTimings').value = qItem["Special Timings"] || "";
+        document.getElementById('adminSpecialNote').value = qItem["Special Note"] || "";
+
+        document.getElementById('adminModal').classList.add('active');
     }
 
     function downloadMasterQueueJSON() {
         const queueKeys = Object.keys(pendingQueueUpdates);
         if (queueKeys.length === 0) {
-            alert("Your update queue is empty. Please add at least one doctor update before downloading.");
+            alert("Your update queue is empty. Please save at least one doctor update before downloading.");
+            return;
+        }
+        // Directly open preview verification window before final download
+        openPreviewModal();
+    }
+
+    function confirmAndDownloadFromPreview() {
+        const queueKeys = Object.keys(pendingQueueUpdates);
+        if (queueKeys.length === 0) {
+            alert("Queue is empty.");
             return;
         }
 
-        // Apply all queued updates to master doctorData array
         queueKeys.forEach(idx => {
             const updates = pendingQueueUpdates[idx];
             doctorData[idx]["Special Date"] = updates["Special Date"];
@@ -1310,7 +1449,6 @@
             doctorData[idx]["Special Note"] = updates["Special Note"];
         });
 
-        // Generate master JSON download
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doctorData, null, 4));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
@@ -1319,11 +1457,11 @@
         downloadAnchor.click();
         downloadAnchor.remove();
 
-        alert("Master 'doctors.json' file downloaded with all your updates combined! Replace it in your website folder.");
+        alert("Master 'doctors.json' file successfully downloaded with all verified modifications!");
         
-        // Clear queue after download
         pendingQueueUpdates = {};
         updateQueueBadge();
+        closePreviewModal();
         closeAdminModal();
         renderStarredAccordion();
         applyFilters();
