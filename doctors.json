@@ -9,6 +9,7 @@
         "Department": "Cardiology",
         "Branch": "COPC",
         "OP Fee": "₹800",
+        "Credit Accepted": "AROGYABHADRATHA, EHS",
         "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
         "Leave / Timing Updates": "Regular Timings"
     },
@@ -17,6 +18,7 @@
         "Doctor Name": "Dr. Sarah Johnson",
         "Department": "Neurology",
         "Branch": "Hitec City",
+        "Credit Accepted": "AROGYABHADRATHA, EHS & CGHS",
         "OP Fee": "₹1000",
         "OP Timings": "Mon - Fri 09:00 AM - 1:00 PM Sat 2pm to 5pm",
         "Leave / Timing Updates": "Regular Timings"
@@ -26,6 +28,7 @@
         "Doctor Name": "Dr. Murali",
         "Department": "Cardiology",
         "Branch": "Hitech City",
+        "Credit Accepted": "AROGYABHADRATHA",
         "OP Fee": "₹800",
         "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
         "Leave / Timing Updates": "On leave 29th sep"
@@ -35,6 +38,7 @@
         "Doctor Name": "Dr. Manohar",
         "Department": "Cardiology",
         "Branch": "Banjara Hills",
+        "Credit Accepted": "NO",
         "OP Fee": "₹800",
         "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
         "Leave / Timing Updates": "Regular Timings"
@@ -44,6 +48,7 @@
         "Doctor Name": "Dr. Chowdary",
         "Department": "Cardiology",
         "Branch": "Nampally",
+        "Credit Accepted": "CGHS, EHS, ECHS & AAROGYABHADRATHA",
         "OP Fee": "₹800",
         "OP Timings": "Mon - Sat: 10:00 AM - 2:00 PM",
         "Leave / Timing Updates": "On leave 10th sep"
@@ -53,6 +58,7 @@
         "Doctor Name": "Dr. Rajesh",
         "Department": "Cardiology",
         "Branch": "Malakpet",
+        "Credit Accepted": "AROGYABHADRATHA, EHS",
         "OP Fee": "₹800",
         "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
         "Leave / Timing Updates": "On leave 19th sep"
@@ -62,6 +68,7 @@
         "Doctor Name": "Dr. Naveen",
         "Department": "Cardiology",
         "Branch": "Raipur",
+        "Credit Accepted": "AROGYABHADRATHA",
         "OP Fee": "₹800",
         "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
         "Leave / Timing Updates": "On leave 21st sep"
