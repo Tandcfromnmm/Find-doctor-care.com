@@ -628,10 +628,10 @@
     <div class="brand-header">
         <div class="brand-left">
             <img src="images-removebg-preview.png" alt="Logo" class="logo-image" id="brandLogo">
-            <div class="brand-title">Find Doctor</div>
+            <div class="brand-title">Care Find Doctor</div>
         </div>
         <button class="admin-trigger-btn" onclick="promptAdminPassword()">
-            <span>⚙️ Office Update</span>
+            <span>⚙️ Reschedule</span>
         </button>
     </div>
     
@@ -746,9 +746,9 @@
 <div id="passwordModal" class="modal-overlay" onclick="closePasswordOnBg(event)">
     <div class="modal-card" style="max-width: 400px;">
         <button class="modal-close" onclick="closePasswordModal()">✕</button>
-        <h2 class="modal-title">Admin Access Required</h2>
+        <h2 class="modal-title">Authorized Access</h2>
         <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-            Please enter the office password to modify schedules.
+            Please enter the reschedule password.
         </p>
         <div style="display: flex; flex-direction: column; gap: 14px;">
             <input type="password" id="adminPasswordInput" placeholder="Enter password..." onkeydown="handlePasswordKey(event)">
@@ -761,7 +761,7 @@
 <div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)">
     <div class="modal-card">
         <button class="modal-close" onclick="closeAdminModal()">✕</button>
-        <h2 class="modal-title">Office Schedule Update Queue</h2>
+        <h2 class="modal-title">Doctor Schedule Update Queue</h2>
         <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
             Add multiple doctors to your update queue one by one, then download them all in a single file!
         </p>
@@ -789,7 +789,7 @@
             </div>
 
             <div>
-                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Office Update Reason / Note:</label>
+                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Doctor Update Reason / Note:</label>
                 <input type="text" id="adminSpecialNote" placeholder="e.g. Special clinic hours">
             </div>
 
@@ -797,7 +797,7 @@
             
             <div style="border-top: 1px solid #2d3748; padding-top: 14px; margin-top: 4px;">
                 <div id="queueCounterBadge" class="queue-badge">Queue: 0 doctors waiting</div>
-                <button class="admin-btn" onclick="downloadMasterQueueJSON()">📥 Download Single Master doctors.json</button>
+                <button class="admin-btn" onclick="downloadMasterQueueJSON()">Download updated file</button>
             </div>
         </div>
     </div>
@@ -807,7 +807,7 @@
     let doctorData = [];
     let selectedAdminDoctorIndex = null;
     let pendingQueueUpdates = {}; // Tracks updates by doctor index
-    const ADMIN_SECRET_PASSWORD = "careoffice123";
+    const ADMIN_SECRET_PASSWORD = "12345";
 
     function loadDoctorData() {
         fetch('doctors.json')
@@ -819,7 +819,7 @@
             })
             .catch(error => {
                 console.error('Error loading doctor data:', error);
-                document.getElementById('resultsContainer').innerHTML = `<div class="no-results">Unable to load doctors.json file. Make sure it is in the same folder.</div>`;
+                document.getElementById('resultsContainer').innerHTML = `<div class="no-results">Error found in lastest input, check symbols eg:""(){}[]'',:;.</div>`;
             });
     }
 
