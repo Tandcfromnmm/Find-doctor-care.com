@@ -592,6 +592,34 @@
             transition: background 0.2s ease;
         }
         .admin-btn:hover { background: #2563eb; }
+
+        .admin-secondary-btn {
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #2d3748;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            transition: all 0.2s ease;
+        }
+        .admin-secondary-btn:hover {
+            background: #2d3748;
+            color: #ffffff;
+        }
+
+        .queue-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
@@ -729,17 +757,16 @@
     </div>
 </div>
 
-<!-- OFFICE UPDATE ADMIN MODAL WITH DOCTOR SEARCH -->
+<!-- OFFICE UPDATE ADMIN MODAL WITH QUEUE SYSTEM -->
 <div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)">
     <div class="modal-card">
         <button class="modal-close" onclick="closeAdminModal()">✕</button>
-        <h2 class="modal-title">Office Schedule Update</h2>
+        <h2 class="modal-title">Office Schedule Update Queue</h2>
         <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-            Search and select a doctor, then set date-specific changes.
+            Add multiple doctors to your update queue one by one, then download them all in a single file!
         </p>
         
         <div style="display: flex; flex-direction: column; gap: 14px;">
-            <!-- Admin Doctor Live Search Box -->
             <div style="position: relative;" id="adminSearchWrapper">
                 <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Find Doctor to Edit:</label>
                 <input type="text" id="adminSearchInput" placeholder="Type doctor name to search..." oninput="handleAdminSearchInput()" autocomplete="off">
@@ -766,7 +793,12 @@
                 <input type="text" id="adminSpecialNote" placeholder="e.g. Special clinic hours">
             </div>
 
-            <button class="admin-btn" onclick="saveAdminUpdate()">Save & Download Updated doctors.json</button>
+            <button class="admin-secondary-btn" onclick="addToQueue()">➕ Add to Update Queue</button>
+            
+            <div style="border-top: 1px solid #2d3748; padding-top: 14px; margin-top: 4px;">
+                <div id="queueCounterBadge" class="queue-badge">Queue: 0 doctors waiting</div>
+                <button class="admin-btn" onclick="downloadMasterQueueJSON()">📥 Download Single Master doctors.json</button>
+            </div>
         </div>
     </div>
 </div>
@@ -774,7 +806,8 @@
 <script>
     let doctorData = [];
     let selectedAdminDoctorIndex = null;
-    const ADMIN_SECRET_PASSWORD = "careoffice123"; // You can change this password here
+    let pendingQueueUpdates = {}; // Tracks updates by doctor index
+    const ADMIN_SECRET_PASSWORD = "careoffice123";
 
     function loadDoctorData() {
         fetch('doctors.json')
@@ -839,7 +872,6 @@
 
     checkBackendSync();
 
-    // AUTO-REFRESH & COUNTDOWN TIMER
     const REFRESH_INTERVAL_SECONDS = 300; 
     let timeLeft = REFRESH_INTERVAL_SECONDS;
 
@@ -1162,6 +1194,7 @@
         document.getElementById('adminSpecialDate').value = "";
         document.getElementById('adminSpecialTimings').value = "";
         document.getElementById('adminSpecialNote').value = "";
+        updateQueueBadge();
         document.getElementById('adminModal').classList.add('active');
     }
 
@@ -1175,7 +1208,6 @@
         }
     }
 
-    // ADMIN DOCTOR LIVE SEARCH IN MODAL
     function handleAdminSearchInput() {
         const query = document.getElementById('adminSearchInput').value.toLowerCase().trim();
         const suggestionsBox = document.getElementById('adminSuggestionsList');
@@ -1208,10 +1240,17 @@
                 document.getElementById('adminSearchInput').value = item.doc["Doctor Name"];
                 document.getElementById('adminSelectedDoctorDisplay').value = `${item.doc["Doctor Name"]} (${item.doc["Department"]} - ${item.doc["Branch"]})`;
                 
-                // Populate existing values if any
-                document.getElementById('adminSpecialDate').value = item.doc["Special Date"] || "";
-                document.getElementById('adminSpecialTimings').value = item.doc["Special Timings"] || "";
-                document.getElementById('adminSpecialNote').value = item.doc["Special Note"] || "";
+                // If already in queue, load from queue, else load from doctorData
+                const existingQueueItem = pendingQueueUpdates[item.idx];
+                if (existingQueueItem) {
+                    document.getElementById('adminSpecialDate').value = existingQueueItem["Special Date"] || "";
+                    document.getElementById('adminSpecialTimings').value = existingQueueItem["Special Timings"] || "";
+                    document.getElementById('adminSpecialNote').value = existingQueueItem["Special Note"] || "";
+                } else {
+                    document.getElementById('adminSpecialDate').value = item.doc["Special Date"] || "";
+                    document.getElementById('adminSpecialTimings').value = item.doc["Special Timings"] || "";
+                    document.getElementById('adminSpecialNote').value = item.doc["Special Note"] || "";
+                }
 
                 suggestionsBox.style.display = 'none';
             };
@@ -1222,17 +1261,56 @@
         suggestionsBox.style.display = 'block';
     }
 
-    function saveAdminUpdate() {
+    function addToQueue() {
         if (selectedAdminDoctorIndex === null || selectedAdminDoctorIndex === undefined) {
             alert("Please search and select a doctor first.");
             return;
         }
 
-        doctorData[selectedAdminDoctorIndex]["Special Date"] = document.getElementById('adminSpecialDate').value;
-        doctorData[selectedAdminDoctorIndex]["Special Timings"] = document.getElementById('adminSpecialTimings').value;
-        doctorData[selectedAdminDoctorIndex]["Special Note"] = document.getElementById('adminSpecialNote').value;
+        // Save into queue object
+        pendingQueueUpdates[selectedAdminDoctorIndex] = {
+            "Special Date": document.getElementById('adminSpecialDate').value,
+            "Special Timings": document.getElementById('adminSpecialTimings').value,
+            "Special Note": document.getElementById('adminSpecialNote').value
+        };
 
-        // Generate JSON download for staff to replace on server
+        updateQueueBadge();
+        
+        // Clear fields for next doctor entry
+        selectedAdminDoctorIndex = null;
+        document.getElementById('adminSearchInput').value = "";
+        document.getElementById('adminSelectedDoctorDisplay').value = "";
+        document.getElementById('adminSpecialDate').value = "";
+        document.getElementById('adminSpecialTimings').value = "";
+        document.getElementById('adminSpecialNote').value = "";
+
+        alert("Added to update queue successfully! You can search and add another doctor, or download the final file when ready.");
+    }
+
+    function updateQueueBadge() {
+        const count = Object.keys(pendingQueueUpdates).length;
+        const badge = document.getElementById('queueCounterBadge');
+        if (badge) {
+            badge.textContent = `Queue: ${count} doctor(s) waiting to be saved`;
+        }
+    }
+
+    function downloadMasterQueueJSON() {
+        const queueKeys = Object.keys(pendingQueueUpdates);
+        if (queueKeys.length === 0) {
+            alert("Your update queue is empty. Please add at least one doctor update before downloading.");
+            return;
+        }
+
+        // Apply all queued updates to master doctorData array
+        queueKeys.forEach(idx => {
+            const updates = pendingQueueUpdates[idx];
+            doctorData[idx]["Special Date"] = updates["Special Date"];
+            doctorData[idx]["Special Timings"] = updates["Special Timings"];
+            doctorData[idx]["Special Note"] = updates["Special Note"];
+        });
+
+        // Generate master JSON download
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doctorData, null, 4));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
@@ -1241,7 +1319,11 @@
         downloadAnchor.click();
         downloadAnchor.remove();
 
-        alert("Update saved! A new 'doctors.json' file has been downloaded. Replace it in your website folder to make it live.");
+        alert("Master 'doctors.json' file downloaded with all your updates combined! Replace it in your website folder.");
+        
+        // Clear queue after download
+        pendingQueueUpdates = {};
+        updateQueueBadge();
         closeAdminModal();
         renderStarredAccordion();
         applyFilters();
