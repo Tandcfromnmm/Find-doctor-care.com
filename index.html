@@ -39,8 +39,14 @@
         .brand-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
             margin-bottom: 24px;
+        }
+
+        .brand-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .logo-image {
@@ -57,30 +63,54 @@
             letter-spacing: -0.01em;
         }
 
+        /* Admin Quick Trigger Button */
+        .admin-trigger-btn {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .admin-trigger-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            color: #ffffff;
+        }
+
         /* Search Bar & Auto-Suggest Style */
         .search-box-wrapper {
             position: relative;
             margin-bottom: 24px;
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="date"], select {
             width: 100%;
-            padding: 14px 44px 14px 44px;
-            font-size: 16px;
-            background: var(--card-bg);
+            padding: 14px 16px;
+            font-size: 15px;
+            background: #0b132b;
             border: 1px solid #2d3748;
-            border-radius: var(--radius);
+            border-radius: 12px;
             color: var(--text-main);
             outline: none;
-            transition: all 0.2s ease;
             box-sizing: border-box;
+            transition: all 0.2s ease;
         }
 
-        input[type="text"]::placeholder {
-            color: var(--text-secondary);
+        .search-box-wrapper input[type="text"] {
+            padding-left: 44px;
+            padding-right: 44px;
+            border-radius: var(--radius);
+            background: var(--card-bg);
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus, input[type="date"]:focus, select:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 4px var(--accent-glow);
         }
@@ -236,9 +266,6 @@
             background: #2d3748;
             border-radius: 3px;
         }
-        .accordion-content::-webkit-scrollbar-thumb:hover {
-            background: #3b82f6;
-        }
 
         .starred-row-item {
             padding: 12px 20px;
@@ -326,7 +353,7 @@
             margin-bottom: 10px;
         }
 
-        /* Meta Pills Container (Credits, Call day, Age Criteria) */
+        /* Meta Pills Container */
         .meta-pills-container {
             display: flex;
             flex-wrap: wrap;
@@ -341,7 +368,6 @@
             color: #34d399;
             padding: 2px 6px;
             border-radius: 4px;
-            letter-spacing: 0.03em;
         }
 
         .callday-pill {
@@ -351,7 +377,6 @@
             color: #fbbf24;
             padding: 2px 6px;
             border-radius: 4px;
-            letter-spacing: 0.03em;
             border: 1px dashed rgba(245, 158, 11, 0.4);
         }
 
@@ -362,7 +387,6 @@
             color: #c084fc;
             padding: 2px 6px;
             border-radius: 4px;
-            letter-spacing: 0.03em;
             border: 1px dashed rgba(168, 85, 247, 0.4);
         }
 
@@ -436,33 +460,21 @@
             user-select: none;
         }
 
-        /* Live Indicator Dot Style */
         .live-dot {
             width: 6px;
             height: 6px;
             background-color: #10b981;
             border-radius: 50%;
             display: inline-block;
-            box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
             animation: livePulse 2s infinite;
         }
 
         @keyframes livePulse {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            70% {
-                transform: scale(1);
-                box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-            }
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
-        /* Countdown Pill Style */
         .refresh-countdown {
             background: rgba(59, 130, 246, 0.15);
             color: #60a5fa;
@@ -472,7 +484,6 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* Developer Credit Animation */
         .developer-credit {
             display: inline-block;
             font-weight: 600;
@@ -486,21 +497,14 @@
         }
 
         @keyframes colorShine {
-            0% {
-                background-position: 200% center;
-            }
-            100% {
-                background-position: -200% center;
-            }
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
         }
 
         /* Modal Overlay */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(6px);
             display: flex;
@@ -541,74 +545,68 @@
 
         .modal-close {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 20px; right: 20px;
             background: #1e293b;
             border: none;
-            width: 32px;
-            height: 32px;
+            width: 32px; height: 32px;
             border-radius: 50%;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 16px; font-weight: 600;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             color: var(--text-secondary);
-        }
-
-        .modal-close:hover {
-            background: #2d3748;
-            color: var(--text-main);
         }
 
         .modal-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0 0 20px 0;
+            font-size: 20px; font-weight: 700; margin: 0 0 20px 0;
         }
 
         .modal-details-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            font-size: 15px;
-            background: #0b132b;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #1e293b;
-            margin-bottom: 0;
+            display: flex; flex-direction: column; gap: 14px;
+            font-size: 15px; background: #0b132b;
+            padding: 16px; border-radius: 12px; border: 1px solid #1e293b;
         }
 
         .modal-detail-row {
-            display: flex;
-            justify-content: space-between;
+            display: flex; justify-content: space-between;
         }
 
-        .modal-detail-row span:first-child {
-            color: var(--text-secondary);
-        }
+        .modal-detail-row span:first-child { color: var(--text-secondary); }
+        .modal-detail-row span:last-child { font-weight: 600; color: var(--text-main); text-align: right; }
 
-        .modal-detail-row span:last-child {
+        /* Admin Action Buttons */
+        .admin-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
             font-weight: 600;
-            color: var(--text-main);
-            text-align: right;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 16px;
+            transition: background 0.2s ease;
         }
+        .admin-btn:hover { background: #2563eb; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="brand-header">
-        <img src="images-removebg-preview.png" alt="Logo" class="logo-image" id="brandLogo">
-        <div class="brand-title">Care Find Doctor</div>
+        <div class="brand-left">
+            <img src="images-removebg-preview.png" alt="Logo" class="logo-image" id="brandLogo">
+            <div class="brand-title">Find Doctor</div>
+        </div>
+        <button class="admin-trigger-btn" onclick="openAdminModal()">
+            <span>⚙️ Office Update</span>
+        </button>
     </div>
     
     <div class="search-box-wrapper">
         <svg class="search-icon" viewBox="0 0 24 24">
             <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
         </svg>
-        <input type="text" id="searchInput" placeholder="Type doctor name..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
+        <input type="text" id="searchInput" placeholder="Search doctor, spec, credit, call day, or age criteria..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
         <div id="searchSpinner" class="apple-spinner"><div></div></div>
         <div id="suggestionsList" class="suggestions-list"></div>
     </div>
@@ -640,13 +638,13 @@
 <footer class="site-footer">
     <div class="footer-item">
         <span class="live-dot"></span>
-        <span id="backendTimestamp">Last modify: Loading...</span>
+        <span id="backendTimestamp">Backend Sync: Loading...</span>
     </div>
     
     <span class="footer-divider">|</span>
     
     <div class="footer-item">
-        <span>Backend check in:<span id="countdownTimer" class="refresh-countdown">05:00</span></span>
+        <span>Auto-refresh in <span id="countdownTimer" class="refresh-countdown">05:00</span></span>
     </div>
     
     <span class="footer-divider">|</span>
@@ -656,6 +654,7 @@
     </div>
 </footer>
 
+<!-- DOCTOR DETAILS MODAL -->
 <div id="doctorModal" class="modal-overlay" onclick="closeModalOnBg(event)">
     <div class="modal-card">
         <button class="modal-close" onclick="closeModal()">✕</button>
@@ -700,6 +699,43 @@
     </div>
 </div>
 
+<!-- QUICK OFFICE UPDATE ADMIN MODAL -->
+<div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)">
+    <div class="modal-card">
+        <button class="modal-close" onclick="closeAdminModal()">✕</button>
+        <h2 class="modal-title">Office Schedule Update</h2>
+        <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
+            Select a doctor and enter a date-specific timing change. The system will automatically reset after the date passes.
+        </p>
+        
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Select Doctor:</label>
+                <select id="adminDoctorSelect" onchange="populateDoctorAdminFields()">
+                    <option value="">-- Select Doctor --</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Target Date (Day of change):</label>
+                <input type="date" id="adminSpecialDate">
+            </div>
+
+            <div>
+                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Special Timings / Note:</label>
+                <input type="text" id="adminSpecialTimings" placeholder="e.g. 1:00 PM - 3:00 PM">
+            </div>
+
+            <div>
+                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Office Update Reason / Note:</label>
+                <input type="text" id="adminSpecialNote" placeholder="e.g. Special clinic hours">
+            </div>
+
+            <button class="admin-btn" onclick="saveAdminUpdate()">Save & Download Updated doctors.json</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let doctorData = [];
 
@@ -709,10 +745,11 @@
             .then(data => {
                 doctorData = data;
                 renderStarredAccordion();
+                populateAdminDoctorDropdown();
             })
             .catch(error => {
                 console.error('Error loading doctor data:', error);
-                document.getElementById('resultsContainer').innerHTML = `<div class="no-results">Error eg:{}""[]''<>:;() found in latest input. Please check.</div>`;
+                document.getElementById('resultsContainer').innerHTML = `<div class="no-results">Unable to load doctors.json file. Make sure it is in the same folder.</div>`;
             });
     }
 
@@ -765,10 +802,8 @@
 
     checkBackendSync();
 
-    // ------------------------------------------------------------------
     // AUTO-REFRESH & COUNTDOWN TIMER CONFIGURATION
-    // ------------------------------------------------------------------
-    const REFRESH_INTERVAL_SECONDS = 300; // 300 seconds = 5 minutes
+    const REFRESH_INTERVAL_SECONDS = 300; 
     let timeLeft = REFRESH_INTERVAL_SECONDS;
 
     function updateCountdownDisplay() {
@@ -782,19 +817,40 @@
         }
     }
 
-    const countdownInterval = setInterval(() => {
+    setInterval(() => {
         timeLeft--;
         if (timeLeft <= 0) {
-            // Refresh data silently and reset countdown
             loadDoctorData();
             checkBackendSync();
             timeLeft = REFRESH_INTERVAL_SECONDS;
         }
         updateCountdownDisplay();
-    }, 1000); // Ticks every 1 second
+    }, 1000);
 
     updateCountdownDisplay();
-    // ------------------------------------------------------------------
+
+    // SMART DATE OVERRIDE MATCHER (Self-clearing once date passes)
+    function getActiveSchedule(doc) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const currentDateStr = `${year}-${month}-${day}`;
+
+        const targetDate = doc["Special Date"] ? String(doc["Special Date"]).trim() : "";
+
+        if (targetDate && targetDate === currentDateStr) {
+            return {
+                timings: doc["Special Timings"] || doc["OP Timings"],
+                note: doc["Special Note"] || doc["Leave / Timing Updates"] || "Special schedule for today"
+            };
+        }
+
+        return {
+            timings: doc["OP Timings"] || 'N/A',
+            note: (doc["Leave / Timing Updates"] && doc["Leave / Timing Updates"] !== "Regular Timings") ? doc["Leave / Timing Updates"] : ""
+        };
+    }
 
     function toggleAccordion() {
         const wrapper = document.getElementById('starredAccordion');
@@ -944,6 +1000,8 @@
             card.className = 'doctor-card-minimal';
             card.onclick = () => openModal(doc);
 
+            const schedule = getActiveSchedule(doc);
+
             let creditsValue = doc["Credit Accepted"] || doc["Credits"] || doc["Insurance Accepted"] || "None";
             let creditPillsHTML = '';
             if (creditsValue && creditsValue !== "None") {
@@ -972,11 +1030,11 @@
                 ${metaCombinedHTML}
                 <div class="card-details-footer">
                     <span>Fee: <strong>${doc["OP Fee"] || 'N/A'}</strong></span>
-                    <span style="max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Timing: ${doc["OP Timings"] || 'N/A'}</span>
+                    <span style="max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Timing: ${schedule.timings}</span>
                 </div>
-                ${doc["Leave / Timing Updates"] && doc["Leave / Timing Updates"] !== "Regular Timings" ? `
+                ${schedule.note ? `
                     <div class="update-banner">
-                        ⚠️ <strong>Update:</strong> ${doc["Leave / Timing Updates"]}
+                        ⚠️ <strong>Notice:</strong> ${schedule.note}
                     </div>
                 ` : ''}
             `;
@@ -989,16 +1047,19 @@
         document.getElementById('modalDept').textContent = doc["Department"] || 'Department';
         document.getElementById('modalBranch').textContent = doc["Branch"] || 'N/A';
         document.getElementById('modalFee').textContent = doc["OP Fee"] || 'N/A';
-        document.getElementById('modalTimings').textContent = doc["OP Timings"] || 'N/A';
+        
+        const schedule = getActiveSchedule(doc);
+        document.getElementById('modalTimings').textContent = schedule.timings;
+
         document.getElementById('modalCredits').textContent = doc["Credit Accepted"] || doc["Credits"] || doc["Insurance Accepted"] || 'Not Specified';
         document.getElementById('modalCallDay').textContent = doc["Call Day"] || doc["Call Days"] || doc["Duty Day"] || 'Not Assigned';
         document.getElementById('modalAgeLimit').textContent = doc["Age Criteria"] || doc["Age Limit"] || doc["Age Restriction"] || doc["Restrictions"] || doc["Patient Age"] || 'All Ages (No Restrictions)';
 
         const updateContainer = document.getElementById('modalUpdateContainer');
-        if (doc["Leave / Timing Updates"] && doc["Leave / Timing Updates"] !== "Regular Timings") {
+        if (schedule.note) {
             updateContainer.innerHTML = `
                 <div class="update-banner" style="margin-top: 14px;">
-                    ⚠️ <strong>Update:</strong> ${doc["Leave / Timing Updates"]}
+                    ⚠️ <strong>Notice:</strong> ${schedule.note}
                 </div>
             `;
         } else {
@@ -1016,6 +1077,73 @@
         if (event.target.id === 'doctorModal') {
             closeModal();
         }
+    }
+
+    // ADMIN MODAL LOGIC FOR OFFICE STAFF
+    function openAdminModal() {
+        document.getElementById('adminModal').classList.add('active');
+    }
+
+    function closeAdminModal() {
+        document.getElementById('adminModal').classList.remove('active');
+    }
+
+    function closeAdminOnBg(event) {
+        if (event.target.id === 'adminModal') {
+            closeAdminModal();
+        }
+    }
+
+    function populateAdminDoctorDropdown() {
+        const select = document.getElementById('adminDoctorSelect');
+        select.innerHTML = `<option value="">-- Select Doctor --</option>`;
+        
+        doctorData.forEach((doc, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.textContent = `${doc["Doctor Name"]} (${doc["Department"]} - ${doc["Branch"]})`;
+            select.appendChild(opt);
+        });
+    }
+
+    function populateDoctorAdminFields() {
+        const index = document.getElementById('adminDoctorSelect').value;
+        if (index === "") {
+            document.getElementById('adminSpecialDate').value = "";
+            document.getElementById('adminSpecialTimings').value = "";
+            document.getElementById('adminSpecialNote').value = "";
+            return;
+        }
+
+        const doc = doctorData[index];
+        document.getElementById('adminSpecialDate').value = doc["Special Date"] || "";
+        document.getElementById('adminSpecialTimings').value = doc["Special Timings"] || "";
+        document.getElementById('adminSpecialNote').value = doc["Special Note"] || "";
+    }
+
+    function saveAdminUpdate() {
+        const index = document.getElementById('adminDoctorSelect').value;
+        if (index === "") {
+            alert("Please select a doctor first.");
+            return;
+        }
+
+        doctorData[index]["Special Date"] = document.getElementById('adminSpecialDate').value;
+        doctorData[index]["Special Timings"] = document.getElementById('adminSpecialTimings').value;
+        doctorData[index]["Special Note"] = document.getElementById('adminSpecialNote').value;
+
+        // Generate JSON download for staff to replace on server
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doctorData, null, 4));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "doctors.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+
+        alert("Update saved! A new 'doctors.json' file has been downloaded. Replace it in your website folder to make it live.");
+        closeAdminModal();
+        renderStarredAccordion();
     }
 </script>
 
