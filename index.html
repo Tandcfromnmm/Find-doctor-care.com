@@ -326,7 +326,7 @@
             margin-bottom: 10px;
         }
 
-        /* Meta Pills Container (Credits, Call Day, Age Restriction) */
+        /* Meta Pills Container (Credits, Call day, Age Restriction) */
         .meta-pills-container {
             display: flex;
             flex-wrap: wrap;
@@ -669,7 +669,7 @@
                 <span id="modalAgeLimit" style="text-align: right; color: #c084fc;"></span>
             </div>
             <div class="modal-detail-row">
-                <span>Call Day:</span>
+                <span>Call day:</span>
                 <span id="modalCallDay" style="text-align: right; color: #fbbf24;"></span>
             </div>
             <div class="modal-detail-row">
@@ -766,7 +766,7 @@
             const ageText = doc["Age Limit"] || doc["Age Restriction"] || doc["Restrictions"] || doc["Patient Age"] || '';
 
             let subInfoText = `${doc["Department"] || 'Department'}`;
-            if (callDayText) subInfoText += ` • <span style="color:#fbbf24;">Call: ${callDayText}</span>`;
+            if (callDayText) subInfoText += ` • <span style="color:#fbbf24;">Call day: ${callDayText}</span>`;
             if (ageText) subInfoText += ` • <span style="color:#c084fc;">Age: ${ageText}</span>`;
 
             row.innerHTML = `
@@ -893,11 +893,11 @@
 
             // Call Day mapping
             let callDayValue = doc["Call Day"] || doc["Call Days"] || doc["Duty Day"] || "";
-            let callDayHTML = callDayValue ? `<span class="callday-pill">📞 Call: ${callDayValue}</span>` : '';
+            let callDayHTML = callDayValue ? `<span class="callday-pill">Call day: ${callDayValue}</span>` : '';
 
             // Age Restriction mapping
             let ageValue = doc["Age Limit"] || doc["Age Restriction"] || doc["Restrictions"] || doc["Patient Age"] || "";
-            let ageHTML = ageValue ? `<span class="age-pill">👤 Age: ${ageValue}</span>` : '';
+            let ageHTML = ageValue ? `<span class="age-pill">Age: ${ageValue}</span>` : '';
 
             let metaCombinedHTML = (creditPillsHTML || callDayHTML || ageHTML) 
                 ? `<div class="meta-pills-container">${ageHTML}${callDayHTML}${creditPillsHTML}</div>` 
