@@ -326,8 +326,8 @@
             margin-bottom: 10px;
         }
 
-        /* Credit tags pill list */
-        .credits-container {
+        /* Meta Pills Container (Credits & Call Day) */
+        .meta-pills-container {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
@@ -342,6 +342,17 @@
             padding: 2px 6px;
             border-radius: 4px;
             letter-spacing: 0.03em;
+        }
+
+        .callday-pill {
+            font-size: 10.5px;
+            font-weight: 600;
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.03em;
+            border: 1px dashed rgba(245, 158, 11, 0.4);
         }
 
         .card-details-footer {
@@ -568,7 +579,7 @@
 
 <div class="container">
     <div class="brand-header">
-        <img src="images-removebg-preview.png" alt="Logo" class="logo-image">
+        <img src="1000135014.png" alt="Logo" class="logo-image">
         <div class="brand-title">Find Doctor</div>
     </div>
     
@@ -576,7 +587,7 @@
         <svg class="search-icon" viewBox="0 0 24 24">
             <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
         </svg>
-        <input type="text" id="searchInput" placeholder="Search doctor, specialty, branch, or credit (ECHS, CGHS)..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
+        <input type="text" id="searchInput" placeholder="Search doctor, specialty, credit, or call day (e.g. Monday)..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
         <div id="searchSpinner" class="apple-spinner"><div></div></div>
         <div id="suggestionsList" class="suggestions-list"></div>
     </div>
@@ -643,7 +654,11 @@
                 <span id="modalBranch"></span>
             </div>
             <div class="modal-detail-row">
-                <span>Credits:</span>
+                <span>Call Day:</span>
+                <span id="modalCallDay" style="text-align: right; color: #fbbf24;"></span>
+            </div>
+            <div class="modal-detail-row">
+                <span>Credit Schemes:</span>
                 <span id="modalCredits" style="text-align: right;"></span>
             </div>
             <div class="modal-detail-row">
@@ -732,10 +747,12 @@
             row.className = 'starred-row-item';
             row.onclick = () => openModal(doc);
 
+            const callDayText = doc["Call Day"] || doc["Call Days"] || doc["Duty Day"] || '';
+
             row.innerHTML = `
                 <div>
                     <div style="font-weight: 600; font-size: 14.5px; color: var(--text-main); margin-bottom: 2px;">${doc["Doctor Name"] || 'N/A'}</div>
-                    <div style="font-size: 12.5px; color: var(--text-secondary);">${doc["Department"] || 'Department'}</div>
+                    <div style="font-size: 12.5px; color: var(--text-secondary);">${doc["Department"] || 'Department'} ${callDayText ? `• <span style="color:#fbbf24;">Call: ${callDayText}</span>` : ''}</div>
                 </div>
                 <span class="branch-tag">${doc["Branch"] || 'Location'}</span>
             `;
@@ -846,13 +863,19 @@
             card.className = 'doctor-card-minimal';
             card.onclick = () => openModal(doc);
 
-            // Parse credits accepted (expects comma separated like "ECHS, CGHS, EHS, AROGYABHADRATHA" or property key like "Credit Accepted")
+            // Credits mapping
             let creditsValue = doc["Credit Accepted"] || doc["Credits"] || doc["Insurance Accepted"] || "None";
             let creditPillsHTML = '';
             if (creditsValue && creditsValue !== "None") {
                 let creditArray = creditsValue.split(',').map(item => item.trim());
-                creditPillsHTML = `<div class="credits-container">` + creditArray.map(c => `<span class="credit-pill">✓ ${c}</span>`).join('') + `</div>`;
+                creditPillsHTML = creditArray.map(c => `<span class="credit-pill">✓ ${c}</span>`).join('');
             }
+
+            // Call Day mapping
+            let callDayValue = doc["Call Day"] || doc["Call Days"] || doc["Duty Day"] || "";
+            let callDayHTML = callDayValue ? `<span class="callday-pill">📞 Call Day: ${callDayValue}</span>` : '';
+
+            let metaCombinedHTML = (creditPillsHTML || callDayHTML) ? `<div class="meta-pills-container">${callDayHTML}${creditPillsHTML}</div>` : '';
 
             card.innerHTML = `
                 <div class="card-top-row">
@@ -862,7 +885,7 @@
                     </div>
                     <span class="branch-tag">${doc["Branch"] || 'Location'}</span>
                 </div>
-                ${creditPillsHTML}
+                ${metaCombinedHTML}
                 <div class="card-details-footer">
                     <span>Fee: <strong>${doc["OP Fee"] || 'N/A'}</strong></span>
                     <span style="max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Timing: ${doc["OP Timings"] || 'N/A'}</span>
@@ -884,6 +907,7 @@
         document.getElementById('modalFee').textContent = doc["OP Fee"] || 'N/A';
         document.getElementById('modalTimings').textContent = doc["OP Timings"] || 'N/A';
         document.getElementById('modalCredits').textContent = doc["Credit Accepted"] || doc["Credits"] || doc["Insurance Accepted"] || 'Not Specified';
+        document.getElementById('modalCallDay').textContent = doc["Call Day"] || doc["Call Days"] || doc["Duty Day"] || 'Not Assigned';
 
         const updateContainer = document.getElementById('modalUpdateContainer');
         if (doc["Leave / Timing Updates"] && doc["Leave / Timing Updates"] !== "Regular Timings") {
