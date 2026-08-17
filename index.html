@@ -87,10 +87,10 @@
         /* Search Bar & Auto-Suggest Style */
         .search-box-wrapper {
             position: relative;
-            margin-bottom: 24px;
+            margin-bottom: 14px;
         }
 
-        input[type="text"], input[type="date"], select {
+        input[type="text"], input[type="date"], select, input[type="password"] {
             width: 100%;
             padding: 14px 16px;
             font-size: 15px;
@@ -110,7 +110,7 @@
             background: var(--card-bg);
         }
 
-        input[type="text"]:focus, input[type="date"]:focus, select:focus {
+        input[type="text"]:focus, input[type="date"]:focus, select:focus, input[type="password"]:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 4px var(--accent-glow);
         }
@@ -125,7 +125,6 @@
             fill: var(--text-secondary);
         }
 
-        /* Apple Style Spinner Loader inside input wrapper */
         .apple-spinner {
             position: absolute;
             right: 14px;
@@ -185,6 +184,14 @@
         .suggestion-item:hover {
             background: rgba(59, 130, 246, 0.15);
             color: #60a5fa;
+        }
+
+        /* Filters Container */
+        .filters-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 24px;
         }
 
         /* Dashboard Accordion Style for Starred Doctors */
@@ -353,7 +360,6 @@
             margin-bottom: 10px;
         }
 
-        /* Meta Pills Container */
         .meta-pills-container {
             display: flex;
             flex-wrap: wrap;
@@ -426,7 +432,7 @@
             padding: 20px;
         }
 
-        /* INLINE CARD FOOTER WITH SEPARATORS */
+        /* FOOTER */
         .site-footer {
             width: 100%;
             max-width: 600px;
@@ -573,7 +579,6 @@
         .modal-detail-row span:first-child { color: var(--text-secondary); }
         .modal-detail-row span:last-child { font-weight: 600; color: var(--text-main); text-align: right; }
 
-        /* Admin Action Buttons */
         .admin-btn {
             background: var(--accent);
             color: white;
@@ -597,7 +602,7 @@
             <img src="images-removebg-preview.png" alt="Logo" class="logo-image" id="brandLogo">
             <div class="brand-title">Find Doctor</div>
         </div>
-        <button class="admin-trigger-btn" onclick="openAdminModal()">
+        <button class="admin-trigger-btn" onclick="promptAdminPassword()">
             <span>⚙️ Office Update</span>
         </button>
     </div>
@@ -606,9 +611,19 @@
         <svg class="search-icon" viewBox="0 0 24 24">
             <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
         </svg>
-        <input type="text" id="searchInput" placeholder="Search doctor, spec, credit, call day, or age criteria..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
+        <input type="text" id="searchInput" placeholder="Search doctor name..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
         <div id="searchSpinner" class="apple-spinner"><div></div></div>
         <div id="suggestionsList" class="suggestions-list"></div>
+    </div>
+
+    <!-- FILTER DROPDOWNS -->
+    <div class="filters-container">
+        <select id="deptFilter" onchange="applyFilters()">
+            <option value="">All Departments</option>
+        </select>
+        <select id="branchFilter" onchange="applyFilters()">
+            <option value="">All Branches</option>
+        </select>
     </div>
 
     <!-- Starred Doctors Accordion -->
@@ -630,11 +645,11 @@
 
     <div class="section-heading" id="resultsHeading">Search Results</div>
     <div id="resultsContainer" class="results-container">
-        <div class="no-results">Type name to search, or expand the starred above.</div>
+        <div class="no-results">Type name, or select filters above to find doctors.</div>
     </div>
 </div>
 
-<!-- INLINE CARD FOOTER WITH SEPARATORS -->
+<!-- FOOTER -->
 <footer class="site-footer">
     <div class="footer-item">
         <span class="live-dot"></span>
@@ -699,21 +714,41 @@
     </div>
 </div>
 
-<!-- QUICK OFFICE UPDATE ADMIN MODAL -->
+<!-- ADMIN PASSWORD MODAL -->
+<div id="passwordModal" class="modal-overlay" onclick="closePasswordOnBg(event)">
+    <div class="modal-card" style="max-width: 400px;">
+        <button class="modal-close" onclick="closePasswordModal()">✕</button>
+        <h2 class="modal-title">Admin Access Required</h2>
+        <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
+            Please enter the office password to modify schedules.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            <input type="password" id="adminPasswordInput" placeholder="Enter password..." onkeydown="handlePasswordKey(event)">
+            <button class="admin-btn" onclick="verifyAdminPassword()">Verify & Open Panel</button>
+        </div>
+    </div>
+</div>
+
+<!-- OFFICE UPDATE ADMIN MODAL WITH DOCTOR SEARCH -->
 <div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)">
     <div class="modal-card">
         <button class="modal-close" onclick="closeAdminModal()">✕</button>
         <h2 class="modal-title">Office Schedule Update</h2>
         <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-            Select a doctor and enter a date-specific timing change. The system will automatically reset after the date passes.
+            Search and select a doctor, then set date-specific changes.
         </p>
         
         <div style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Admin Doctor Live Search Box -->
+            <div style="position: relative;" id="adminSearchWrapper">
+                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Find Doctor to Edit:</label>
+                <input type="text" id="adminSearchInput" placeholder="Type doctor name to search..." oninput="handleAdminSearchInput()" autocomplete="off">
+                <div id="adminSuggestionsList" class="suggestions-list"></div>
+            </div>
+
             <div>
-                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Select Doctor:</label>
-                <select id="adminDoctorSelect" onchange="populateDoctorAdminFields()">
-                    <option value="">-- Select Doctor --</option>
-                </select>
+                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Selected Doctor:</label>
+                <input type="text" id="adminSelectedDoctorDisplay" readonly style="background: #1e293b; color: #60a5fa; font-weight: 600;" placeholder="No doctor selected yet">
             </div>
 
             <div>
@@ -738,6 +773,8 @@
 
 <script>
     let doctorData = [];
+    let selectedAdminDoctorIndex = null;
+    const ADMIN_SECRET_PASSWORD = "careoffice123"; // You can change this password here
 
     function loadDoctorData() {
         fetch('doctors.json')
@@ -745,7 +782,7 @@
             .then(data => {
                 doctorData = data;
                 renderStarredAccordion();
-                populateAdminDoctorDropdown();
+                populateFilterDropdowns();
             })
             .catch(error => {
                 console.error('Error loading doctor data:', error);
@@ -802,7 +839,7 @@
 
     checkBackendSync();
 
-    // AUTO-REFRESH & COUNTDOWN TIMER CONFIGURATION
+    // AUTO-REFRESH & COUNTDOWN TIMER
     const REFRESH_INTERVAL_SECONDS = 300; 
     let timeLeft = REFRESH_INTERVAL_SECONDS;
 
@@ -829,7 +866,6 @@
 
     updateCountdownDisplay();
 
-    // SMART DATE OVERRIDE MATCHER (Self-clearing once date passes)
     function getActiveSchedule(doc) {
         const today = new Date();
         const year = today.getFullYear();
@@ -897,21 +933,53 @@
         });
     }
 
+    function populateFilterDropdowns() {
+        const deptSelect = document.getElementById('deptFilter');
+        const branchSelect = document.getElementById('branchFilter');
+
+        const departments = [...new Set(doctorData.map(d => d["Department"]).filter(Boolean))].sort();
+        const branches = [...new Set(doctorData.map(d => d["Branch"]).filter(Boolean))].sort();
+
+        deptSelect.innerHTML = `<option value="">All Departments</option>` + departments.map(d => `<option value="${d}">${d}</option>`).join('');
+        branchSelect.innerHTML = `<option value="">All Branches</option>` + branches.map(b => `<option value="${b}">${b}</option>`).join('');
+    }
+
+    function applyFilters() {
+        const selectedDept = document.getElementById('deptFilter').value.toLowerCase();
+        const selectedBranch = document.getElementById('branchFilter').value.toLowerCase();
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+        const filtered = doctorData.filter(doc => {
+            const matchesName = query === "" || (doc["Doctor Name"] && doc["Doctor Name"].toLowerCase().includes(query));
+            const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept);
+            const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch);
+
+            return matchesName && matchesDept && matchesBranch;
+        });
+
+        renderDoctors(filtered);
+    }
+
     function handleSearchInput() {
         const query = document.getElementById('searchInput').value.toLowerCase().trim();
         const suggestionsBox = document.getElementById('suggestionsList');
         
+        applyFilters();
+
         if (query === "") {
             suggestionsBox.style.display = 'none';
             document.getElementById('searchSpinner').style.display = 'none';
-            document.getElementById('resultsContainer').innerHTML = `<div class="no-results">Type name to search, or expand the starred above.</div>`;
             return;
         }
 
+        const selectedDept = document.getElementById('deptFilter').value.toLowerCase();
+        const selectedBranch = document.getElementById('branchFilter').value.toLowerCase();
+
         const filtered = doctorData.filter(doc => {
-            return Object.values(doc).some(val => 
-                String(val).toLowerCase().includes(query)
-            );
+            const matchesQuery = Object.values(doc).some(val => String(val).toLowerCase().includes(query));
+            const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept);
+            const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch);
+            return matchesQuery && matchesDept && matchesBranch;
         });
 
         showSuggestions(filtered);
@@ -920,30 +988,8 @@
     function handleKeyDown(event) {
         if (event.key === 'Enter') {
             event.preventDefault();
-            const query = document.getElementById('searchInput').value.toLowerCase().trim();
-            const spinner = document.getElementById('searchSpinner');
-            const suggestionsBox = document.getElementById('suggestionsList');
-
-            suggestionsBox.style.display = 'none';
-            
-            if (query === "") {
-                spinner.style.display = 'none';
-                document.getElementById('resultsContainer').innerHTML = `<div class="no-results">Type name to search, or expand the starred above.</div>`;
-                return;
-            }
-
-            spinner.style.display = 'block';
-
-            setTimeout(() => {
-                spinner.style.display = 'none';
-                const filtered = doctorData.filter(doc => {
-                    return Object.values(doc).some(val => 
-                        String(val).toLowerCase().includes(query)
-                    );
-                });
-
-                renderDoctors(filtered);
-            }, 350); 
+            document.getElementById('suggestionsList').style.display = 'none';
+            applyFilters();
         }
     }
 
@@ -965,13 +1011,7 @@
             item.onclick = function() {
                 document.getElementById('searchInput').value = doc["Doctor Name"];
                 suggestionsBox.style.display = 'none';
-                
-                const spinner = document.getElementById('searchSpinner');
-                spinner.style.display = 'block';
-                setTimeout(() => {
-                    spinner.style.display = 'none';
-                    renderDoctors([doc]);
-                }, 250);
+                renderDoctors([doc]);
             };
             
             suggestionsBox.appendChild(item);
@@ -984,6 +1024,10 @@
         if (!e.target.closest('.search-box-wrapper')) {
             document.getElementById('suggestionsList').style.display = 'none';
         }
+        if (!e.target.closest('#adminSearchWrapper')) {
+            const adminSuggestions = document.getElementById('adminSuggestionsList');
+            if (adminSuggestions) adminSuggestions.style.display = 'none';
+        }
     });
 
     function renderDoctors(doctors) {
@@ -991,7 +1035,7 @@
         container.innerHTML = '';
 
         if (doctors.length === 0) {
-            container.innerHTML = `<div class="no-results">No doctors found matching your keyword.</div>`;
+            container.innerHTML = `<div class="no-results">No doctors found matching your criteria.</div>`;
             return;
         }
 
@@ -1079,8 +1123,45 @@
         }
     }
 
-    // ADMIN MODAL LOGIC FOR OFFICE STAFF
+    // PASSWORD & ADMIN PANEL LOGIC
+    function promptAdminPassword() {
+        document.getElementById('adminPasswordInput').value = "";
+        document.getElementById('passwordModal').classList.add('active');
+    }
+
+    function closePasswordModal() {
+        document.getElementById('passwordModal').classList.remove('active');
+    }
+
+    function closePasswordOnBg(event) {
+        if (event.target.id === 'passwordModal') {
+            closePasswordModal();
+        }
+    }
+
+    function handlePasswordKey(event) {
+        if (event.key === 'Enter') {
+            verifyAdminPassword();
+        }
+    }
+
+    function verifyAdminPassword() {
+        const enteredPwd = document.getElementById('adminPasswordInput').value;
+        if (enteredPwd === ADMIN_SECRET_PASSWORD) {
+            closePasswordModal();
+            openAdminModal();
+        } else {
+            alert("Incorrect office password.");
+        }
+    }
+
     function openAdminModal() {
+        selectedAdminDoctorIndex = null;
+        document.getElementById('adminSearchInput').value = "";
+        document.getElementById('adminSelectedDoctorDisplay').value = "";
+        document.getElementById('adminSpecialDate').value = "";
+        document.getElementById('adminSpecialTimings').value = "";
+        document.getElementById('adminSpecialNote').value = "";
         document.getElementById('adminModal').classList.add('active');
     }
 
@@ -1094,43 +1175,62 @@
         }
     }
 
-    function populateAdminDoctorDropdown() {
-        const select = document.getElementById('adminDoctorSelect');
-        select.innerHTML = `<option value="">-- Select Doctor --</option>`;
-        
-        doctorData.forEach((doc, index) => {
-            const opt = document.createElement('option');
-            opt.value = index;
-            opt.textContent = `${doc["Doctor Name"]} (${doc["Department"]} - ${doc["Branch"]})`;
-            select.appendChild(opt);
-        });
-    }
+    // ADMIN DOCTOR LIVE SEARCH IN MODAL
+    function handleAdminSearchInput() {
+        const query = document.getElementById('adminSearchInput').value.toLowerCase().trim();
+        const suggestionsBox = document.getElementById('adminSuggestionsList');
 
-    function populateDoctorAdminFields() {
-        const index = document.getElementById('adminDoctorSelect').value;
-        if (index === "") {
-            document.getElementById('adminSpecialDate').value = "";
-            document.getElementById('adminSpecialTimings').value = "";
-            document.getElementById('adminSpecialNote').value = "";
+        if (query === "") {
+            suggestionsBox.style.display = 'none';
             return;
         }
 
-        const doc = doctorData[index];
-        document.getElementById('adminSpecialDate').value = doc["Special Date"] || "";
-        document.getElementById('adminSpecialTimings').value = doc["Special Timings"] || "";
-        document.getElementById('adminSpecialNote').value = doc["Special Note"] || "";
+        const matched = [];
+        doctorData.forEach((doc, idx) => {
+            if (doc["Doctor Name"].toLowerCase().includes(query) || (doc["Department"] && doc["Department"].toLowerCase().includes(query))) {
+                matched.push({ doc, idx });
+            }
+        });
+
+        suggestionsBox.innerHTML = '';
+        if (matched.length === 0) {
+            suggestionsBox.style.display = 'none';
+            return;
+        }
+
+        matched.slice(0, 6).forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            div.innerHTML = `<strong>${item.doc["Doctor Name"]}</strong> <span style="color:var(--text-secondary); font-size:13px;">(${item.doc["Department"]} - ${item.doc["Branch"]})</span>`;
+            
+            div.onclick = function() {
+                selectedAdminDoctorIndex = item.idx;
+                document.getElementById('adminSearchInput').value = item.doc["Doctor Name"];
+                document.getElementById('adminSelectedDoctorDisplay').value = `${item.doc["Doctor Name"]} (${item.doc["Department"]} - ${item.doc["Branch"]})`;
+                
+                // Populate existing values if any
+                document.getElementById('adminSpecialDate').value = item.doc["Special Date"] || "";
+                document.getElementById('adminSpecialTimings').value = item.doc["Special Timings"] || "";
+                document.getElementById('adminSpecialNote').value = item.doc["Special Note"] || "";
+
+                suggestionsBox.style.display = 'none';
+            };
+
+            suggestionsBox.appendChild(div);
+        });
+
+        suggestionsBox.style.display = 'block';
     }
 
     function saveAdminUpdate() {
-        const index = document.getElementById('adminDoctorSelect').value;
-        if (index === "") {
-            alert("Please select a doctor first.");
+        if (selectedAdminDoctorIndex === null || selectedAdminDoctorIndex === undefined) {
+            alert("Please search and select a doctor first.");
             return;
         }
 
-        doctorData[index]["Special Date"] = document.getElementById('adminSpecialDate').value;
-        doctorData[index]["Special Timings"] = document.getElementById('adminSpecialTimings').value;
-        doctorData[index]["Special Note"] = document.getElementById('adminSpecialNote').value;
+        doctorData[selectedAdminDoctorIndex]["Special Date"] = document.getElementById('adminSpecialDate').value;
+        doctorData[selectedAdminDoctorIndex]["Special Timings"] = document.getElementById('adminSpecialTimings').value;
+        doctorData[selectedAdminDoctorIndex]["Special Note"] = document.getElementById('adminSpecialNote').value;
 
         // Generate JSON download for staff to replace on server
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doctorData, null, 4));
@@ -1144,6 +1244,7 @@
         alert("Update saved! A new 'doctors.json' file has been downloaded. Replace it in your website folder to make it live.");
         closeAdminModal();
         renderStarredAccordion();
+        applyFilters();
     }
 </script>
 
