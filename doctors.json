@@ -5,7 +5,7 @@
 [
     {
         "Starred": "Yes",
-        "Doctor Name": "Dr. John Smith",
+        "Doctor Name": "Dr. Murali Manohar",
         "Department": "Cardiology",
         "Branch": "COPC",
         "Age Criteria": "15+",
@@ -17,7 +17,7 @@
     },
     {
         "Starred": "No",
-        "Doctor Name": "Dr. Sarah Johnson",
+        "Doctor Name": "Dr. Sagar",
         "Department": "Neurology",
         "Branch": "Hitec City",
         "Age Criteria": "15+",
@@ -31,7 +31,7 @@
         "Starred": "Yes",
         "Doctor Name": "Dr. Murali",
         "Department": "Cardiology",
-        "Branch": "Hitech City",
+        "Branch": "Arilova Health city",
         "Age Criteria": "Any age",
         "Call Day": "Tuesday & Saturday",
         "Credit Accepted": "AROGYABHADRATHA",
@@ -53,8 +53,8 @@
     },
       {
         "Starred": "Yes",
-        "Doctor Name": "Dr. Chowdary",
-        "Department": "Cardiology",
+        "Doctor Name": "Dr. Ramchandar Rao",
+        "Department": "Urology",
         "Branch": "Nampally",
         "Age Criteria": "15+",
         "Call Day": "Tuesday",
@@ -65,7 +65,91 @@
     },
       {
         "Starred": "Yes",
-        "Doctor Name": "Dr. Rajesh",
+        "Doctor Name": "Dr. Venkatesh",
+        "Department": "Paediatric",
+        "Branch": "Malakpet",
+        "Age Criteria": "0 to 10y only",
+        "Call Day": "Thursday",
+        "Credit Accepted": "AROGYABHADRATHA, EHS",
+        "OP Fee": "₹800",
+        "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "On leave 19th sep"
+    },
+      {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Prabhu",
+        "Department": "Nephrology",
+        "Branch": "Raipur",
+        "Age Criteria": "99+ only",
+        "Call Day": "Wednesday",
+        "Credit Accepted": "AROGYABHADRATHA",
+        "OP Fee": "₹800",
+        "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "On leave 21st sep"
+    },
+      {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Rakesh",
+        "Department": "Neuro-Surgeon",
+        "Branch": "COPC Road no:10",
+        "Age Criteria": "15+",
+        "Call Day": "Monday",
+        "OP Fee": "₹800",
+        "Credit Accepted": "AROGYABHADRATHA, EHS",
+        "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "Regular Timings"
+    },
+    {
+        "Starred": "No",
+        "Doctor Name": "Dr. Surendar",
+        "Department": "Neurology",
+        "Branch": "Ramnagar",
+        "Age Criteria": "15+",
+        "Call Day": "Sep 4th, 8th, 12th & 18th",
+        "Credit Accepted": "AROGYABHADRATHA, EHS & CGHS",
+        "OP Fee": "₹1000",
+        "OP Timings": "Mon - Fri 09:00 AM - 1:00 PM Sat 2pm to 5pm",
+        "Leave / Timing Updates": "Regular Timings"
+    },
+     {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Modi",
+        "Department": "CTVS Cardiac-Surgeon",
+        "Branch": "Bhubaneswar",
+        "Age Criteria": "Any age",
+        "Call Day": "Tuesday & Saturday",
+        "Credit Accepted": "AROGYABHADRATHA",
+        "OP Fee": "₹800",
+        "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "On leave 29th sep"
+    },
+     {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Rahul",
+        "Department": "Paediatric",
+        "Branch": "Indore",
+        "Age Criteria": "0 to 15y only",
+        "Call Day": " Monday & Friday",
+        "Credit Accepted": "NO",
+        "OP Fee": "₹800",
+        "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "Regular Timings"
+    },
+      {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Sandeep",
+        "Department": "Orthopedic",
+        "Branch": "Musheerabad",
+        "Age Criteria": "15+",
+        "Call Day": "Tuesday",
+        "Credit Accepted": "CGHS, EHS, ECHS & AAROGYABHADRATHA",
+        "OP00",
+        "OP Timings": "Mon - Sat: 10:00 AM - 2:00 PM",
+        "Leave / Timing Updates": "On leave 10th sep"
+    },
+      {
+        "Starred": "Yes",
+        "Doctor Name": "Dr. Naresh",
         "Department": "Cardiology",
         "Branch": "Malakpet",
         "Age Criteria": "0 to 10y only",
@@ -77,14 +161,14 @@
     },
       {
         "Starred": "Yes",
-        "Doctor Name": "Dr. Naveen",
-        "Department": "Cardiology",
-        "Branch": "Raipur",
-        "Age Criteria": "99+ only",
+        "Doctor Name": "Dr. Kamal",
+        "Department": "Gastroenterology",
+        "Branch": "Nagpur",
+        "Age Criteria": "15+ only",
         "Call Day": "Wednesday",
         "Credit Accepted": "AROGYABHADRATHA",
         "OP Fee": "₹800",
         "OP Timings": "Mon - Sat 10:00 AM - 2:00 PM",
         "Leave / Timing Updates": "On leave 21st sep"
-    }
+    } 
 ]
