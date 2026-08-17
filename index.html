@@ -658,10 +658,10 @@
     <div class="brand-header">
         <div class="brand-left">
             <img src="images-removebg-preview.png" alt="Logo" class="logo-image" id="brandLogo" onerror="this.style.display='none'">
-            <div class="brand-title">Find Doctor</div>
+            <div class="brand-title">Care Find Doctor</div>
         </div>
         <button class="admin-trigger-btn" onclick="promptAdminPassword()">
-            <span>⚙️ Office Update</span>
+            <span>⚙️ Reschedule</span>
         </button>
     </div>
     
@@ -776,9 +776,9 @@
 <div id="passwordModal" class="modal-overlay" onclick="closePasswordOnBg(event)">
     <div class="modal-card" style="max-width: 400px;">
         <button class="modal-close" onclick="closePasswordModal()">✕</button>
-        <h2 class="modal-title">Admin Access Required</h2>
+        <h2 class="modal-title">Authorized Person's Only</h2>
         <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-            Please enter the office password to modify schedules.
+            Please enter the password to modify schedules.
         </p>
         <div style="display: flex; flex-direction: column; gap: 14px;">
             <input type="password" id="adminPasswordInput" placeholder="Enter password..." onkeydown="handlePasswordKey(event)">
@@ -791,9 +791,9 @@
 <div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)">
     <div class="modal-card">
         <button class="modal-close" onclick="closeAdminModal()">✕</button>
-        <h2 class="modal-title">Office Schedule Update Panel</h2>
+        <h2 class="modal-title">Reschedule Panel</h2>
         <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-            Every update you save is automatically added to your session queue. Preview or modify items below before downloading the master file!
+            Every update you save is automatically added to your session queue. Preview or modify items below before downloading the file!
         </p>
         
         <div style="display: flex; flex-direction: column; gap: 14px;">
@@ -819,18 +819,18 @@
             </div>
 
             <div>
-                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Office Update Reason / Note:</label>
+                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Update Reason / Note:</label>
                 <input type="text" id="adminSpecialNote" placeholder="e.g. Special clinic hours">
             </div>
 
-            <button class="admin-secondary-btn" onclick="saveToQueueAction()">💾 Save Update to Queue</button>
+            <button class="admin-secondary-btn" onclick="saveToQueueAction()">Save Update to Queue</button>
             
             <div style="border-top: 1px solid #2d3748; padding-top: 14px; margin-top: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <div id="queueCounterBadge" class="queue-badge" style="margin-bottom: 0;">Queue: 0 updates waiting</div>
                     <button class="admin-secondary-btn" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 12px;" onclick="openPreviewModal()">👁️ Preview All Updates</button>
                 </div>
-                <button class="admin-btn" onclick="downloadMasterQueueJSON()">📥 Download Master doctors.json</button>
+                <button class="admin-btn" onclick="downloadMasterQueueJSON()">Verify file</button>
             </div>
         </div>
     </div>
@@ -849,7 +849,7 @@
             <!-- Rendered dynamically -->
         </div>
 
-        <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">📥 Verify & Download Master File</button>
+        <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">Download File</button>
     </div>
 </div>
 
