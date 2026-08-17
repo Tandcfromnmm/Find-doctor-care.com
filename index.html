@@ -462,6 +462,16 @@
             }
         }
 
+        /* Countdown Pill Style */
+        .refresh-countdown {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+
         /* Developer Credit Animation */
         .developer-credit {
             display: inline-block;
@@ -590,7 +600,7 @@
 
 <div class="container">
     <div class="brand-header">
-        <img src="images-removebg-preview.png" alt="Logo" class="logo-image">
+        <img src="1000135014.png" alt="Logo" class="logo-image">
         <div class="brand-title">Care Find Doctor</div>
     </div>
     
@@ -598,7 +608,7 @@
         <svg class="search-icon" viewBox="0 0 24 24">
             <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
         </svg>
-        <input type="text" id="searchInput" placeholder="Type doctor..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
+        <input type="text" id="searchInput" placeholder="Type doctor name..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
         <div id="searchSpinner" class="apple-spinner"><div></div></div>
         <div id="suggestionsList" class="suggestions-list"></div>
     </div>
@@ -636,7 +646,7 @@
     <span class="footer-divider">|</span>
     
     <div class="footer-item">
-        <span>Content managed by your office</span>
+        <span>Auto-refresh in <span id="countdownTimer" class="refresh-countdown">05:00</span></span>
     </div>
     
     <span class="footer-divider">|</span>
@@ -756,22 +766,35 @@
     checkBackendSync();
 
     // ------------------------------------------------------------------
-    // AUTO-REFRESH CONFIGURATION
+    // AUTO-REFRESH & COUNTDOWN TIMER CONFIGURATION
     // ------------------------------------------------------------------
-    // Option A: Soft Refresh (Silently re-fetches json data & updates views in background without flickering page)
-    setInterval(() => {
-        loadDoctorData();
-        checkBackendSync();
-    }, 300000); // 300000 ms = 5 minutes. Change this number for a different time period.
+    const REFRESH_INTERVAL_SECONDS = 300; // 300 seconds = 5 minutes
+    let timeLeft = REFRESH_INTERVAL_SECONDS;
 
-    /* 
-       Option B: Hard Browser Page Refresh (Uncomment the block below if you want the 
-       entire browser window to physically reload every 5 minutes instead)
-       
-       setInterval(() => {
-           location.reload();
-       }, 300000); 
-    */
+    function updateCountdownDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        const timerEl = document.getElementById('countdownTimer');
+        if (timerEl) {
+            timerEl.textContent = formattedTime;
+        }
+    }
+
+    const countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+            // Refresh data silently and reset countdown
+            loadDoctorData();
+            checkBackendSync();
+            timeLeft = REFRESH_INTERVAL_SECONDS;
+        }
+        updateCountdownDisplay();
+    }, 1000); // Ticks every 1 second
+
+    // Initial call to set display right away
+    updateCountdownDisplay();
     // ------------------------------------------------------------------
 
     function toggleAccordion() {
