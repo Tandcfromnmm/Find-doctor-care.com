@@ -1123,12 +1123,12 @@
             applyFilters();
         }
 
-        function checkIsOnCall(doc, selectedDayName) {
+        function checkIsOnCall(doc, targetDayName) {
             const callDayRaw = doc["Call Day"] || doc["Call Days"] || "";
             if (!callDayRaw) return false;
             
             const assignedDays = callDayRaw.split(/[,&]/).map(d => d.trim().toLowerCase());
-            return assignedDays.includes(selectedDayName.toLowerCase());
+            return assignedDays.includes(targetDayName.toLowerCase());
         }
 
         function applyFilters() { 
@@ -1242,6 +1242,9 @@
                 return; 
             } 
 
+            const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const currentActualDayName = daysOfWeek[new Date().getDay()];
+
             doctors.forEach((doc) => { 
                 const card = document.createElement('div'); 
                 card.className = 'doctor-card-minimal'; 
@@ -1263,12 +1266,22 @@
                 let ageHTML = ageValue ? `<span class="age-pill">Age: ${ageValue}</span>` : ''; 
 
                 let statusBadgeHTML = '';
-                if (activeSelectedCallDay) {
-                    const isOnCall = checkIsOnCall(doc, activeSelectedCallDay);
-                    if (isOnCall) {
-                        statusBadgeHTML = `<span class="status-badge-pill status-on-call">🟢 On Call Today</span>`;
+                if (!activeSelectedCallDay) {
+                    // Smart Real-World Status for Today
+                    const isOnCallToday = checkIsOnCall(doc, currentActualDayName);
+                    if (isOnCallToday) {
+                        statusBadgeHTML = `<span class="status-badge-pill status-on-call">🟢 On Call Day Today (${currentActualDayName})</span>`;
                     } else {
-                        statusBadgeHTML = `<span class="status-badge-pill status-off-call">⚪ Off Call</span>`;
+                        statusBadgeHTML = `<span class="status-badge-pill status-off-call">⚪ Off Call Day Today (${currentActualDayName})</span>`;
+                    }
+                } else {
+                    // Smart Status relative to the selected dropdown filter day
+                    const isOnCallFilterDay = checkIsOnCall(doc, activeSelectedCallDay);
+                    const capitalizedFilterDay = activeSelectedCallDay.charAt(0).toUpperCase() + activeSelectedCallDay.slice(1);
+                    if (isOnCallFilterDay) {
+                        statusBadgeHTML = `<span class="status-badge-pill status-on-call">🟢 On Call Day (${capitalizedFilterDay})</span>`;
+                    } else {
+                        statusBadgeHTML = `<span class="status-badge-pill status-off-call">⚪ Off Call Day (${capitalizedFilterDay})</span>`;
                     }
                 }
 
