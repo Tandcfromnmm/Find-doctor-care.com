@@ -535,6 +535,11 @@
         .admin-btn:hover { 
             background: #2563eb; 
         } 
+        .admin-btn:disabled { 
+            background: #1e293b; 
+            color: #475569; 
+            cursor: not-allowed; 
+        } 
         .admin-secondary-btn { 
             background: #1e293b; 
             color: #94a3b8; 
@@ -606,6 +611,31 @@
         } 
         .btn-del-sm:hover { 
             background: rgba(239, 68, 68, 0.35); 
+        } 
+        /* Acknowledge Checkbox Layout */ 
+        .acknowledge-wrapper { 
+            background: #0b132b; 
+            border: 1px solid #1e293b; 
+            border-radius: 12px; 
+            padding: 14px; 
+            margin-top: 14px; 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 12px; 
+            cursor: pointer; 
+        } 
+        .acknowledge-wrapper input[type="checkbox"] { 
+            width: 18px; 
+            height: 18px; 
+            accent-color: var(--accent); 
+            margin-top: 2px; 
+            cursor: pointer; 
+        } 
+        .acknowledge-wrapper label { 
+            font-size: 13.5px; 
+            color: var(--text-secondary); 
+            line-height: 1.4; 
+            cursor: pointer; 
         } 
     </style> 
 </head> 
@@ -787,18 +817,31 @@
         </div> 
     </div> 
 
-    <!-- PREVIEW MODAL --> 
+    <!-- PREVIEW & DOWNLOAD AUTHOR MODAL --> 
     <div id="previewModal" class="modal-overlay" onclick="closePreviewOnBg(event)"> 
         <div class="modal-card"> 
             <button class="modal-close" onclick="closePreviewModal()">✕</button> 
             <h2 class="modal-title">Queue Preview & Verification</h2> 
             <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
-                Review all queued modifications below. You can modify or remove any entry before downloading. 
+                Review all queued modifications below. Provide your name and check the acknowledgment box before downloading. 
             </p> 
-            <div id="previewContainerList" style="max-height: 280px; overflow-y: auto; margin-bottom: 16px;"> 
+            <div id="previewContainerList" style="max-height: 220px; overflow-y: auto; margin-bottom: 16px;"> 
                 <!-- Rendered dynamically --> 
             </div> 
-            <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">Download Verified Master File</button> 
+
+            <!-- Administrator Identification Field --> 
+            <div style="margin-bottom: 12px;"> 
+                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Rescheduled By (Your Name):</label> 
+                <input type="text" id="rescheduledByInput" placeholder="Enter your full name or ID..." oninput="validatePreviewDownloadForm()"> 
+            </div> 
+
+            <!-- Acknowledgment Checkbox --> 
+            <div class="acknowledge-wrapper"> 
+                <input type="checkbox" id="acknowledgeCheckbox" onchange="validatePreviewDownloadForm()"> 
+                <label for="acknowledgeCheckbox">The downloaded file will be uploaded to the server before committing any other modifications.</label> 
+            </div> 
+
+            <button class="admin-btn" id="downloadVerifiedBtn" onclick="confirmAndDownloadFromPreview()" disabled style="margin-top: 16px;">Download Verified Master File</button> 
         </div> 
     </div> 
 
@@ -998,7 +1041,6 @@
             const selectedBranch = branchSelect.value.toLowerCase(); 
             const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
 
-            // Require an active search query or filter selection to show results cards
             if (query === "" && selectedDept === "" && selectedBranch === "") { 
                 const container = document.getElementById('resultsContainer'); 
                 container.innerHTML = `<div class="no-results">Start typing a doctor's name or select filters to view doctors.</div>`; 
@@ -1347,6 +1389,12 @@
                     container.appendChild(cardDiv); 
                 }); 
             } 
+
+            // Reset author input & acknowledgment state when preview opens
+            document.getElementById('rescheduledByInput').value = ""; 
+            document.getElementById('acknowledgeCheckbox').checked = false; 
+            validatePreviewDownloadForm(); 
+
             document.getElementById('previewModal').classList.add('active'); 
         } 
 
@@ -1393,6 +1441,18 @@
             openPreviewModal(); 
         } 
 
+        function validatePreviewDownloadForm() { 
+            const nameVal = document.getElementById('rescheduledByInput').value.trim(); 
+            const isChecked = document.getElementById('acknowledgeCheckbox').checked; 
+            const downloadBtn = document.getElementById('downloadVerifiedBtn'); 
+
+            if (nameVal.length > 0 && isChecked) { 
+                downloadBtn.removeAttribute('disabled'); 
+            } else { 
+                downloadBtn.setAttribute('disabled', 'true'); 
+            } 
+        } 
+
         function confirmAndDownloadFromPreview() { 
             const queueKeys = Object.keys(pendingQueueUpdates); 
             if (queueKeys.length === 0) { 
@@ -1400,12 +1460,19 @@
                 return; 
             } 
 
+            const rescheduledByName = document.getElementById('rescheduledByInput').value.trim(); 
+            const timestampNow = formatBackendDate(new Date()); 
+
             queueKeys.forEach(idx => { 
                 const updates = pendingQueueUpdates[idx]; 
                 doctorData[idx]["Special Date From"] = updates["Special Date From"]; 
                 doctorData[idx]["Special Date To"] = updates["Special Date To"]; 
                 doctorData[idx]["Special Timings"] = updates["Special Timings"]; 
                 doctorData[idx]["Special Note"] = updates["Special Note"]; 
+                
+                // Store who rescheduled and when for audit logging tracking inside the record
+                doctorData[idx]["Rescheduled By"] = rescheduledByName; 
+                doctorData[idx]["Rescheduled At"] = timestampNow; 
             }); 
 
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doctorData, null, 4)); 
@@ -1416,7 +1483,7 @@
             downloadAnchor.click(); 
             downloadAnchor.remove(); 
 
-            alert("Master 'doctors.json' file successfully downloaded with date-range schedules and synced backend attributes!"); 
+            alert(`Master 'doctors.json' file successfully downloaded! Recorded under Rescheduled By: ${rescheduledByName}. Remember to upload it to the server before making other modifications.`); 
             pendingQueueUpdates = {}; 
             updateQueueBadge(); 
             closePreviewModal(); 
