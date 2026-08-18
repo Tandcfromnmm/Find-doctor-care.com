@@ -1074,7 +1074,8 @@
             const selectedBranch = branchSelect.value.toLowerCase(); 
 
             const filtered = doctorData.filter(doc => { 
-                const matchesQuery = Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
+                const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
+                const matchesQuery = docName.startsWith(query) || docName.includes("dr. " + query); 
                 const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
                 const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
                 return matchesQuery && matchesDept && matchesBranch; 
@@ -1278,7 +1279,8 @@
 
             const matched = []; 
             doctorData.forEach((doc, idx) => { 
-                if (doc["Doctor Name"].toLowerCase().includes(query) || (doc["Department"] && doc["Department"].toLowerCase().includes(query))) { 
+                const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
+                if (docName.startsWith(query) || docName.includes("dr. " + query)) { 
                     matched.push({ doc, idx }); 
                 } 
             }); 
@@ -1289,7 +1291,7 @@
                 return; 
             } 
 
-            matched.slice(0, 6).forEach(item => { 
+            matched.slice(0, 5).forEach(item => { 
                 const div = document.createElement('div'); 
                 div.className = 'suggestion-item'; 
                 div.innerHTML = `<strong>${item.doc["Doctor Name"]}</strong> <span style="color:var(--text-secondary); font-size:13px;">(${item.doc["Department"]} - ${item.doc["Branch"]})</span>`; 
@@ -1390,7 +1392,6 @@
                 }); 
             } 
 
-            // Reset author input & acknowledgment state when preview opens
             document.getElementById('rescheduledByInput').value = ""; 
             document.getElementById('acknowledgeCheckbox').checked = false; 
             validatePreviewDownloadForm(); 
@@ -1470,7 +1471,6 @@
                 doctorData[idx]["Special Timings"] = updates["Special Timings"]; 
                 doctorData[idx]["Special Note"] = updates["Special Note"]; 
                 
-                // Store who rescheduled and when for audit logging tracking inside the record
                 doctorData[idx]["Rescheduled By"] = rescheduledByName; 
                 doctorData[idx]["Rescheduled At"] = timestampNow; 
             }); 
