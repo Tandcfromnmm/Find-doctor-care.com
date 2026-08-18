@@ -1107,7 +1107,6 @@
                 const dayName = daysOfWeek[targetDate.getDay()];
                 const formattedLabel = i === 0 ? `Today - ${getFormattedDateString(targetDate)}` : (i === 1 ? `Tomorrow - ${getFormattedDateString(targetDate)}` : getFormattedDateString(targetDate));
                 
-                // Store date string (YYYY-MM-DD) as value so we can match exact dates, or day name
                 const year = targetDate.getFullYear();
                 const month = String(targetDate.getMonth() + 1).padStart(2, '0');
                 const day = String(targetDate.getDate()).padStart(2, '0');
@@ -1128,7 +1127,6 @@
             const callDayRaw = doc["Call Day"] || doc["Call Days"] || "";
             if (!callDayRaw) return false;
             
-            // Split combined days like "Monday, Friday" or "Monday & Friday"
             const assignedDays = callDayRaw.split(/[,&]/).map(d => d.trim().toLowerCase());
             return assignedDays.includes(selectedDayName.toLowerCase());
         }
@@ -1156,7 +1154,6 @@
                 return matchesName && matchesDept && matchesBranch; 
             }); 
 
-            // Smart Sort & Highlight by Call Day if selected
             if (selectedCallDay && !callDaySelect.disabled) {
                 filtered.sort((a, b) => {
                     const aOnCall = checkIsOnCall(a, selectedCallDay) ? 0 : 1;
@@ -1265,7 +1262,6 @@
                 let ageValue = doc["Age Criteria"] || doc["Age Limit"] || ""; 
                 let ageHTML = ageValue ? `<span class="age-pill">Age: ${ageValue}</span>` : ''; 
 
-                // Strict Status Badge when a specific Call Day is selected
                 let statusBadgeHTML = '';
                 if (activeSelectedCallDay) {
                     const isOnCall = checkIsOnCall(doc, activeSelectedCallDay);
@@ -1597,7 +1593,7 @@
                 const updates = pendingQueueUpdates[idx]; 
                 doctorData[idx]["Special Date From"] = updates["Special Date From"]; 
                 doctorData[idx]["Special Date To"] = updates["Special Date To"]; 
-                doctorData[idx]["Special Timings"] = updates["Smart Timings"] || updates["Special Timings"]; 
+                doctorData[idx]["Special Timings"] = updates["Special Timings"]; 
                 doctorData[idx]["Special Note"] = updates["Special Note"]; 
                 
                 doctorData[idx]["Rescheduled By"] = rescheduledByName; 
