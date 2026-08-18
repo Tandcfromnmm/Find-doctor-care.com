@@ -647,7 +647,7 @@
                 <div class="brand-title">Find Doctor</div> 
             </div> 
             <button class="admin-trigger-btn" onclick="promptAdminPassword()"> 
-                <span>⌘ Reschedule</span> 
+                <span>⚙️ Reschedule</span> 
             </button> 
         </div> 
 
@@ -773,11 +773,11 @@
             <button class="modal-close" onclick="closeAdminModal()">✕</button> 
             <h2 class="modal-title">Reschedule Panel</h2> 
             <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
-                Update schedules for a single date or across a custom date range (From Date & To Date). Add changes to queue for batch verification and download to upload in server. 
+                Update schedules for a single date or across a custom date range (From Date & To Date). All fields below are mandatory to save an update. 
             </p> 
             <div style="display: flex; flex-direction: column; gap: 14px;"> 
                 <div style="position: relative;" id="adminSearchWrapper"> 
-                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Find Doctor to Edit:</label> 
+                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Find Doctor to Edit <span style="color:#f87171;">*</span>:</label> 
                     <input type="text" id="adminSearchInput" placeholder="Type doctor name to search..." oninput="handleAdminSearchInput()" autocomplete="off"> 
                     <div id="adminSuggestionsList" class="suggestions-list"></div> 
                 </div> 
@@ -788,21 +788,21 @@
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"> 
                     <div> 
-                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">From Date:</label> 
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">From Date <span style="color:#f87171;">*</span>:</label> 
                         <input type="date" id="adminSpecialDateFrom"> 
                     </div> 
                     <div> 
-                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">To Date:</label> 
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">To Date <span style="color:#f87171;">*</span>:</label> 
                         <input type="date" id="adminSpecialDateTo"> 
                     </div> 
                 </div> 
 
                 <div> 
-                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Special Timings / Note:</label> 
+                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Special Timings / Note <span style="color:#f87171;">*</span>:</label> 
                     <input type="text" id="adminSpecialTimings" placeholder="e.g. 1:00 PM - 3:00 PM"> 
                 </div> 
                 <div> 
-                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Office Update Reason / Note:</label> 
+                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Office Update Reason / Note <span style="color:#f87171;">*</span>:</label> 
                     <input type="text" id="adminSpecialNote" placeholder="e.g. Special clinic hours / Doctor on leave"> 
                 </div> 
                 <button class="admin-secondary-btn" onclick="saveToQueueAction()">Save Update to Queue</button> 
@@ -1325,14 +1325,22 @@
                 return; 
             } 
 
-            const fromDate = document.getElementById('adminSpecialDateFrom').value; 
-            const toDate = document.getElementById('adminSpecialDateTo').value; 
+            const fromDate = document.getElementById('adminSpecialDateFrom').value.trim(); 
+            const toDate = document.getElementById('adminSpecialDateTo').value.trim(); 
+            const timings = document.getElementById('adminSpecialTimings').value.trim(); 
+            const note = document.getElementById('adminSpecialNote').value.trim(); 
+
+            // Mandating all fields check
+            if (!fromDate || !toDate || !timings || !note) { 
+                alert("All fields (From Date, To Date, Special Timings, and Office Update Reason / Note) are mandatory to save the update."); 
+                return; 
+            } 
 
             pendingQueueUpdates[selectedAdminDoctorIndex] = { 
                 "Special Date From": fromDate, 
-                "Special Date To": toDate ? toDate : fromDate, 
-                "Special Timings": document.getElementById('adminSpecialTimings').value, 
-                "Special Note": document.getElementById('adminSpecialNote').value 
+                "Special Date To": toDate, 
+                "Special Timings": timings, 
+                "Special Note": note 
             }; 
 
             updateQueueBadge(); 
