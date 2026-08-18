@@ -174,7 +174,7 @@
             color: #60a5fa; 
         } 
 
-        /* Draggable Floating Symptom Icon Style with Magnetic Snap */
+        /* High-Performance Hardware-Accelerated Draggable Floating Icon */
         .floating-symptom-btn {
             position: fixed;
             bottom: 24px;
@@ -194,21 +194,18 @@
             z-index: 1500;
             touch-action: none;
             user-select: none;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                        box-shadow 0.2s ease,
-                        left 0.3s ease, 
-                        bottom 0.3s ease;
+            will-change: transform;
+            transform: translate3d(0, 0, 0);
+            transition: box-shadow 0.2s ease;
+        }
+        .floating-symptom-btn.snapping {
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
         }
         .floating-symptom-btn:hover {
-            transform: scale(1.08);
             box-shadow: 0 12px 30px rgba(16, 185, 129, 0.6);
         }
         .floating-symptom-btn:active {
             cursor: grabbing;
-            transform: scale(1.1);
-        }
-        .floating-symptom-btn.snapping {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         /* Filters Container */ 
@@ -721,8 +718,8 @@
             </div>
         </div> 
 
-        <!-- Draggable Floating Symptom Triage Icon with Magnetic Snap -->
-        <button id="floating-symptom-btn" class="floating-symptom-btn" onclick="openSymptomModal()" title="AI Symptom Triage">
+        <!-- Draggable Floating Symptom Triage Icon with Magnetic Return Snap -->
+        <button id="floating-symptom-btn" class="floating-symptom-btn" onclick="handleSymptomClick(event)" title="AI Symptom Triage">
             🩺
         </button>
 
@@ -1062,65 +1059,57 @@
 
         updateCountdownDisplay(); 
 
-        /* Draggable & Magnetic Floating Icon Logic */
+        /* High-Performance Hardware-Accelerated Draggable & Magnetic Return Logic */
         const icon = document.getElementById('floating-symptom-btn');
         let isDragging = false;
-        let startX, startY;
-        let initialX, initialY;
-
-        const SNAP_THRESHOLD = 100;
-        const TARGET_BOTTOM = 24;
-        const TARGET_LEFT = 24;
+        let startX = 0, startY = 0;
+        let currentX = 0, currentY = 0;
+        let hasMoved = false;
 
         icon.addEventListener('pointerdown', (e) => {
             isDragging = true;
+            hasMoved = false;
             icon.classList.remove('snapping');
             icon.setPointerCapture(e.pointerId);
 
-            startX = e.clientX;
-            startY = e.clientY;
-
-            const rect = icon.getBoundingClientRect();
-            initialX = rect.left;
-            initialY = rect.top;
+            startX = e.clientX - currentX;
+            startY = e.clientY - currentY;
         });
 
         icon.addEventListener('pointermove', (e) => {
             if (!isDragging) return;
-
+            
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
 
-            let newX = initialX + dx;
-            let newY = initialY + dy;
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+                hasMoved = true;
+            }
 
-            const maxX = window.innerWidth - icon.offsetWidth;
-            const maxY = window.innerHeight - icon.offsetHeight;
-            
-            newX = Math.max(0, Math.min(newX, maxX));
-            newY = Math.max(0, Math.min(newY, maxY));
+            currentX = dx;
+            currentY = dy;
 
-            icon.style.left = `${newX}px`;
-            icon.style.top = `${newY}px`;
-            icon.style.bottom = 'auto';
+            // Hardware-accelerated GPU translation
+            icon.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
         });
 
         icon.addEventListener('pointerup', (e) => {
             if (!isDragging) return;
             isDragging = false;
-            icon.releasePointerCapture(e.pointerId);
+            try { icon.releasePointerCapture(e.pointerId); } catch(err) {}
 
-            const rect = icon.getBoundingClientRect();
-            const distanceFromLeft = rect.left;
-            const distanceFromBottom = window.innerHeight - rect.bottom;
-
-            if (distanceFromLeft < SNAP_THRESHOLD && distanceFromBottom < SNAP_THRESHOLD) {
-                icon.classList.add('snapping');
-                icon.style.top = 'auto';
-                icon.style.left = `${TARGET_LEFT}px`;
-                icon.style.bottom = `${TARGET_BOTTOM}px`;
-            }
+            // Magnetic Return Snap to original position
+            icon.classList.add('snapping');
+            currentX = 0;
+            currentY = 0;
+            icon.style.transform = `translate3d(0px, 0px, 0)`;
         });
+
+        function handleSymptomClick(e) {
+            if (!hasMoved) {
+                openSymptomModal();
+            }
+        }
 
         /* AI Symptom Triage Modal Controls & Logic */
         function openSymptomModal() {
