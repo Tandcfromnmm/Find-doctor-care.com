@@ -617,7 +617,7 @@
                 <div class="brand-title">Find Doctor</div> 
             </div> 
             <button class="admin-trigger-btn" onclick="promptAdminPassword()"> 
-                <span>⚙️ Office Update</span> 
+                <span>⚙️ Reschedule</span> 
             </button> 
         </div> 
 
@@ -737,7 +737,7 @@
         </div> 
     </div> 
 
-    <!-- OFFICE UPDATE ADMIN MODAL WITH AUTO-QUEUE & PREVIEW (UPDATED WITH FROM & TO DATE) --> 
+    <!-- OFFICE UPDATE ADMIN MODAL WITH AUTO-QUEUE & PREVIEW --> 
     <div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)"> 
         <div class="modal-card"> 
             <button class="modal-close" onclick="closeAdminModal()">✕</button> 
@@ -756,7 +756,6 @@
                     <input type="text" id="adminSelectedDoctorDisplay" readonly style="background: #1e293b; color: #60a5fa; font-weight: 600;" placeholder="No doctor selected yet"> 
                 </div> 
                 
-                <!-- Updated Date Range Fields --> 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"> 
                     <div> 
                         <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">From Date:</label> 
@@ -773,16 +772,16 @@
                     <input type="text" id="adminSpecialTimings" placeholder="e.g. 1:00 PM - 3:00 PM"> 
                 </div> 
                 <div> 
-                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Office Update Reason / Note:</label> 
+                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Update Reason / Note:</label> 
                     <input type="text" id="adminSpecialNote" placeholder="e.g. Special clinic hours / Doctor on leave"> 
                 </div> 
-                <button class="admin-secondary-btn" onclick="saveToQueueAction()">💾 Save Update to Queue</button> 
+                <button class="admin-secondary-btn" onclick="saveToQueueAction()">Save Update to Queue</button> 
                 <div style="border-top: 1px solid #2d3748; padding-top: 14px; margin-top: 4px;"> 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"> 
                         <div id="queueCounterBadge" class="queue-badge" style="margin-bottom: 0;">Queue: 0 updates waiting</div> 
-                        <button class="admin-secondary-btn" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 12px;" onclick="openPreviewModal()">👁️ Preview All Updates</button> 
+                        <button class="admin-secondary-btn" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 12px;" onclick="openPreviewModal()">Preview All Updates</button> 
                     </div> 
-                    <button class="admin-btn" onclick="downloadMasterQueueJSON()">📥 Download Master doctors.json</button> 
+                    <button class="admin-btn" onclick="downloadMasterQueueJSON()">Verify</button> 
                 </div> 
             </div> 
         </div> 
@@ -799,7 +798,7 @@
             <div id="previewContainerList" style="max-height: 280px; overflow-y: auto; margin-bottom: 16px;"> 
                 <!-- Rendered dynamically --> 
             </div> 
-            <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">📥 Verify & Download Master File</button> 
+            <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">Download File</button> 
         </div> 
     </div> 
 
@@ -815,30 +814,50 @@
         let pendingQueueUpdates = {}; 
         const ADMIN_SECRET_PASSWORD = "careoffice123"; 
 
-        function loadDoctorData() { 
-            fetch('doctors.json') 
+        function loadDoctorData(isAutoRefresh = false) { 
+            fetch('doctors.json', { cache: 'no-cache' }) 
                 .then(response => { 
                     if (!response.ok) throw new Error("File not found"); 
-                    return response.json(); 
+                    // Check if file has last-modified header or parse JSON to detect actual content changes
+                    return response.text();
                 }) 
-                .then(data => { 
-                    doctorData = data; 
-                    initApp(); 
+                .then(textData => { 
+                    let newJsonData;
+                    try {
+                        newJsonData = JSON.parse(textData);
+                    } catch(e) {
+                        newJsonData = defaultSampleDoctors;
+                    }
+
+                    const serializedNew = JSON.stringify(newJsonData);
+                    const serializedCurrent = JSON.stringify(doctorData);
+
+                    // Update backend sync timestamp ONLY if data actually changed or if it's the initial load
+                    if (serializedNew !== serializedCurrent) {
+                        doctorData = newJsonData;
+                        checkBackendSync(); // Updates timestamp only when content changes
+                        initApp();
+                    } else if (!isAutoRefresh) {
+                        initApp();
+                    }
                 }) 
                 .catch(error => { 
                     console.warn('Could not load external doctors.json. Using sample data.', error); 
-                    doctorData = defaultSampleDoctors; 
-                    initApp(); 
+                    if (doctorData.length === 0) {
+                        doctorData = defaultSampleDoctors;
+                        checkBackendSync();
+                        initApp();
+                    }
                 }); 
         } 
 
         function initApp() { 
             renderStarredAccordion(); 
             populateFilterDropdowns(); 
-            checkBackendSync(); 
+            applyFilters();
         } 
 
-        loadDoctorData(); 
+        loadDoctorData(false); 
 
         function formatBackendDate(dateObj) { 
             let hours = dateObj.getHours(); 
@@ -883,7 +902,7 @@
         setInterval(() => { 
             timeLeft--; 
             if (timeLeft <= 0) { 
-                loadDoctorData(); 
+                loadDoctorData(true); // Triggers background check; timestamp updates only if JSON content changed
                 timeLeft = REFRESH_INTERVAL_SECONDS; 
             } 
             updateCountdownDisplay(); 
@@ -1372,6 +1391,7 @@
                 const updates = pendingQueueUpdates[idx]; 
                 doctorData[idx]["Special Date From"] = updates["Special Date From"]; 
                 doctorData[idx]["Special Date To"] = updates["Special Date To"]; 
+                doctorData.status = updates["Special Timings"]; 
                 doctorData[idx]["Special Timings"] = updates["Special Timings"]; 
                 doctorData[idx]["Special Note"] = updates["Special Note"]; 
             }); 
