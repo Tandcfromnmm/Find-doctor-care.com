@@ -898,6 +898,22 @@
                     <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Office Update Reason / Note <span style="color:#f87171;">*</span>:</label> 
                     <input type="text" id="adminSpecialNote" placeholder="e.g. Special clinic hours / Doctor on leave"> 
                 </div> 
+
+                <!-- CHANGE CALL DAY TOGGLE & CALENDAR SECTION -->
+                <div style="background: #0b132b; border: 1px solid #1e293b; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label style="font-size: 13px; font-weight: 600; color: var(--text-main);">Change Call Day:</label>
+                        <select id="adminChangeCallDayToggle" onchange="toggleChangeCallDaySection()" style="width: 110px; padding: 8px 12px; font-size: 13.5px;">
+                            <option value="No" selected>No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div id="newCallDayCalendarContainer" style="display: none; margin-top: 4px;">
+                        <label style="font-size: 12.5px; color: #fbbf24; display: block; margin-bottom: 6px;">Select New Call Day (Mandatory): <span style="color:#f87171;">*</span></label>
+                        <input type="date" id="adminNewCallDayDate">
+                    </div>
+                </div>
+
                 <button class="admin-secondary-btn" onclick="saveToQueueAction()">Save Update to Queue</button> 
                 <div style="border-top: 1px solid #2d3748; padding-top: 14px; margin-top: 4px;"> 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"> 
@@ -1626,6 +1642,9 @@
             document.getElementById('adminSpecialDateTo').value = ""; 
             document.getElementById('adminSpecialTimings').value = ""; 
             document.getElementById('adminSpecialNote').value = ""; 
+            document.getElementById('adminChangeCallDayToggle').value = "No";
+            document.getElementById('adminNewCallDayDate').value = "";
+            toggleChangeCallDaySection();
             updateQueueBadge(); 
             document.getElementById('adminModal').classList.add('active'); 
         } 
@@ -1639,6 +1658,17 @@
                 closeAdminModal(); 
             } 
         } 
+
+        function toggleChangeCallDaySection() {
+            const toggleVal = document.getElementById('adminChangeCallDayToggle').value;
+            const container = document.getElementById('newCallDayCalendarContainer');
+            if (toggleVal === "Yes") {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+                document.getElementById('adminNewCallDayDate').value = "";
+            }
+        }
 
         function handleAdminSearchInput() { 
             const query = document.getElementById('adminSearchInput').value.toLowerCase().trim(); 
@@ -1678,12 +1708,22 @@
                         document.getElementById('adminSpecialDateTo').value = existingQueueItem["Special Date To"] || ""; 
                         document.getElementById('adminSpecialTimings').value = existingQueueItem["Special Timings"] || ""; 
                         document.getElementById('adminSpecialNote').value = existingQueueItem["Special Note"] || ""; 
+                        if (existingQueueItem["New Call Day"]) {
+                            document.getElementById('adminChangeCallDayToggle').value = "Yes";
+                            document.getElementById('adminNewCallDayDate').value = existingQueueItem["New Call Day"];
+                        } else {
+                            document.getElementById('adminChangeCallDayToggle').value = "No";
+                            document.getElementById('adminNewCallDayDate').value = "";
+                        }
                     } else { 
                         document.getElementById('adminSpecialDateFrom').value = item.doc["Special Date From"] || item.doc["Special Date"] || ""; 
                         document.getElementById('adminSpecialDateTo').value = item.doc["Special Date To"] || ""; 
                         document.getElementById('adminSpecialTimings').value = item.doc["Special Timings"] || ""; 
                         document.getElementById('adminSpecialNote').value = item.doc["Special Note"] || ""; 
+                        document.getElementById('adminChangeCallDayToggle').value = "No";
+                        document.getElementById('adminNewCallDayDate').value = "";
                     } 
+                    toggleChangeCallDaySection();
                     suggestionsBox.style.display = 'none'; 
                 }; 
                 suggestionsBox.appendChild(div); 
@@ -1701,17 +1741,26 @@
             const toDate = document.getElementById('adminSpecialDateTo').value.trim(); 
             const timings = document.getElementById('adminSpecialTimings').value.trim(); 
             const note = document.getElementById('adminSpecialNote').value.trim(); 
+            const changeCallDayToggle = document.getElementById('adminChangeCallDayToggle').value;
+            const newCallDayDate = document.getElementById('adminNewCallDayDate').value.trim();
 
             if (!fromDate || !toDate || !timings || !note) { 
                 alert("All fields (From Date, To Date, Special Timings, and Office Update Reason / Note) are mandatory to save the update."); 
                 return; 
             } 
 
+            if (changeCallDayToggle === "Yes" && !newCallDayDate) {
+                alert("Please select the new call day from the calendar since 'Change Call Day' is set to Yes.");
+                return;
+            }
+
             pendingQueueUpdates[selectedAdminDoctorIndex] = { 
                 "Special Date From": fromDate, 
                 "Special Date To": toDate, 
                 "Special Timings": timings, 
-                "Special Note": note 
+                "Special Note": note,
+                "Change Call Day": changeCallDayToggle,
+                "New Call Day": changeCallDayToggle === "Yes" ? newCallDayDate : ""
             }; 
 
             const docName = doctorData[selectedAdminDoctorIndex]["Doctor Name"] || "Doctor";
@@ -1725,6 +1774,9 @@
             document.getElementById('adminSpecialDateTo').value = ""; 
             document.getElementById('adminSpecialTimings').value = ""; 
             document.getElementById('adminSpecialNote').value = ""; 
+            document.getElementById('adminChangeCallDayToggle').value = "No";
+            document.getElementById('adminNewCallDayDate').value = "";
+            toggleChangeCallDaySection();
 
             alert("Update with date range saved to queue automatically!"); 
         } 
@@ -1753,6 +1805,8 @@
                         ? (item["Special Date From"] || 'None') 
                         : `${item["Special Date From"]} to ${item["Special Date To"]}`; 
 
+                    let callDayDisplayHtml = item["Change Call Day"] === "Yes" ? `<div><strong>New Call Day:</strong> <span style="color:#fbbf24;">${item["New Call Day"]}</span></div>` : '';
+
                     const cardDiv = document.createElement('div'); 
                     cardDiv.className = 'preview-item-card'; 
                     cardDiv.innerHTML = ` 
@@ -1768,6 +1822,7 @@
                             <div><strong>Date Range:</strong> ${dateRangeDisplay}</div> 
                             <div><strong>Timings:</strong> ${item["Special Timings"] || 'Regular'}</div> 
                             <div><strong>Note:</strong> ${item["Special Note"] || 'None'}</div> 
+                            ${callDayDisplayHtml}
                         </div> 
                     `; 
                     container.appendChild(cardDiv); 
@@ -1811,6 +1866,14 @@
             document.getElementById('adminSpecialDateTo').value = qItem["Special Date To"] || ""; 
             document.getElementById('adminSpecialTimings').value = qItem["Special Timings"] || ""; 
             document.getElementById('adminSpecialNote').value = qItem["Special Note"] || ""; 
+            if (qItem["Change Call Day"] === "Yes") {
+                document.getElementById('adminChangeCallDayToggle').value = "Yes";
+                document.getElementById('adminNewCallDayDate').value = qItem["New Call Day"] || "";
+            } else {
+                document.getElementById('adminChangeCallDayToggle').value = "No";
+                document.getElementById('adminNewCallDayDate').value = "";
+            }
+            toggleChangeCallDaySection();
 
             document.getElementById('adminModal').classList.add('active'); 
         } 
@@ -1853,6 +1916,11 @@
                 doctorData[idx]["Special Timings"] = updates["Special Timings"]; 
                 doctorData[idx]["Special Note"] = updates["Special Note"]; 
                 
+                if (updates["Change Call Day"] === "Yes" && updates["New Call Day"]) {
+                    let existingCallDays = doctorData[idx]["Call Day"] || doctorData[idx]["Call Days"] || "";
+                    doctorData[idx]["Call Day"] = existingCallDays ? `${existingCallDays}, ${updates["New Call Day"]}` : updates["New Call Day"];
+                }
+
                 doctorData[idx]["Rescheduled By"] = rescheduledByName; 
                 doctorData[idx]["Rescheduled At"] = timestampNow; 
             }); 
