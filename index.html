@@ -878,7 +878,7 @@
 
     <script> 
         const defaultSampleDoctors = [ 
-            { "Doctor Name": "Dr. Rajesh Sharma", "Department": "Cardiology", "Branch": "Banjara Hills", "OP Fee": "₹800", "OP Timings": "10:00 AM - 02:00 PM", "Starred": "Yes", "Call Day": "Monday, Friday", "Age Criteria": "All Ages", "Credit Accepted": "Arogyasri, CGHS" }, 
+            { "Doctor Name": "Dr. Rajesh Sharma", "Department": "Cardiology", "Branch": "Banjara Hills", "OP Fee": "₹800", "OP Timings": "10:00 AM - 02:00 PM", "Starred": "Yes", "Call Day": "Monday, Friday, Aug 20, 2026-08-28", "Age Criteria": "All Ages", "Credit Accepted": "Arogyasri, CGHS" }, 
             { "Doctor Name": "Dr. Priya Reddy", "Department": "Pediatrics", "Branch": "Hitech City", "OP Fee": "₹600", "OP Timings": "09:00 AM - 01:00 PM", "Starred": "Yes", "Call Day": "Wednesday", "Age Criteria": "0 - 15 Years", "Credit Accepted": "CGHS" }, 
             { "Doctor Name": "Dr. Anil Kumar", "Department": "Orthopedics", "Branch": "Banjara Hills", "OP Fee": "₹700", "OP Timings": "04:00 PM - 08:00 PM", "Starred": "No", "Call Day": "Monday, Wednesday, Friday", "Age Criteria": "All Ages", "Credit Accepted": "Cash Only" } 
         ]; 
@@ -1123,12 +1123,36 @@
             applyFilters();
         }
 
-        function checkIsOnCall(doc, targetDayName) {
+        function checkIsOnCall(doc, targetDayName, targetDateString = "") {
             const callDayRaw = doc["Call Day"] || doc["Call Days"] || "";
             if (!callDayRaw) return false;
             
-            const assignedDays = callDayRaw.split(/[,&]/).map(d => d.trim().toLowerCase());
-            return assignedDays.includes(targetDayName.toLowerCase());
+            const entries = callDayRaw.split(/[,&]/).map(d => d.trim().toLowerCase());
+            
+            // 1. Check if it matches the weekday name
+            if (targetDayName && entries.includes(targetDayName.toLowerCase())) {
+                return true;
+            }
+
+            // 2. If a specific date is provided, check if the JSON entries match specific date formats across any month/year
+            if (targetDateString) {
+                const dateObj = new Date(targetDateString);
+                const isoDate = targetDateString.toLowerCase(); // e.g. "2026-08-20"
+                const shortMonthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+                const monthStr = shortMonthNames[dateObj.getMonth()];
+                const dayNum = dateObj.getDate();
+                
+                const format1 = `${monthStr} ${dayNum}`.toLowerCase(); // e.g. "aug 20"
+                const format2 = `${monthStr}-${dayNum}`.toLowerCase(); // e.g. "aug-20"
+                
+                for (let entry of entries) {
+                    if (entry === isoDate || entry === format1 || entry === format2 || entry.includes(isoDate)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         function applyFilters() { 
@@ -1156,9 +1180,12 @@
             }); 
 
             if (selectedCallDay && !callDaySelect.disabled) {
+                const selectedOption = callDaySelect.options[callDaySelect.selectedIndex];
+                const targetDateStr = selectedOption ? selectedOption.getAttribute('data-date-string') : "";
+
                 filtered.sort((a, b) => {
-                    const aOnCall = checkIsOnCall(a, selectedCallDay) ? 0 : 1;
-                    const bOnCall = checkIsOnCall(b, selectedCallDay) ? 0 : 1;
+                    const aOnCall = checkIsOnCall(a, selectedCallDay, targetDateStr) ? 0 : 1;
+                    const bOnCall = checkIsOnCall(b, selectedCallDay, targetDateStr) ? 0 : 1;
                     return aOnCall - bOnCall;
                 });
             }
@@ -1244,7 +1271,13 @@
             } 
 
             const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            const currentActualDayName = daysOfWeek[new Date().getDay()];
+            const todayObj = new Date();
+            const currentActualDayName = daysOfWeek[todayObj.getDay()];
+            const todayIsoStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+
+            const callDaySelect = document.getElementById('callDayFilter');
+            const selectedOption = callDaySelect ? callDaySelect.options[callDaySelect.selectedIndex] : null;
+            const activeDateStr = selectedOption ? selectedOption.getAttribute('data-date-string') : "";
 
             doctors.forEach((doc) => { 
                 const card = document.createElement('div'); 
@@ -1268,14 +1301,14 @@
 
                 let statusBadgeHTML = '';
                 if (!activeSelectedCallDay) {
-                    const isOnCallToday = checkIsOnCall(doc, currentActualDayName);
+                    const isOnCallToday = checkIsOnCall(doc, currentActualDayName, todayIsoStr);
                     if (isOnCallToday) {
                         statusBadgeHTML = `<span class="status-badge-pill status-on-call">🟢 On Call Day Today (${currentActualDayName})</span>`;
                     } else {
                         statusBadgeHTML = `<span class="status-badge-pill status-off-call">⚪ Off Call Day Today (${currentActualDayName})</span>`;
                     }
                 } else {
-                    const isOnCallFilterDay = checkIsOnCall(doc, activeSelectedCallDay);
+                    const isOnCallFilterDay = checkIsOnCall(doc, activeSelectedCallDay, activeDateStr);
                     const capitalizedFilterDay = activeSelectedCallDay.charAt(0).toUpperCase() + activeSelectedCallDay.slice(1);
                     if (isOnCallFilterDay) {
                         statusBadgeHTML = `<span class="status-badge-pill status-on-call">🟢 On Call Day (${capitalizedFilterDay})</span>`;
