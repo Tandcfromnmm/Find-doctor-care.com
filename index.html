@@ -766,7 +766,7 @@
 
         <div class="section-heading" id="resultsHeading">Search Results</div> 
         <div id="resultsContainer" class="results-container"> 
-            <div class="no-results">Please select both Department and Branch to view doctors.</div> 
+            <div class="no-results">Type a doctor name or select Department and Branch to view doctors.</div> 
         </div> 
     </div> 
 
@@ -1365,18 +1365,26 @@
 
             const container = document.getElementById('resultsContainer'); 
 
-            if (selectedDept === "" || selectedBranch === "") { 
-                container.innerHTML = `<div class="no-results">Please select both Department and Branch to view doctors.</div>`; 
+            // If a search query is entered, allow searching globally across all doctors
+            if (query === "" && (selectedDept === "" || selectedBranch === "")) { 
+                container.innerHTML = `<div class="no-results">Type a doctor name or select Department and Branch to view doctors.</div>`; 
                 return; 
             } 
 
             let filtered = doctorData.filter(doc => { 
-                // Flexible partial matching for name or any field when search is typed or entered
                 const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
                 const matchesName = query === "" || docName.includes(query) || Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
-                const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selectedDept; 
-                const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch; 
-                return matchesName && matchesDept && matchesBranch; 
+                
+                if (query !== "") {
+                    // When searching by name/keyword, only require department/branch match if they are actively selected
+                    const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
+                    const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
+                    return matchesName && matchesDept && matchesBranch;
+                } else {
+                    const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selectedDept; 
+                    const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch; 
+                    return matchesName && matchesDept && matchesBranch; 
+                }
             }); 
 
             if (selectedCallDay && !callDaySelect.disabled) {
@@ -1404,17 +1412,9 @@
                 return; 
             } 
 
-            const deptSelect = document.getElementById('deptFilter');
-            const branchSelect = document.getElementById('branchFilter');
-            const selectedDept = deptSelect.value.toLowerCase(); 
-            const selectedBranch = branchSelect.value.toLowerCase(); 
-
             const filtered = doctorData.filter(doc => { 
                 const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
-                const matchesQuery = docName.includes(query); 
-                const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
-                const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
-                return matchesQuery && matchesDept && matchesBranch; 
+                return docName.includes(query); 
             }); 
 
             showSuggestions(filtered); 
