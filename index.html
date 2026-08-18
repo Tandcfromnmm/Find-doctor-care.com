@@ -174,37 +174,29 @@
             color: #60a5fa; 
         } 
 
-        /* AI Symptom Checker Banner */
-        .symptom-checker-box {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
-            border: 1px dashed rgba(16, 185, 129, 0.4);
-            border-radius: 12px;
-            padding: 14px 16px;
-            margin-bottom: 16px;
-        }
-        .symptom-input-row {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .symptom-btn {
-            background: #10b981;
+        /* Floating Symptom Icon Style */
+        .floating-symptom-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             border: none;
-            padding: 0 16px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 13.5px;
+            border-radius: 50%;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
             cursor: pointer;
-            transition: background 0.2s ease;
-            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1500;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .symptom-btn:hover { background: #059669; }
-        .symptom-result-box {
-            font-size: 13px;
-            color: #34d399;
-            margin-top: 8px;
-            display: none;
+        .floating-symptom-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.6);
         }
 
         /* Filters Container */ 
@@ -701,43 +693,6 @@
             line-height: 1.4; 
             cursor: pointer; 
         } 
-
-        /* Rota Calendar Styles */
-        .rota-calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            margin-top: 10px;
-        }
-        .rota-day-cell {
-            background: #0b132b;
-            border: 1px solid #1e293b;
-            border-radius: 8px;
-            padding: 8px 4px;
-            text-align: center;
-            font-size: 12px;
-            min-height: 60px;
-        }
-        .rota-day-name {
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 11px;
-            margin-bottom: 4px;
-        }
-        .rota-day-date {
-            color: var(--text-main);
-            font-weight: 700;
-            font-size: 13px;
-        }
-        .rota-count-badge {
-            margin-top: 4px;
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-            font-size: 10px;
-            padding: 1px 4px;
-            border-radius: 4px;
-            display: inline-block;
-        }
     </style> 
 </head> 
 <body> 
@@ -748,27 +703,16 @@
                 <div class="brand-title">Find Doctor</div> 
             </div> 
             <div class="admin-trigger-group">
-                <button class="admin-trigger-btn" onclick="openRotaCalendarModal()" title="View Monthly Rota Calendar"> 
-                    <span>📅 Rota</span> 
-                </button>
                 <button class="admin-trigger-btn" onclick="promptAdminPassword()"> 
                     <span>⚙️ Reschedule</span> 
                 </button> 
             </div>
         </div> 
 
-        <!-- AI Symptom-to-Department Triage Box -->
-        <div class="symptom-checker-box">
-            <div style="font-size: 13.5px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
-                <span>💡 AI Symptom Triage (50+ Symptoms Supported)</span>
-            </div>
-            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Type your symptom or issue (e.g. foot pain, chest pain, diabetes, cough)...</div>
-            <div class="symptom-input-row">
-                <input type="text" id="symptomInput" placeholder="e.g. foot pain, knee swelling, heart palpitation..." style="padding: 10px 12px; font-size: 13.5px;" onkeydown="handleSymptomKey(event)">
-                <button class="symptom-btn" onclick="checkSymptomTriage()">Analyze</button>
-            </div>
-            <div id="symptomResult" class="symptom-result-box"></div>
-        </div>
+        <!-- Floating Symptom Triage Icon -->
+        <button class="floating-symptom-btn" onclick="openSymptomModal()" title="AI Symptom Triage">
+            🩺
+        </button>
 
         <div class="search-box-wrapper"> 
             <svg class="search-icon" viewBox="0 0 24 24"> 
@@ -876,15 +820,19 @@
         </div> 
     </div> 
 
-    <!-- ROTA CALENDAR MODAL -->
-    <div id="rotaCalendarModal" class="modal-overlay" onclick="closeRotaOnBg(event)">
-        <div class="modal-card" style="max-width: 550px;">
-            <button class="modal-close" onclick="closeRotaCalendarModal()">✕</button>
-            <h2 class="modal-title">📅 Monthly Rota Calendar</h2>
+    <!-- AI SYMPTOM TRIAGE MODAL -->
+    <div id="symptomModal" class="modal-overlay" onclick="closeSymptomOnBg(event)">
+        <div class="modal-card" style="max-width: 450px;">
+            <button class="modal-close" onclick="closeSymptomModal()">✕</button>
+            <h2 class="modal-title">💡 AI Symptom Triage</h2>
             <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-                Overview of on-call availability for the next 7 days across active filters.
+                Type your symptom or issue (e.g. foot pain, chest pain, diabetes, cough) to find the right department.
             </p>
-            <div id="rotaCalendarContent"></div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <input type="text" id="symptomInput" placeholder="e.g. foot pain, knee swelling..." onkeydown="handleSymptomKey(event)">
+                <button class="admin-btn" onclick="checkSymptomTriage()" style="margin-top: 0;">Analyze & Filter Department</button>
+                <div id="symptomResult" style="font-size: 13.5px; color: #34d399; display: none; background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);"></div>
+            </div>
         </div>
     </div>
 
@@ -1102,7 +1050,23 @@
 
         updateCountdownDisplay(); 
 
-        /* Comprehensive AI Symptom Triage with 50+ Symptoms / 15+ Specialties */
+        /* AI Symptom Triage Modal Controls & Logic */
+        function openSymptomModal() {
+            document.getElementById('symptomInput').value = "";
+            document.getElementById('symptomResult').style.display = 'none';
+            document.getElementById('symptomModal').classList.add('active');
+        }
+
+        function closeSymptomModal() {
+            document.getElementById('symptomModal').classList.remove('active');
+        }
+
+        function closeSymptomOnBg(event) {
+            if (event.target.id === 'symptomModal') {
+                closeSymptomModal();
+            }
+        }
+
         function handleSymptomKey(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -1118,7 +1082,6 @@
                 return;
             }
 
-            // Keyword mapping configuration covering 50+ symptoms & 15+ departments
             const symptomRules = [
                 { dept: "Cardiology", keywords: ["chest pain", "heart", "palpitation", "bp", "blood pressure", "chest tightness", "angina", "cardiac"] },
                 { dept: "Cardio-Thoracic Surgery", keywords: ["bypass", "valve replacement", "open-heart", "congenital heart", "thoracic surgery"] },
@@ -1137,7 +1100,7 @@
                 { dept: "Pediatrics", keywords: ["child", "baby", "infant", "pediatric", "newborn", "kid"] }
             ];
 
-            let matchedDept = "General Medicine"; // Safe fallback for anything else
+            let matchedDept = "General Medicine"; 
             for (let rule of symptomRules) {
                 if (rule.keywords.some(kw => query.includes(kw))) {
                     matchedDept = rule.dept;
@@ -1145,11 +1108,10 @@
                 }
             }
 
-            resultBox.innerHTML = `Recommended Department: <strong>${matchedDept}</strong>. Click to auto-filter department.`;
+            resultBox.innerHTML = `Recommended Department: <strong>${matchedDept}</strong>. Filtering results...`;
             resultBox.style.display = 'block';
             logAuditTrail(`AI Triage analyzed symptom '${query}' -> Recommended ${matchedDept}`);
 
-            // Auto-select department filter dropdown
             const deptSelect = document.getElementById('deptFilter');
             for (let option of deptSelect.options) {
                 if (option.value.toLowerCase() === matchedDept.toLowerCase()) {
@@ -1158,6 +1120,10 @@
                     break;
                 }
             }
+
+            setTimeout(() => {
+                closeSymptomModal();
+            }, 1200);
         }
 
         function getActiveSchedule(doc) { 
@@ -1548,68 +1514,6 @@
                 closeModal(); 
             } 
         } 
-
-        /* Interactive Monthly Rota Calendar Modal */
-        function openRotaCalendarModal() {
-            const content = document.getElementById('rotaCalendarContent');
-            const deptSelect = document.getElementById('deptFilter');
-            const branchSelect = document.getElementById('branchFilter');
-            const selDept = deptSelect.value;
-            const selBranch = branchSelect.value;
-
-            let filteredDocs = doctorData;
-            if (selDept) filteredDocs = filteredDocs.filter(d => d["Department"] === selDept);
-            if (selBranch) filteredDocs = filteredDocs.filter(d => d["Branch"] === selBranch);
-
-            let gridHTML = `<div class="rota-calendar-grid">`;
-            const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            const fullDaysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            
-            const today = new Date();
-            for (let i = 0; i < 7; i++) {
-                const targetDate = new Date(today);
-                targetDate.setDate(today.getDate() + i);
-                const dayNameFull = fullDaysOfWeek[targetDate.getDay()];
-                const year = targetDate.getFullYear();
-                const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-                const day = String(targetDate.getDate()).padStart(2, '0');
-                const dateIsoStr = `${year}-${month}-${day}`;
-
-                const onCallCount = filteredDocs.filter(doc => checkIsOnCall(doc, dayNameFull, dateIsoStr)).length;
-
-                gridHTML += `
-                    <div class="rota-day-cell">
-                        <div class="rota-day-name">${daysOfWeek[targetDate.getDay()]}</div>
-                        <div class="rota-day-date">${targetDate.getDate()}</div>
-                        <span class="rota-count-badge">${onCallCount} on duty</span>
-                    </div>
-                `;
-            }
-            gridHTML += `</div>`;
-
-            let auditLogHTML = `<div style="margin-top: 20px;"><div class="section-heading">Activity Audit Trail (${activityAuditTrail.length} entries)</div><div style="background:#0b132b; border:1px solid #1e293b; border-radius:10px; padding:10px; max-height:120px; overflow-y:auto; font-size:12px; color:var(--text-secondary);">`;
-            if (activityAuditTrail.length === 0) {
-                auditLogHTML += `<div>No activities recorded yet.</div>`;
-            } else {
-                activityAuditTrail.forEach(log => {
-                    auditLogHTML += `<div style="margin-bottom:6px; border-bottom:1px solid #1e293b; padding-bottom:4px;"><span style="color:#60a5fa;">[${log.time}]</span> ${log.message}</div>`;
-                });
-            }
-            auditLogHTML += `</div></div>`;
-
-            content.innerHTML = gridHTML + auditLogHTML;
-            document.getElementById('rotaCalendarModal').classList.add('active');
-        }
-
-        function closeRotaCalendarModal() {
-            document.getElementById('rotaCalendarModal').classList.remove('active');
-        }
-
-        function closeRotaOnBg(event) {
-            if (event.target.id === 'rotaCalendarModal') {
-                closeRotaCalendarModal();
-            }
-        }
 
         function promptAdminPassword() { 
             document.getElementById('adminPasswordInput').value = ""; 
