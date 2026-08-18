@@ -336,6 +336,25 @@
             border-radius: 4px; 
             border: 1px dashed rgba(245, 158, 11, 0.4); 
         } 
+        .status-badge-pill { 
+            font-size: 10.5px; 
+            font-weight: 600; 
+            padding: 2px 8px; 
+            border-radius: 4px; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 4px; 
+        } 
+        .status-on-call { 
+            background: rgba(16, 185, 129, 0.2); 
+            color: #34d399; 
+            border: 1px solid rgba(16, 185, 129, 0.4); 
+        } 
+        .status-off-call { 
+            background: rgba(148, 163, 184, 0.1); 
+            color: var(--text-secondary); 
+            border: 1px solid rgba(148, 163, 184, 0.2); 
+        } 
         .age-pill { 
             font-size: 10.5px; 
             font-weight: 600; 
@@ -859,9 +878,9 @@
 
     <script> 
         const defaultSampleDoctors = [ 
-            { "Doctor Name": "Dr. Rajesh Sharma", "Department": "Cardiology", "Branch": "Banjara Hills", "OP Fee": "₹800", "OP Timings": "10:00 AM - 02:00 PM", "Starred": "Yes", "Call Day": "Monday", "Age Criteria": "All Ages", "Credit Accepted": "Arogyasri, CGHS" }, 
+            { "Doctor Name": "Dr. Rajesh Sharma", "Department": "Cardiology", "Branch": "Banjara Hills", "OP Fee": "₹800", "OP Timings": "10:00 AM - 02:00 PM", "Starred": "Yes", "Call Day": "Monday, Friday", "Age Criteria": "All Ages", "Credit Accepted": "Arogyasri, CGHS" }, 
             { "Doctor Name": "Dr. Priya Reddy", "Department": "Pediatrics", "Branch": "Hitech City", "OP Fee": "₹600", "OP Timings": "09:00 AM - 01:00 PM", "Starred": "Yes", "Call Day": "Wednesday", "Age Criteria": "0 - 15 Years", "Credit Accepted": "CGHS" }, 
-            { "Doctor Name": "Dr. Anil Kumar", "Department": "Orthopedics", "Branch": "Banjara Hills", "OP Fee": "₹700", "OP Timings": "04:00 PM - 08:00 PM", "Starred": "No", "Call Day": "Friday", "Age Criteria": "All Ages", "Credit Accepted": "Cash Only" } 
+            { "Doctor Name": "Dr. Anil Kumar", "Department": "Orthopedics", "Branch": "Banjara Hills", "OP Fee": "₹700", "OP Timings": "04:00 PM - 08:00 PM", "Starred": "No", "Call Day": "Monday, Wednesday, Friday", "Age Criteria": "All Ages", "Credit Accepted": "Cash Only" } 
         ]; 
 
         let doctorData = []; 
@@ -1077,7 +1096,6 @@
 
             callDaySelect.disabled = false;
             
-            // Generate upcoming options: Today, Tomorrow, and next 5 days (total 7 days)
             let optionsHTML = `<option value="" selected>All Call Days (Smart Sorted)</option>`;
             
             const today = new Date();
@@ -1089,8 +1107,13 @@
                 const dayName = daysOfWeek[targetDate.getDay()];
                 const formattedLabel = i === 0 ? `Today - ${getFormattedDateString(targetDate)}` : (i === 1 ? `Tomorrow - ${getFormattedDateString(targetDate)}` : getFormattedDateString(targetDate));
                 
-                // Value can match either specific day name or exact date format depending on how doctor data stores call days
-                optionsHTML += `<option value="${dayName}">${formattedLabel} (${dayName})</option>`;
+                // Store date string (YYYY-MM-DD) as value so we can match exact dates, or day name
+                const year = targetDate.getFullYear();
+                const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+                const day = String(targetDate.getDate()).padStart(2, '0');
+                const dateValue = `${year}-${month}-${day}`;
+
+                optionsHTML += `<option value="${dayName}" data-date-string="${dateValue}">${formattedLabel} (${dayName})</option>`;
             }
 
             callDaySelect.innerHTML = optionsHTML;
@@ -1099,6 +1122,15 @@
         function onDepartmentOrBranchChange() {
             updateCallDayDropdownOptions();
             applyFilters();
+        }
+
+        function checkIsOnCall(doc, selectedDayName) {
+            const callDayRaw = doc["Call Day"] || doc["Call Days"] || "";
+            if (!callDayRaw) return false;
+            
+            // Split combined days like "Monday, Friday" or "Monday & Friday"
+            const assignedDays = callDayRaw.split(/[,&]/).map(d => d.trim().toLowerCase());
+            return assignedDays.includes(selectedDayName.toLowerCase());
         }
 
         function applyFilters() { 
@@ -1124,20 +1156,16 @@
                 return matchesName && matchesDept && matchesBranch; 
             }); 
 
-            // Smart Sort & Filter by Call Day if selected
+            // Smart Sort & Highlight by Call Day if selected
             if (selectedCallDay && !callDaySelect.disabled) {
                 filtered.sort((a, b) => {
-                    const callA = (a["Call Day"] || a["Call Days"] || "").toLowerCase();
-                    const callB = (b["Call Day"] || b["Call Days"] || "").toLowerCase();
-                    
-                    const matchA = callA.includes(selectedCallDay) ? 0 : 1;
-                    const matchB = callB.includes(selectedCallDay) ? 0 : 1;
-                    
-                    return matchA - matchB;
+                    const aOnCall = checkIsOnCall(a, selectedCallDay) ? 0 : 1;
+                    const bOnCall = checkIsOnCall(b, selectedCallDay) ? 0 : 1;
+                    return aOnCall - bOnCall;
                 });
             }
 
-            renderDoctors(filtered); 
+            renderDoctors(filtered, selectedCallDay); 
         } 
 
         function handleSearchInput() { 
@@ -1191,7 +1219,7 @@
                 item.onclick = function() { 
                     document.getElementById('searchInput').value = doc["Doctor Name"]; 
                     suggestionsBox.style.display = 'none'; 
-                    renderDoctors([doc]); 
+                    renderDoctors([doc], document.getElementById('callDayFilter').value.toLowerCase()); 
                 }; 
                 suggestionsBox.appendChild(item); 
             }); 
@@ -1208,7 +1236,7 @@
             } 
         }); 
 
-        function renderDoctors(doctors) { 
+        function renderDoctors(doctors, activeSelectedCallDay = "") { 
             const container = document.getElementById('resultsContainer'); 
             container.innerHTML = ''; 
 
@@ -1232,12 +1260,23 @@
                 } 
 
                 let callDayValue = doc["Call Day"] || doc["Call Days"] || ""; 
-                let callDayHTML = callDayValue ? `<span class="callday-pill">Call day: ${callDayValue}</span>` : ''; 
+                let callDayHTML = callDayValue ? `<span class="callday-pill">Call Days: ${callDayValue}</span>` : ''; 
 
                 let ageValue = doc["Age Criteria"] || doc["Age Limit"] || ""; 
                 let ageHTML = ageValue ? `<span class="age-pill">Age: ${ageValue}</span>` : ''; 
 
-                let metaCombinedHTML = (creditPillsHTML || callDayHTML || ageHTML) ? `<div class="meta-pills-container">${ageHTML}${callDayHTML}${creditPillsHTML}</div>` : ''; 
+                // Strict Status Badge when a specific Call Day is selected
+                let statusBadgeHTML = '';
+                if (activeSelectedCallDay) {
+                    const isOnCall = checkIsOnCall(doc, activeSelectedCallDay);
+                    if (isOnCall) {
+                        statusBadgeHTML = `<span class="status-badge-pill status-on-call">🟢 On Call Today</span>`;
+                    } else {
+                        statusBadgeHTML = `<span class="status-badge-pill status-off-call">⚪ Off Call</span>`;
+                    }
+                }
+
+                let metaCombinedHTML = (creditPillsHTML || callDayHTML || ageHTML || statusBadgeHTML) ? `<div class="meta-pills-container">${statusBadgeHTML}${ageHTML}${callDayHTML}${creditPillsHTML}</div>` : ''; 
 
                 card.innerHTML = ` 
                     <div class="card-top-row"> 
