@@ -633,10 +633,10 @@
         <!-- FILTER DROPDOWNS --> 
         <div class="filters-container"> 
             <select id="deptFilter" onchange="applyFilters()"> 
-                <option value="">All Departments</option> 
+                <option value="" disabled selected>Select Department</option> 
             </select> 
             <select id="branchFilter" onchange="applyFilters()"> 
-                <option value="">All Branches</option> 
+                <option value="" disabled selected>Select Branch</option> 
             </select> 
         </div> 
 
@@ -659,7 +659,7 @@
 
         <div class="section-heading" id="resultsHeading">Search Results</div> 
         <div id="resultsContainer" class="results-container"> 
-            <div class="no-results">Type name, or select filters above to find doctors.</div> 
+            <div class="no-results">Please select both Department and Branch to view doctors.</div> 
         </div> 
     </div> 
 
@@ -728,7 +728,7 @@
             <button class="modal-close" onclick="closePasswordModal()">✕</button> 
             <h2 class="modal-title">Admin Access Required</h2> 
             <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
-                Please enter the office password to modify schedules. 
+                Please enter the password to modify schedules. 
             </p> 
             <div style="display: flex; flex-direction: column; gap: 14px;"> 
                 <input type="password" id="adminPasswordInput" placeholder="Enter password..." onkeydown="handlePasswordKey(event)"> 
@@ -737,13 +737,13 @@
         </div> 
     </div> 
 
-    <!-- OFFICE UPDATE ADMIN MODAL WITH AUTO-QUEUE & PREVIEW --> 
+    <!-- Reschedule Panel & PREVIEW --> 
     <div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)"> 
         <div class="modal-card"> 
             <button class="modal-close" onclick="closeAdminModal()">✕</button> 
-            <h2 class="modal-title">Office Schedule Update Panel</h2> 
+            <h2 class="modal-title">Reschedule Panel</h2> 
             <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
-                Update schedules for a single date or across a custom date range (From Date & To Date). Changes automatically queue for batch verification. 
+                Update schedules for a single date or across a custom date range (From Date & To Date).Add changes to queue for batch verification. 
             </p> 
             <div style="display: flex; flex-direction: column; gap: 14px;"> 
                 <div style="position: relative;" id="adminSearchWrapper"> 
@@ -781,7 +781,7 @@
                         <div id="queueCounterBadge" class="queue-badge" style="margin-bottom: 0;">Queue: 0 updates waiting</div> 
                         <button class="admin-secondary-btn" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 12px;" onclick="openPreviewModal()">Preview All Updates</button> 
                     </div> 
-                    <button class="admin-btn" onclick="downloadMasterQueueJSON()">Verify</button> 
+                    <button class="admin-btn" onclick="downloadMasterQueueJSON()">Verify modification</button> 
                 </div> 
             </div> 
         </div> 
@@ -818,7 +818,6 @@
             fetch('doctors.json', { cache: 'no-cache' }) 
                 .then(response => { 
                     if (!response.ok) throw new Error("File not found"); 
-                    // Check if file has last-modified header or parse JSON to detect actual content changes
                     return response.text();
                 }) 
                 .then(textData => { 
@@ -832,10 +831,9 @@
                     const serializedNew = JSON.stringify(newJsonData);
                     const serializedCurrent = JSON.stringify(doctorData);
 
-                    // Update backend sync timestamp ONLY if data actually changed or if it's the initial load
                     if (serializedNew !== serializedCurrent) {
                         doctorData = newJsonData;
-                        checkBackendSync(); // Updates timestamp only when content changes
+                        checkBackendSync(); 
                         initApp();
                     } else if (!isAutoRefresh) {
                         initApp();
@@ -902,7 +900,7 @@
         setInterval(() => { 
             timeLeft--; 
             if (timeLeft <= 0) { 
-                loadDoctorData(true); // Triggers background check; timestamp updates only if JSON content changed
+                loadDoctorData(true); 
                 timeLeft = REFRESH_INTERVAL_SECONDS; 
             } 
             updateCountdownDisplay(); 
@@ -985,19 +983,28 @@
             const departments = [...new Set(doctorData.map(d => d["Department"]).filter(Boolean))].sort(); 
             const branches = [...new Set(doctorData.map(d => d["Branch"]).filter(Boolean))].sort(); 
 
-            deptSelect.innerHTML = `<option value="">All Departments</option>` + departments.map(d => `<option value="${d}">${d}</option>`).join(''); 
-            branchSelect.innerHTML = `<option value="">All Branches</option>` + branches.map(b => `<option value="${b}">${b}</option>`).join(''); 
+            deptSelect.innerHTML = `<option value="" disabled selected>Select Department</option>` + departments.map(d => `<option value="${d}">${d}</option>`).join(''); 
+            branchSelect.innerHTML = `<option value="" disabled selected>Select Branch</option>` + branches.map(b => `<option value="${b}">${b}</option>`).join(''); 
         } 
 
         function applyFilters() { 
-            const selectedDept = document.getElementById('deptFilter').value.toLowerCase(); 
-            const selectedBranch = document.getElementById('branchFilter').value.toLowerCase(); 
+            const deptSelect = document.getElementById('deptFilter');
+            const branchSelect = document.getElementById('branchFilter');
+            const selectedDept = deptSelect.value.toLowerCase(); 
+            const selectedBranch = branchSelect.value.toLowerCase(); 
             const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
+
+            const container = document.getElementById('resultsContainer');
+
+            if (!deptSelect.value || !branchSelect.value) {
+                container.innerHTML = `<div class="no-results">Please select both Department and Branch to view doctors.</div>`;
+                return;
+            }
 
             const filtered = doctorData.filter(doc => { 
                 const matchesName = query === "" || (doc["Doctor Name"] && doc["Doctor Name"].toLowerCase().includes(query)); 
-                const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
-                const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
+                const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selectedDept; 
+                const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch; 
                 return matchesName && matchesDept && matchesBranch; 
             }); 
 
@@ -1015,13 +1022,21 @@
                 return; 
             } 
 
-            const selectedDept = document.getElementById('deptFilter').value.toLowerCase(); 
-            const selectedBranch = document.getElementById('branchFilter').value.toLowerCase(); 
+            const deptSelect = document.getElementById('deptFilter');
+            const branchSelect = document.getElementById('branchFilter');
+
+            if (!deptSelect.value || !branchSelect.value) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            const selectedDept = deptSelect.value.toLowerCase(); 
+            const selectedBranch = branchSelect.value.toLowerCase(); 
 
             const filtered = doctorData.filter(doc => { 
                 const matchesQuery = Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
-                const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
-                const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
+                const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selectedDept; 
+                const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch; 
                 return matchesQuery && matchesDept && matchesBranch; 
             }); 
 
@@ -1391,7 +1406,6 @@
                 const updates = pendingQueueUpdates[idx]; 
                 doctorData[idx]["Special Date From"] = updates["Special Date From"]; 
                 doctorData[idx]["Special Date To"] = updates["Special Date To"]; 
-                doctorData.status = updates["Special Timings"]; 
                 doctorData[idx]["Special Timings"] = updates["Special Timings"]; 
                 doctorData[idx]["Special Note"] = updates["Special Note"]; 
             }); 
