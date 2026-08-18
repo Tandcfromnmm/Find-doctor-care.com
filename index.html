@@ -720,7 +720,7 @@
 
         <div class="section-heading" id="resultsHeading">Search Results</div> 
         <div id="resultsContainer" class="results-container"> 
-            <div class="no-results">Start typing a doctor's name or select filters to view doctors.</div> 
+            <div class="no-results">Please select both Department and Branch to view doctors.</div> 
         </div> 
     </div> 
 
@@ -1141,16 +1141,17 @@
             const selectedCallDay = callDaySelect.value.toLowerCase();
             const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
 
-            if (query === "" && selectedDept === "" && selectedBranch === "") { 
-                const container = document.getElementById('resultsContainer'); 
-                container.innerHTML = `<div class="no-results">Start typing a doctor's name or select filters to view doctors.</div>`; 
+            const container = document.getElementById('resultsContainer'); 
+
+            if (selectedDept === "" || selectedBranch === "") { 
+                container.innerHTML = `<div class="no-results">Please select both Department and Branch to view doctors.</div>`; 
                 return; 
             } 
 
             let filtered = doctorData.filter(doc => { 
                 const matchesName = query === "" || (doc["Doctor Name"] && doc["Doctor Name"].toLowerCase().includes(query)) || Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
-                const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
-                const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
+                const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selectedDept; 
+                const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch; 
                 return matchesName && matchesDept && matchesBranch; 
             }); 
 
@@ -1267,7 +1268,6 @@
 
                 let statusBadgeHTML = '';
                 if (!activeSelectedCallDay) {
-                    // Smart Real-World Status for Today
                     const isOnCallToday = checkIsOnCall(doc, currentActualDayName);
                     if (isOnCallToday) {
                         statusBadgeHTML = `<span class="status-badge-pill status-on-call">🟢 On Call Day Today (${currentActualDayName})</span>`;
@@ -1275,7 +1275,6 @@
                         statusBadgeHTML = `<span class="status-badge-pill status-off-call">⚪ Off Call Day Today (${currentActualDayName})</span>`;
                     }
                 } else {
-                    // Smart Status relative to the selected dropdown filter day
                     const isOnCallFilterDay = checkIsOnCall(doc, activeSelectedCallDay);
                     const capitalizedFilterDay = activeSelectedCallDay.charAt(0).toUpperCase() + activeSelectedCallDay.slice(1);
                     if (isOnCallFilterDay) {
