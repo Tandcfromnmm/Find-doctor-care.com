@@ -537,7 +537,7 @@
                 <button class="modal-close" onclick="closeAdminModal()">&times;</button>
             </div>
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
-                Make date-range timing/leave modifications for doctors and queue updates.
+                Make daily timing/leave modifications for doctors and queue updates.
             </div>
             <div class="admin-form-group" id="adminSearchWrapper" style="position: relative;">
                 <label>Search Doctor to Modify</label>
@@ -548,15 +548,9 @@
                 <label>Selected Target Doctor</label>
                 <input type="text" id="adminSelectedDoctorDisplay" class="admin-form-control" readonly style="background: #f1f5f9;">
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="admin-form-group">
-                    <label>From Date</label>
-                    <input type="date" id="adminSpecialDateFrom" class="admin-form-control">
-                </div>
-                <div class="admin-form-group">
-                    <label>Till Date</label>
-                    <input type="date" id="adminSpecialDateTo" class="admin-form-control">
-                </div>
+            <div class="admin-form-group">
+                <label>Special Date (Optional)</label>
+                <input type="date" id="adminSpecialDate" class="admin-form-control">
             </div>
             <div class="admin-form-group">
                 <label>Special Timings / Leave Reason</label>
@@ -630,6 +624,7 @@
         let pendingQueueUpdates = {}; 
         const ADMIN_SECRET_PASSWORD = "careoffice123";
 
+        // Fetch file and extract the server Last-Modified header
         function loadDoctorData() {
             fetch('doctors.json', { cache: 'no-cache' })
                 .then(response => {
@@ -700,6 +695,7 @@
 
         loadDoctorData();
 
+        // Auto Refresh Countdown
         const REFRESH_INTERVAL_SECONDS = 300; 
         let timeLeft = REFRESH_INTERVAL_SECONDS;
 
@@ -727,43 +723,17 @@
 
         function getActiveSchedule(doc) {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const currentDateStr = `${year}-${month}-${day}`;
 
-            const fromDateStr = doc["Special Date From"] ? String(doc["Special Date From"]).trim() : "";
-            const tillDateStr = doc["Special Date To"] ? String(doc["Special Date To"]).trim() : "";
+            const targetDate = doc["Special Date"] ? String(doc["Special Date"]).trim() : "";
 
-            // Fallback check for legacy single "Special Date" field if it exists
-            const legacyDateStr = doc["Special Date"] ? String(doc["Special Date"]).trim() : "";
-
-            let isWithinRange = false;
-
-            if (fromDateStr && tillDateStr) {
-                const fromDate = new Date(fromDateStr);
-                fromDate.setHours(0, 0, 0, 0);
-                const tillDate = new Date(tillDateStr);
-                tillDate.setHours(0, 0, 0, 0);
-
-                if (today >= fromDate && today <= tillDate) {
-                    isWithinRange = true;
-                }
-            } else if (fromDateStr && !tillDateStr) {
-                const fromDate = new Date(fromDateStr);
-                fromDate.setHours(0, 0, 0, 0);
-                if (today.getTime() === fromDate.getTime()) {
-                    isWithinRange = true;
-                }
-            } else if (legacyDateStr) {
-                const legacyDate = new Date(legacyDateStr);
-                legacyDate.setHours(0, 0, 0, 0);
-                if (today.getTime() === legacyDate.getTime()) {
-                    isWithinRange = true;
-                }
-            }
-
-            if (isWithinRange) {
+            if (targetDate && targetDate === currentDateStr) {
                 return {
                     timings: doc["Special Timings"] || doc["OP Timings"],
-                    note: doc["Special Note"] || doc["Leave / Timing Updates"] || "Special schedule active"
+                    note: doc["Special Note"] || doc["Leave / Timing Updates"] || "Special schedule for today"
                 };
             }
 
@@ -1042,8 +1012,7 @@
             selectedAdminDoctorIndex = null;
             document.getElementById('adminSearchInput').value = "";
             document.getElementById('adminSelectedDoctorDisplay').value = "";
-            document.getElementById('adminSpecialDateFrom').value = "";
-            document.getElementById('adminSpecialDateTo').value = "";
+            document.getElementById('adminSpecialDate').value = "";
             document.getElementById('adminSpecialTimings').value = "";
             document.getElementById('adminSpecialNote').value = "";
             updateQueueBadge();
@@ -1094,13 +1063,11 @@
                     
                     const existingQueueItem = pendingQueueUpdates[item.idx];
                     if (existingQueueItem) {
-                        document.getElementById('adminSpecialDateFrom').value = existingQueueItem["Special Date From"] || "";
-                        document.getElementById('adminSpecialDateTo').value = existingQueueItem["Special Date To"] || "";
+                        document.getElementById('adminSpecialDate').value = existingQueueItem["Special Date"] || "";
                         document.getElementById('adminSpecialTimings').value = existingQueueItem["Special Timings"] || "";
                         document.getElementById('adminSpecialNote').value = existingQueueItem["Special Note"] || "";
                     } else {
-                        document.getElementById('adminSpecialDateFrom').value = item.doc["Special Date From"] || item.doc["Special Date"] || "";
-                        document.getElementById('adminSpecialDateTo').value = item.doc["Special Date To"] || "";
+                        document.getElementById('adminSpecialDate').value = item.doc["Special Date"] || "";
                         document.getElementById('adminSpecialTimings').value = item.doc["Special Timings"] || "";
                         document.getElementById('adminSpecialNote').value = item.doc["Special Note"] || "";
                     }
@@ -1121,8 +1088,7 @@
             }
 
             pendingQueueUpdates[selectedAdminDoctorIndex] = {
-                "Special Date From": document.getElementById('adminSpecialDateFrom').value,
-                "Special Date To": document.getElementById('adminSpecialDateTo').value,
+                "Special Date": document.getElementById('adminSpecialDate').value,
                 "Special Timings": document.getElementById('adminSpecialTimings').value,
                 "Special Note": document.getElementById('adminSpecialNote').value
             };
@@ -1132,8 +1098,7 @@
             selectedAdminDoctorIndex = null;
             document.getElementById('adminSearchInput').value = "";
             document.getElementById('adminSelectedDoctorDisplay').value = "";
-            document.getElementById('adminSpecialDateFrom').value = "";
-            document.getElementById('adminSpecialDateTo').value = "";
+            document.getElementById('adminSpecialDate').value = "";
             document.getElementById('adminSpecialTimings').value = "";
             document.getElementById('adminSpecialNote').value = "";
 
@@ -1171,7 +1136,7 @@
                         </div>
                         <div style="font-size: 13px; color: var(--text-secondary);">
                             <div><strong>Branch:</strong> ${doc["Branch"] || 'N/A'} | <strong>Dept:</strong> ${doc["Department"] || 'N/A'}</div>
-                            <div><strong>From:</strong> ${item["Special Date From"] || 'None'} | <strong>To:</strong> ${item["Special Date To"] || 'None'}</div>
+                            <div><strong>Date:</strong> ${item["Special Date"] || 'None'}</div>
                             <div><strong>Timings:</strong> ${item["Special Timings"] || 'Regular'}</div>
                             <div><strong>Note:</strong> ${item["Special Note"] || 'None'}</div>
                         </div>
@@ -1209,8 +1174,7 @@
             document.getElementById('adminSelectedDoctorDisplay').value = `${doc["Doctor Name"]} (${doc["Department"]} - ${doc["Branch"]})`;
             
             const qItem = pendingQueueUpdates[idx];
-            document.getElementById('adminSpecialDateFrom').value = qItem["Special Date From"] || doc["Special Date"] || "";
-            document.getElementById('adminSpecialDateTo').value = qItem["Special Date To"] || "";
+            document.getElementById('adminSpecialDate').value = qItem["Special Date"] || "";
             document.getElementById('adminSpecialTimings').value = qItem["Special Timings"] || "";
             document.getElementById('adminSpecialNote').value = qItem["Special Note"] || "";
 
@@ -1235,12 +1199,9 @@
 
             queueKeys.forEach(idx => {
                 const updates = pendingQueueUpdates[idx];
-                doctorData[idx]["Special Date From"] = updates["Special Date From"];
-                doctorData[idx]["Special Date To"] = updates["Special Date To"];
+                doctorData[idx]["Special Date"] = updates["Special Date"];
                 doctorData[idx]["Special Timings"] = updates["Special Timings"];
                 doctorData[idx]["Special Note"] = updates["Special Note"];
-                // Clear old legacy single date if updating to range
-                delete doctorData[idx]["Special Date"];
             });
 
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doctorData, null, 4));
