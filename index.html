@@ -617,7 +617,7 @@
                 <div class="brand-title">Find Doctor</div> 
             </div> 
             <button class="admin-trigger-btn" onclick="promptAdminPassword()"> 
-                <span>⚙️ Office Update</span> 
+                <span>⚙️ Reschedule</span> 
             </button> 
         </div> 
 
@@ -659,7 +659,7 @@
 
         <div class="section-heading" id="resultsHeading">Search Results</div> 
         <div id="resultsContainer" class="results-container"> 
-            <div class="no-results">Please select both Department and Branch to view doctors.</div> 
+            <div class="no-results">Start typing a doctor's name or select filters to view doctors.</div> 
         </div> 
     </div> 
 
@@ -726,9 +726,9 @@
     <div id="passwordModal" class="modal-overlay" onclick="closePasswordOnBg(event)"> 
         <div class="modal-card" style="max-width: 400px;"> 
             <button class="modal-close" onclick="closePasswordModal()">✕</button> 
-            <h2 class="modal-title">Authorized Person's Only</h2> 
+            <h2 class="modal-title">Authorized Rescheduler</h2> 
             <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
-                Please enter the password to modify schedules. 
+                Please enter password to modify schedules. 
             </p> 
             <div style="display: flex; flex-direction: column; gap: 14px;"> 
                 <input type="password" id="adminPasswordInput" placeholder="Enter password..." onkeydown="handlePasswordKey(event)"> 
@@ -743,7 +743,7 @@
             <button class="modal-close" onclick="closeAdminModal()">✕</button> 
             <h2 class="modal-title">Reschedule Panel</h2> 
             <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
-                Update schedules for a single date or across a custom date range (From Date & To Date). Add changes to queue for batch verification. 
+                Update schedules for a single date or across a custom date range (From Date & To Date). Changes automatically queue for batch verification. 
             </p> 
             <div style="display: flex; flex-direction: column; gap: 14px;"> 
                 <div style="position: relative;" id="adminSearchWrapper"> 
@@ -781,7 +781,7 @@
                         <div id="queueCounterBadge" class="queue-badge" style="margin-bottom: 0;">Queue: 0 updates waiting</div> 
                         <button class="admin-secondary-btn" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 12px;" onclick="openPreviewModal()">Preview All Updates</button> 
                     </div> 
-                    <button class="admin-btn" onclick="downloadMasterQueueJSON()">Download file</button> 
+                    <button class="admin-btn" onclick="downloadMasterQueueJSON()">Verify modification</button> 
                 </div> 
             </div> 
         </div> 
@@ -798,7 +798,7 @@
             <div id="previewContainerList" style="max-height: 280px; overflow-y: auto; margin-bottom: 16px;"> 
                 <!-- Rendered dynamically --> 
             </div> 
-            <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">Verify modifications</button> 
+            <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">Download Verified File</button> 
         </div> 
     </div> 
 
@@ -996,15 +996,10 @@
 
             const container = document.getElementById('resultsContainer');
 
-            if (!deptSelect.value || !branchSelect.value) {
-                container.innerHTML = `<div class="no-results">Please select both Department and Branch to view doctors.</div>`;
-                return;
-            }
-
             const filtered = doctorData.filter(doc => { 
-                const matchesName = query === "" || (doc["Doctor Name"] && doc["Doctor Name"].toLowerCase().includes(query)); 
-                const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selectedDept; 
-                const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch; 
+                const matchesName = query === "" || (doc["Doctor Name"] && doc["Doctor Name"].toLowerCase().includes(query)) || Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
+                const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
+                const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
                 return matchesName && matchesDept && matchesBranch; 
             }); 
 
@@ -1024,19 +1019,13 @@
 
             const deptSelect = document.getElementById('deptFilter');
             const branchSelect = document.getElementById('branchFilter');
-
-            if (!deptSelect.value || !branchSelect.value) {
-                suggestionsBox.style.display = 'none';
-                return;
-            }
-
             const selectedDept = deptSelect.value.toLowerCase(); 
             const selectedBranch = branchSelect.value.toLowerCase(); 
 
             const filtered = doctorData.filter(doc => { 
                 const matchesQuery = Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
-                const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selectedDept; 
-                const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch; 
+                const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
+                const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
                 return matchesQuery && matchesDept && matchesBranch; 
             }); 
 
