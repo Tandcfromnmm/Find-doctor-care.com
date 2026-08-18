@@ -1,1483 +1,1367 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Doctor - CARE Hospitals</title>
-    <style>
-        :root {
-            --bg-color: #0b132b;
-            --card-bg: #16223f;
-            --text-main: #ffffff;
-            --text-secondary: #94a3b8;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.2);
-            --border-color: #1e293b;
-            --radius: 16px;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 30px 16px 0 16px;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            flex: 1;
-        }
-
-        /* Branding Header */
-        .brand-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-        }
-
-        .brand-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-image {
-            width: 48px;
-            height: 48px;
-            object-fit: contain;
-            flex-shrink: 0;
-        }
-
-        .brand-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text-main);
-            letter-spacing: -0.01em;
-        }
-
-        /* Admin Quick Trigger Button */
-        .admin-trigger-btn {
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #60a5fa;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 8px 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .admin-trigger-btn:hover {
-            background: rgba(59, 130, 246, 0.3);
-            color: #ffffff;
-        }
-
-        /* Search Bar Style */
-        .search-box-wrapper {
-            position: relative;
-            margin-bottom: 14px;
-        }
-
-        input[type="text"], input[type="date"], select, input[type="password"] {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 15px;
-            background: #0b132b;
-            border: 1px solid #2d3748;
-            border-radius: 12px;
-            color: var(--text-main);
-            outline: none;
-            box-sizing: border-box;
-            transition: all 0.2s ease;
-        }
-
-        .search-box-wrapper input[type="text"] {
-            padding-left: 44px;
-            padding-right: 44px;
-            border-radius: var(--radius);
-            background: var(--card-bg);
-        }
-
-        input[type="text"]:focus, input[type="date"]:focus, select:focus, input[type="password"]:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px var(--accent-glow);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            fill: var(--text-secondary);
-        }
-
-        .apple-spinner {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            display: none;
-        }
-
-        .apple-spinner div {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            border-radius: 50%;
-            box-sizing: border-box;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-top-color: var(--accent);
-            animation: appleSpin 0.8s linear infinite;
-        }
-
-        @keyframes appleSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Suggestion Dropdown List */
-        .suggestions-list {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--card-bg);
-            border: 1px solid #2d3748;
-            border-radius: 12px;
-            margin-top: 6px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            max-height: 220px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-        }
-
-        .suggestion-item {
-            padding: 12px 16px;
-            font-size: 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #1e293b;
-            color: var(--text-main);
-            transition: background 0.15s ease;
-        }
-
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-
-        .suggestion-item:hover {
-            background: rgba(59, 130, 246, 0.15);
-            color: #60a5fa;
-        }
-
-        /* Filters Container */
-        .filters-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-
-        /* Dashboard Accordion Style for Starred Doctors */
-        .accordion-wrapper {
-            background: var(--card-bg);
-            border: 1px solid #2d3748;
-            border-radius: var(--radius);
-            margin-bottom: 24px;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-        }
-
-        .accordion-header {
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(22, 34, 63, 0.95);
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s ease;
-        }
-
-        .accordion-header:hover {
-            background: rgba(30, 41, 59, 0.8);
-        }
-
-        .accordion-title-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .accordion-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-main);
-            margin: 0;
-        }
-
-        .accordion-badge {
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
-
-        .accordion-arrow {
-            font-size: 14px;
-            color: var(--text-secondary);
-            transition: transform 0.3s ease;
-        }
-
-        .accordion-wrapper.open .accordion-arrow {
-            transform: rotate(180deg);
-        }
-
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(11, 19, 43, 0.5);
-        }
-
-        .accordion-wrapper.open .accordion-content {
-            max-height: 260px;
-            overflow-y: auto;
-        }
-
-        .starred-row-item {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #1e293b;
-            cursor: pointer;
-            transition: background 0.15s ease;
-        }
-
-        .starred-row-item:last-child {
-            border-bottom: none;
-        }
-
-        .starred-row-item:hover {
-            background: rgba(59, 130, 246, 0.1);
-        }
-
-        /* Results Container Style */
-        .results-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 14px;
-            margin-bottom: 40px;
-        }
-
-        .doctor-card-minimal {
-            background: var(--card-bg);
-            border-radius: 14px;
-            padding: 18px;
-            border: 1px solid #2d3748;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.2s ease;
-        }
-
-        .doctor-card-minimal::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--accent);
-            opacity: 0.8;
-        }
-
-        .doctor-card-minimal:hover {
-            transform: translateY(-2px);
-            border-color: var(--accent);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.15);
-        }
-
-        .card-top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-
-        .doctor-name-min {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--text-main);
-            margin: 0 0 2px 0;
-        }
-
-        .branch-tag {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            background: rgba(59, 130, 246, 0.15);
-            color: #60a5fa;
-            padding: 3px 8px;
-            border-radius: 6px;
-        }
-
-        .doctor-spec-min {
-            font-size: 13.5px;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-        }
-
-        .meta-pills-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 12px;
-        }
-
-        .credit-pill {
-            font-size: 10.5px;
-            font-weight: 600;
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        .callday-pill {
-            font-size: 10.5px;
-            font-weight: 600;
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px dashed rgba(245, 158, 11, 0.4);
-        }
-
-        .age-pill {
-            font-size: 10.5px;
-            font-weight: 600;
-            background: rgba(168, 85, 247, 0.15);
-            color: #c084fc;
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px dashed rgba(168, 85, 247, 0.4);
-        }
-
-        .card-details-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            padding-top: 10px;
-            border-top: 1px solid #1e293b;
-            color: var(--text-secondary);
-        }
-
-        .update-banner {
-            background: rgba(245, 158, 11, 0.15);
-            border-left: 3px solid #f59e0b;
-            padding: 8px 10px;
-            border-radius: 6px;
-            font-size: 12.5px;
-            color: #fbbf24;
-            margin-top: 10px;
-        }
-
-        .section-heading {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 10px;
-        }
-
-        .no-results {
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 15px;
-            padding: 20px;
-        }
-
-        /* FOOTER */
-        .site-footer {
-            width: 100%;
-            max-width: 600px;
-            margin: 40px auto 24px auto;
-            background: rgba(22, 34, 63, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: var(--radius);
-            padding: 16px 20px;
-            box-sizing: border-box;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .footer-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .footer-divider {
-            color: #334155;
-            font-weight: 300;
-        }
-
-        .live-dot {
-            width: 6px;
-            height: 6px;
-            background-color: #10b981;
-            border-radius: 50%;
-            display: inline-block;
-            animation: livePulse 2s infinite;
-        }
-
-        @keyframes livePulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-
-        .refresh-countdown {
-            background: rgba(59, 130, 246, 0.15);
-            color: #60a5fa;
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .developer-credit {
-            display: inline-block;
-            font-weight: 600;
-            background: linear-gradient(90deg, #38bdf8 0%, #818cf8 35%, #c084fc 70%, #38bdf8 100%);
-            background-size: 200% auto;
-            color: transparent;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: colorShine 4s linear infinite;
-        }
-
-        @keyframes colorShine {
-            0% { background-position: 200% center; }
-            100% { background-position: -200% center; }
-        }
-
-        /* Modal Overlay */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(6px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            z-index: 2000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-card {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 500px;
-            border-radius: 20px;
-            padding: 28px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            border: 1px solid #2d3748;
-            transform: translateY(20px);
-            transition: transform 0.25s ease;
-            position: relative;
-            box-sizing: border-box;
-            color: var(--text-main);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-overlay.active .modal-card {
-            transform: translateY(0);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 20px; right: 20px;
-            background: #1e293b;
-            border: none;
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            font-size: 16px; font-weight: 600;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text-secondary);
-        }
-
-        .modal-title {
-            font-size: 20px; font-weight: 700; margin: 0 0 20px 0;
-        }
-
-        .modal-details-grid {
-            display: flex; flex-direction: column; gap: 14px;
-            font-size: 15px; background: #0b132b;
-            padding: 16px; border-radius: 12px; border: 1px solid #1e293b;
-        }
-
-        .modal-detail-row {
-            display: flex; justify-content: space-between;
-        }
-
-        .modal-detail-row span:first-child { color: var(--text-secondary); }
-        .modal-detail-row span:last-child { font-weight: 600; color: var(--text-main); text-align: right; }
-
-        .admin-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 16px;
-            transition: background 0.2s ease;
-        }
-        .admin-btn:hover { background: #2563eb; }
-
-        .admin-secondary-btn {
-            background: #1e293b;
-            color: #94a3b8;
-            border: 1px solid #2d3748;
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 8px;
-            transition: all 0.2s ease;
-        }
-        .admin-secondary-btn:hover {
-            background: #2d3748;
-            color: #ffffff;
-        }
-
-        .queue-badge {
-            background: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 10px;
-            display: inline-block;
-            margin-bottom: 8px;
-        }
-
-        .preview-item-card {
-            background: #0b132b;
-            border: 1px solid #1e293b;
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .preview-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .preview-doctor-name {
-            font-weight: 600;
-            font-size: 15px;
-            color: var(--text-main);
-        }
-        .preview-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .preview-btn-sm {
-            padding: 4px 10px;
-            font-size: 11.5px;
-            font-weight: 600;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-edit-sm {
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-        }
-        .btn-edit-sm:hover { background: rgba(59, 130, 246, 0.35); }
-        .btn-del-sm {
-            background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
-        }
-        .btn-del-sm:hover { background: rgba(239, 68, 68, 0.35); }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="brand-header">
-        <div class="brand-left">
-            <img src="images-removebg-preview.png" alt="Logo" class="logo-image" id="brandLogo" onerror="this.style.display='none'">
-            <div class="brand-title">Find Doctor</div>
-        </div>
-        <button class="admin-trigger-btn" onclick="promptAdminPassword()">
-            <span>⚙️ Office Update</span>
-        </button>
-    </div>
-    
-    <div class="search-box-wrapper">
-        <svg class="search-icon" viewBox="0 0 24 24">
-            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-        </svg>
-        <input type="text" id="searchInput" placeholder="Search doctor name..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off">
-        <div id="searchSpinner" class="apple-spinner"><div></div></div>
-        <div id="suggestionsList" class="suggestions-list"></div>
-    </div>
-
-    <!-- FILTER DROPDOWNS -->
-    <div class="filters-container">
-        <select id="deptFilter" onchange="applyFilters()">
-            <option value="">All Departments</option>
-        </select>
-        <select id="branchFilter" onchange="applyFilters()">
-            <option value="">All Branches</option>
-        </select>
-    </div>
-
-    <!-- Starred Doctors Accordion -->
-    <div id="starredAccordion" class="accordion-wrapper">
-        <div class="accordion-header" onclick="toggleAccordion()">
-            <div class="accordion-title-area">
-                <span style="font-size: 16px;">⭐</span>
-                <h3 class="accordion-title">Starred Doctors Quick List</h3>
-                <span id="starredCountBadge" class="accordion-badge">0</span>
-            </div>
-            <div class="accordion-arrow">▼</div>
-        </div>
-        <div class="accordion-content">
-            <div id="starredAccordionList">
-                <div style="color: var(--text-secondary); font-size: 14px; padding: 14px 20px;">Loading Starred Doctors...</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="section-heading" id="resultsHeading">Search Results</div>
-    <div id="resultsContainer" class="results-container">
-        <div class="no-results">Type name, or select filters above to find doctors.</div>
-    </div>
-</div>
-
-<!-- FOOTER -->
-<footer class="site-footer">
-    <div class="footer-item">
-        <span class="live-dot"></span>
-        <span id="backendTimestamp">Backend Sync: Loading...</span>
-    </div>
-    
-    <span class="footer-divider">|</span>
-    
-    <div class="footer-item">
-        <span>Auto-refresh in <span id="countdownTimer" class="refresh-countdown">05:00</span></span>
-    </div>
-    
-    <span class="footer-divider">|</span>
-    
-    <div class="footer-item">
-        <span class="developer-credit">Website Build & Developed by Murali Manohar</span>
-    </div>
-</footer>
-
-<!-- DOCTOR DETAILS MODAL -->
-<div id="doctorModal" class="modal-overlay" onclick="closeModalOnBg(event)">
-    <div class="modal-card">
-        <button class="modal-close" onclick="closeModal()">✕</button>
-        <h2 class="modal-title">Doctor Info</h2>
-        
-        <div class="modal-details-grid">
-            <div class="modal-detail-row">
-                <span>Doctor Name:</span>
-                <span id="modalDoctorName"></span>
-            </div>
-            <div class="modal-detail-row">
-                <span>Department:</span>
-                <span id="modalDept"></span>
-            </div>
-            <div class="modal-detail-row">
-                <span>Location:</span>
-                <span id="modalBranch"></span>
-            </div>
-            <div class="modal-detail-row">
-                <span>Age Criteria:</span>
-                <span id="modalAgeLimit" style="text-align: right; color: #c084fc;"></span>
-            </div>
-            <div class="modal-detail-row">
-                <span>Call day:</span>
-                <span id="modalCallDay" style="text-align: right; color: #fbbf24;"></span>
-            </div>
-            <div class="modal-detail-row">
-                <span>Credit Schemes:</span>
-                <span id="modalCredits" style="text-align: right;"></span>
-            </div>
-            <div class="modal-detail-row">
-                <span>Fee:</span>
-                <span id="modalFee"></span>
-            </div>
-            <div class="modal-detail-row" style="flex-direction: column; gap: 4px;">
-                <span>Timing:</span>
-                <span id="modalTimings" style="text-align: left;"></span>
-            </div>
-        </div>
-
-        <div id="modalUpdateContainer"></div>
-    </div>
-</div>
-
-<!-- ADMIN PASSWORD MODAL -->
-<div id="passwordModal" class="modal-overlay" onclick="closePasswordOnBg(event)">
-    <div class="modal-card" style="max-width: 400px;">
-        <button class="modal-close" onclick="closePasswordModal()">✕</button>
-        <h2 class="modal-title">Admin Access Required</h2>
-        <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-            Please enter the office password to modify schedules.
-        </p>
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-            <input type="password" id="adminPasswordInput" placeholder="Enter password..." onkeydown="handlePasswordKey(event)">
-            <button class="admin-btn" onclick="verifyAdminPassword()">Verify & Open Panel</button>
-        </div>
-    </div>
-</div>
-
-<!-- OFFICE UPDATE ADMIN MODAL WITH AUTO-QUEUE & PREVIEW -->
-<div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)">
-    <div class="modal-card">
-        <button class="modal-close" onclick="closeAdminModal()">✕</button>
-        <h2 class="modal-title">Office Schedule Update Panel</h2>
-        <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-            Every update you save is automatically added to your session queue. Preview or modify items below before downloading the master file!
-        </p>
-        
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-            <div style="position: relative;" id="adminSearchWrapper">
-                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Find Doctor to Edit:</label>
-                <input type="text" id="adminSearchInput" placeholder="Type doctor name to search..." oninput="handleAdminSearchInput()" autocomplete="off">
-                <div id="adminSuggestionsList" class="suggestions-list"></div>
-            </div>
-
-            <div>
-                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Selected Doctor:</label>
-                <input type="text" id="adminSelectedDoctorDisplay" readonly style="background: #1e293b; color: #60a5fa; font-weight: 600;" placeholder="No doctor selected yet">
-            </div>
-
-            <div>
-                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Target Date (Day of change):</label>
-                <input type="date" id="adminSpecialDate">
-            </div>
-
-            <div>
-                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Special Timings / Note:</label>
-                <input type="text" id="adminSpecialTimings" placeholder="e.g. 1:00 PM - 3:00 PM">
-            </div>
-
-            <div>
-                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Office Update Reason / Note:</label>
-                <input type="text" id="adminSpecialNote" placeholder="e.g. Special clinic hours">
-            </div>
-
-            <button class="admin-secondary-btn" onclick="saveToQueueAction()">💾 Save Update to Queue</button>
-            
-            <div style="border-top: 1px solid #2d3748; padding-top: 14px; margin-top: 4px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <div id="queueCounterBadge" class="queue-badge" style="margin-bottom: 0;">Queue: 0 updates waiting</div>
-                    <button class="admin-secondary-btn" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 12px;" onclick="openPreviewModal()">👁️ Preview All Updates</button>
-                </div>
-                <button class="admin-btn" onclick="downloadMasterQueueJSON()">📥 Download Master doctors.json</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- PREVIEW MODAL -->
-<div id="previewModal" class="modal-overlay" onclick="closePreviewOnBg(event)">
-    <div class="modal-card">
-        <button class="modal-close" onclick="closePreviewModal()">✕</button>
-        <h2 class="modal-title">Queue Preview & Verification</h2>
-        <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
-            Review all queued modifications below. You can modify or remove any entry before downloading.
-        </p>
-        
-        <div id="previewContainerList" style="max-height: 280px; overflow-y: auto; margin-bottom: 16px;">
-            <!-- Rendered dynamically -->
-        </div>
-
-        <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">📥 Verify & Download Master File</button>
-    </div>
-</div>
-
-<script>
-    const defaultSampleDoctors = [
-        {
-            "Doctor Name": "Dr. Rajesh Sharma",
-            "Department": "Cardiology",
-            "Branch": "Banjara Hills",
-            "OP Fee": "₹800",
-            "OP Timings": "10:00 AM - 02:00 PM",
-            "Starred": "Yes",
-            "Call Day": "Monday",
-            "Age Criteria": "All Ages",
-            "Credit Accepted": "Arogyasri, CGHS"
-        },
-        {
-            "Doctor Name": "Dr. Priya Reddy",
-            "Department": "Pediatrics",
-            "Branch": "Hitech City",
-            "OP Fee": "₹600",
-            "OP Timings": "09:00 AM - 01:00 PM",
-            "Starred": "Yes",
-            "Call Day": "Wednesday",
-            "Age Criteria": "0 - 15 Years",
-            "Credit Accepted": "CGHS"
-        },
-        {
-            "Doctor Name": "Dr. Anil Kumar",
-            "Department": "Orthopedics",
-            "Branch": "Banjara Hills",
-            "OP Fee": "₹700",
-            "OP Timings": "04:00 PM - 08:00 PM",
-            "Starred": "No",
-            "Call Day": "Friday",
-            "Age Criteria": "All Ages",
-            "Credit Accepted": "Cash Only"
-        }
-    ];
-
-    let doctorData = [];
-    let selectedAdminDoctorIndex = null;
-    let pendingQueueUpdates = {}; 
-    const ADMIN_SECRET_PASSWORD = "careoffice123";
-
-    function loadDoctorData() {
-        fetch('doctors.json')
-            .then(response => {
-                if (!response.ok) throw new Error("File not found");
-                return response.json();
-            })
-            .then(data => {
-                doctorData = data;
-                initApp();
-            })
-            .catch(error => {
-                console.warn('Could not load external doctors.json (likely due to local browser CORS restriction). Using built-in sample data instead.', error);
-                doctorData = defaultSampleDoctors;
-                initApp();
-            });
-    }
-
-    function initApp() {
-        renderStarredAccordion();
-        populateFilterDropdowns();
-        checkBackendSync();
-    }
-
-    loadDoctorData();
-
-    function formatBackendDate(dateObj) {
-        let hours = dateObj.getHours();
-        let minutes = dateObj.getMinutes();
-        const ampm = hours >= 12 ? 'pm' : 'am';
-        
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-
-        const day = dateObj.getDate();
-        const getOrdinal = (n) => {
-            const s = ["th", "st", "nd", "rd"];
-            const v = n % 100;
-            return n + (s[(v - 20) % 10] || s[v] || s[0]);
-        };
-        const formattedDay = getOrdinal(day);
-
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const month = months[dateObj.getMonth()];
-        const year = dateObj.getFullYear();
-
-        return `${hours}:${minutes}${ampm} on ${formattedDay} ${month} ${year}`;
-    }
-
-    function checkBackendSync() {
-        const timestampEl = document.getElementById('backendTimestamp');
-        if (timestampEl) {
-            timestampEl.textContent = `Backend Sync: ${formatBackendDate(new Date())}`;
-        }
-    }
-
-    const REFRESH_INTERVAL_SECONDS = 300; 
-    let timeLeft = REFRESH_INTERVAL_SECONDS;
-
-    function updateCountdownDisplay() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        
-        const timerEl = document.getElementById('countdownTimer');
-        if (timerEl) {
-            timerEl.textContent = formattedTime;
-        }
-    }
-
-    setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) {
-            loadDoctorData();
-            timeLeft = REFRESH_INTERVAL_SECONDS;
-        }
-        updateCountdownDisplay();
-    }, 1000);
-
-    updateCountdownDisplay();
-
-    function getActiveSchedule(doc) {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        const currentDateStr = `${year}-${month}-${day}`;
-
-        const targetDate = doc["Special Date"] ? String(doc["Special Date"]).trim() : "";
-
-        if (targetDate && targetDate === currentDateStr) {
-            return {
-                timings: doc["Special Timings"] || doc["OP Timings"],
-                note: doc["Special Note"] || doc["Leave / Timing Updates"] || "Special schedule for today"
-            };
-        }
-
-        return {
-            timings: doc["OP Timings"] || 'N/A',
-            note: (doc["Leave / Timing Updates"] && doc["Leave / Timing Updates"] !== "Regular Timings") ? doc["Leave / Timing Updates"] : ""
-        };
-    }
-
-    function toggleAccordion() {
-        const wrapper = document.getElementById('starredAccordion');
-        wrapper.classList.toggle('open');
-    }
-
-    function renderStarredAccordion() {
-        const listContainer = document.getElementById('starredAccordionList');
-        const badge = document.getElementById('starredCountBadge');
-        if (!listContainer) return;
-
-        const starredDocs = doctorData.filter(doc => 
-            doc["Starred"] && String(doc["Starred"]).trim().toLowerCase() === "yes"
-        );
-
-        badge.textContent = starredDocs.length;
-
-        if (starredDocs.length === 0) {
-            listContainer.innerHTML = `<div style="color: var(--text-secondary); font-size: 14px; padding: 14px 20px;">No starred doctors available.</div>`;
-            return;
-        }
-
-        listContainer.innerHTML = '';
-        starredDocs.forEach(doc => {
-            const row = document.createElement('div');
-            row.className = 'starred-row-item';
-            row.onclick = () => openModal(doc);
-
-            const callDayText = doc["Call Day"] || doc["Call Days"] || doc["Duty Day"] || '';
-            const ageText = doc["Age Criteria"] || doc["Age Limit"] || '';
-
-            let subInfoText = `${doc["Department"] || 'Department'}`;
-            if (callDayText) subInfoText += ` • <span style="color:#fbbf24;">Call day: ${callDayText}</span>`;
-            if (ageText) subInfoText += ` • <span style="color:#c084fc;">Age: ${ageText}</span>`;
-
-            row.innerHTML = `
-                <div>
-                    <div style="font-weight: 600; font-size: 14.5px; color: var(--text-main); margin-bottom: 2px;">${doc["Doctor Name"] || 'N/A'}</div>
-                    <div style="font-size: 12.5px; color: var(--text-secondary);">${subInfoText}</div>
-                </div>
-                <span class="branch-tag">${doc["Branch"] || 'Location'}</span>
-            `;
-            listContainer.appendChild(row);
-        });
-    }
-
-    function populateFilterDropdowns() {
-        const deptSelect = document.getElementById('deptFilter');
-        const branchSelect = document.getElementById('branchFilter');
-
-        const departments = [...new Set(doctorData.map(d => d["Department"]).filter(Boolean))].sort();
-        const branches = [...new Set(doctorData.map(d => d["Branch"]).filter(Boolean))].sort();
-
-        deptSelect.innerHTML = `<option value="">All Departments</option>` + departments.map(d => `<option value="${d}">${d}</option>`).join('');
-        branchSelect.innerHTML = `<option value="">All Branches</option>` + branches.map(b => `<option value="${b}">${b}</option>`).join('');
-    }
-
-    function applyFilters() {
-        const selectedDept = document.getElementById('deptFilter').value.toLowerCase();
-        const selectedBranch = document.getElementById('branchFilter').value.toLowerCase();
-        const query = document.getElementById('searchInput').value.toLowerCase().trim();
-
-        const filtered = doctorData.filter(doc => {
-            const matchesName = query === "" || (doc["Doctor Name"] && doc["Doctor Name"].toLowerCase().includes(query));
-            const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept);
-            const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch);
-
-            return matchesName && matchesDept && matchesBranch;
-        });
-
-        renderDoctors(filtered);
-    }
-
-    function handleSearchInput() {
-        const query = document.getElementById('searchInput').value.toLowerCase().trim();
-        const suggestionsBox = document.getElementById('suggestionsList');
-        
-        applyFilters();
-
-        if (query === "") {
-            suggestionsBox.style.display = 'none';
-            document.getElementById('searchSpinner').style.display = 'none';
-            return;
-        }
-
-        const selectedDept = document.getElementById('deptFilter').value.toLowerCase();
-        const selectedBranch = document.getElementById('branchFilter').value.toLowerCase();
-
-        const filtered = doctorData.filter(doc => {
-            const matchesQuery = Object.values(doc).some(val => String(val).toLowerCase().includes(query));
-            const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept);
-            const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch);
-            return matchesQuery && matchesDept && matchesBranch;
-        });
-
-        showSuggestions(filtered);
-    }
-
-    function handleKeyDown(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            document.getElementById('suggestionsList').style.display = 'none';
-            applyFilters();
-        }
-    }
-
-    function showSuggestions(doctors) {
-        const suggestionsBox = document.getElementById('suggestionsList');
-        suggestionsBox.innerHTML = '';
-
-        if (doctors.length === 0) {
-            suggestionsBox.style.display = 'none';
-            return;
-        }
-
-        const topMatches = doctors.slice(0, 5);
-        topMatches.forEach(doc => {
-            const item = document.createElement('div');
-            item.className = 'suggestion-item';
-            item.innerHTML = `<strong>${doc["Doctor Name"]}</strong> <span style="color:var(--text-secondary); font-size:13px;">(${doc["Department"]} - ${doc["Branch"]})</span>`;
-            
-            item.onclick = function() {
-                document.getElementById('searchInput').value = doc["Doctor Name"];
-                suggestionsBox.style.display = 'none';
-                renderDoctors([doc]);
-            };
-            
-            suggestionsBox.appendChild(item);
-        });
-
-        suggestionsBox.style.display = 'block';
-    }
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.search-box-wrapper')) {
-            document.getElementById('suggestionsList').style.display = 'none';
-        }
-        if (!e.target.closest('#adminSearchWrapper')) {
-            const adminSuggestions = document.getElementById('adminSuggestionsList');
-            if (adminSuggestions) adminSuggestions.style.display = 'none';
-        }
-    });
-
-    function renderDoctors(doctors) {
-        const container = document.getElementById('resultsContainer');
-        container.innerHTML = '';
-
-        if (doctors.length === 0) {
-            container.innerHTML = `<div class="no-results">No doctors found matching your criteria.</div>`;
-            return;
-        }
-
-        doctors.forEach((doc) => {
-            const card = document.createElement('div');
-            card.className = 'doctor-card-minimal';
-            card.onclick = () => openModal(doc);
-
-            const schedule = getActiveSchedule(doc);
-
-            let creditsValue = doc["Credit Accepted"] || doc["Credits"] || "None";
-            let creditPillsHTML = '';
-            if (creditsValue && creditsValue !== "None") {
-                let creditArray = creditsValue.split(',').map(item => item.trim());
-                creditPillsHTML = creditArray.map(c => `<span class="credit-pill">✓ ${c}</span>`).join('');
-            }
-
-            let callDayValue = doc["Call Day"] || doc["Call Days"] || "";
-            let callDayHTML = callDayValue ? `<span class="callday-pill">Call day: ${callDayValue}</span>` : '';
-
-            let ageValue = doc["Age Criteria"] || doc["Age Limit"] || "";
-            let ageHTML = ageValue ? `<span class="age-pill">Age: ${ageValue}</span>` : '';
-
-            let metaCombinedHTML = (creditPillsHTML || callDayHTML || ageHTML) 
-                ? `<div class="meta-pills-container">${ageHTML}${callDayHTML}${creditPillsHTML}</div>` 
-                : '';
-
-            card.innerHTML = `
-                <div class="card-top-row">
-                    <div>
-                        <h3 class="doctor-name-min">${doc["Doctor Name"] || 'N/A'}</h3>
-                        <div class="doctor-spec-min">${doc["Department"] || 'Department'}</div>
-                    </div>
-                    <span class="branch-tag">${doc["Branch"] || 'Location'}</span>
-                </div>
-                ${metaCombinedHTML}
-                <div class="card-details-footer">
-                    <span>Fee: <strong>${doc["OP Fee"] || 'N/A'}</strong></span>
-                    <span style="max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Timing: ${schedule.timings}</span>
-                </div>
-                ${schedule.note ? `
-                    <div class="update-banner">
-                        ⚠️ <strong>Notice:</strong> ${schedule.note}
-                    </div>
-                ` : ''}
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function openModal(doc) {
-        document.getElementById('modalDoctorName').textContent = doc["Doctor Name"] || 'N/A';
-        document.getElementById('modalDept').textContent = doc["Department"] || 'Department';
-        document.getElementById('modalBranch').textContent = doc["Branch"] || 'N/A';
-        document.getElementById('modalFee').textContent = doc["OP Fee"] || 'N/A';
-        
-        const schedule = getActiveSchedule(doc);
-        document.getElementById('modalTimings').textContent = schedule.timings;
-
-        document.getElementById('modalCredits').textContent = doc["Credit Accepted"] || 'Not Specified';
-        document.getElementById('modalCallDay').textContent = doc["Call Day"] || 'Not Assigned';
-        document.getElementById('modalAgeLimit').textContent = doc["Age Criteria"] || 'All Ages';
-
-        const updateContainer = document.getElementById('modalUpdateContainer');
-        if (schedule.note) {
-            updateContainer.innerHTML = `
-                <div class="update-banner" style="margin-top: 14px;">
-                    ⚠️ <strong>Notice:</strong> ${schedule.note}
-                </div>
-            `;
-        } else {
-            updateContainer.innerHTML = '';
-        }
-
-        document.getElementById('doctorModal').classList.add('active');
-    }
-
-    function closeModal() {
-        document.getElementById('doctorModal').classList.remove('active');
-    }
-
-    function closeModalOnBg(event) {
-        if (event.target.id === 'doctorModal') {
-            closeModal();
-        }
-    }
-
-    function promptAdminPassword() {
-        document.getElementById('adminPasswordInput').value = "";
-        document.getElementById('passwordModal').classList.add('active');
-    }
-
-    function closePasswordModal() {
-        document.getElementById('passwordModal').classList.remove('active');
-    }
-
-    function closePasswordOnBg(event) {
-        if (event.target.id === 'passwordModal') {
-            closePasswordModal();
-        }
-    }
-
-    function handlePasswordKey(event) {
-        if (event.key === 'Enter') {
-            verifyAdminPassword();
-        }
-    }
-
-    function verifyAdminPassword() {
-        const enteredPwd = document.getElementById('adminPasswordInput').value;
-        if (enteredPwd === ADMIN_SECRET_PASSWORD) {
-            closePasswordModal();
-            openAdminModal();
-        } else {
-            alert("Incorrect office password.");
-        }
-    }
-
-    function openAdminModal() {
-        selectedAdminDoctorIndex = null;
-        document.getElementById('adminSearchInput').value = "";
-        document.getElementById('adminSelectedDoctorDisplay').value = "";
-        document.getElementById('adminSpecialDate').value = "";
-        document.getElementById('adminSpecialTimings').value = "";
-        document.getElementById('adminSpecialNote').value = "";
-        updateQueueBadge();
-        document.getElementById('adminModal').classList.add('active');
-    }
-
-    function closeAdminModal() {
-        document.getElementById('adminModal').classList.remove('active');
-    }
-
-    function closeAdminOnBg(event) {
-        if (event.target.id === 'adminModal') {
-            closeAdminModal();
-        }
-    }
-
-    function handleAdminSearchInput() {
-        const query = document.getElementById('adminSearchInput').value.toLowerCase().trim();
-        const suggestionsBox = document.getElementById('adminSuggestionsList');
-
-        if (query === "") {
-            suggestionsBox.style.display = 'none';
-            return;
-        }
-
-        const matched = [];
-        doctorData.forEach((doc, idx) => {
-            if (doc["Doctor Name"].toLowerCase().includes(query) || (doc["Department"] && doc["Department"].toLowerCase().includes(query))) {
-                matched.push({ doc, idx });
-            }
-        });
-
-        suggestionsBox.innerHTML = '';
-        if (matched.length === 0) {
-            suggestionsBox.style.display = 'none';
-            return;
-        }
-
-        matched.slice(0, 6).forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.innerHTML = `<strong>${item.doc["Doctor Name"]}</strong> <span style="color:var(--text-secondary); font-size:13px;">(${item.doc["Department"]} - ${item.doc["Branch"]})</span>`;
-            
-            div.onclick = function() {
-                selectedAdminDoctorIndex = item.idx;
-                document.getElementById('adminSearchInput').value = item.doc["Doctor Name"];
-                document.getElementById('adminSelectedDoctorDisplay').value = `${item.doc["Doctor Name"]} (${item.doc["Department"]} - ${item.doc["Branch"]})`;
-                
-                const existingQueueItem = pendingQueueUpdates[item.idx];
-                if (existingQueueItem) {
-                    document.getElementById('adminSpecialDate').value = existingQueueItem["Special Date"] || "";
-                    document.getElementById('adminSpecialTimings').value = existingQueueItem["Special Timings"] || "";
-                    document.getElementById('adminSpecialNote').value = existingQueueItem["Special Note"] || "";
-                } else {
-                    document.getElementById('adminSpecialDate').value = item.doc["Special Date"] || "";
-                    document.getElementById('adminSpecialTimings').value = item.doc["Special Timings"] || "";
-                    document.getElementById('adminSpecialNote').value = item.doc["Special Note"] || "";
-                }
-
-                suggestionsBox.style.display = 'none';
-            };
-
-            suggestionsBox.appendChild(div);
-        });
-
-        suggestionsBox.style.display = 'block';
-    }
-
-    function saveToQueueAction() {
-        if (selectedAdminDoctorIndex === null || selectedAdminDoctorIndex === undefined) {
-            alert("Please search and select a doctor first.");
-            return;
-        }
-
-        pendingQueueUpdates[selectedAdminDoctorIndex] = {
-            "Special Date": document.getElementById('adminSpecialDate').value,
-            "Special Timings": document.getElementById('adminSpecialTimings').value,
-            "Special Note": document.getElementById('adminSpecialNote').value
-        };
-
-        updateQueueBadge();
-        
-        selectedAdminDoctorIndex = null;
-        document.getElementById('adminSearchInput').value = "";
-        document.getElementById('adminSelectedDoctorDisplay').value = "";
-        document.getElementById('adminSpecialDate').value = "";
-        document.getElementById('adminSpecialTimings').value = "";
-        document.getElementById('adminSpecialNote').value = "";
-
-        alert("Update saved to queue automatically!");
-    }
-
-    function updateQueueBadge() {
-        const count = Object.keys(pendingQueueUpdates).length;
-        const badge = document.getElementById('queueCounterBadge');
-        if (badge) {
-            badge.textContent = `Queue: ${count} update(s) saved`;
-        }
-    }
-
-    function openPreviewModal() {
-        const queueKeys = Object.keys(pendingQueueUpdates);
-        const container = document.getElementById('previewContainerList');
-        container.innerHTML = '';
-
-        if (queueKeys.length === 0) {
-            container.innerHTML = `<div style="color: var(--text-secondary); font-size: 14px; text-align: center; padding: 20px;">No updates saved in queue yet.</div>`;
-        } else {
-            queueKeys.forEach(idx => {
-                const item = pendingQueueUpdates[idx];
-                const doc = doctorData[idx] || {};
-                const cardDiv = document.createElement('div');
-                cardDiv.className = 'preview-item-card';
-                cardDiv.innerHTML = `
-                    <div class="preview-item-header">
-                        <span class="preview-doctor-name">${doc["Doctor Name"] || 'Doctor'}</span>
-                        <div class="preview-actions">
-                            <button class="preview-btn-sm btn-edit-sm" onclick="editQueueItem(${idx})">Edit</button>
-                            <button class="preview-btn-sm btn-del-sm" onclick="removeQueueItem(${idx})">Remove</button>
-                        </div>
-                    </div>
-                    <div style="font-size: 13px; color: var(--text-secondary);">
-                        <div><strong>Branch:</strong> ${doc["Branch"] || 'N/A'} | <strong>Dept:</strong> ${doc["Department"] || 'N/A'}</div>
-                        <div><strong>Date:</strong> ${item["Special Date"] || 'None'}</div>
-                        <div><strong>Timings:</strong> ${item["Special Timings"] || 'Regular'}</div>
-                        <div><strong>Note:</strong> ${item["Special Note"] || 'None'}</div>
-                    </div>
-                `;
-                container.appendChild(cardDiv);
-            });
-        }
-
-        document.getElementById('previewModal').classList.add('active');
-    }
-
-    function closePreviewModal() {
-        document.getElementById('previewModal').classList.remove('active');
-    }
-
-    function closePreviewOnBg(event) {
-        if (event.target.id === 'previewModal') {
-            closePreviewModal();
-        }
-    }
-
-    function removeQueueItem(idx) {
-        delete pendingQueueUpdates[idx];
-        updateQueueBadge();
-        openPreviewModal();
-    }
-
-    function editQueueItem(idx) {
-        closePreviewModal();
-        closeAdminModal();
-
-        const doc = doctorData[idx];
-        selectedAdminDoctorIndex = idx;
-        document.getElementById('adminSearchInput').value = doc["Doctor Name"];
-        document.getElementById('adminSelectedDoctorDisplay').value = `${doc["Doctor Name"]} (${doc["Department"]} - ${doc["Branch"]})`;
-        
-        const qItem = pendingQueueUpdates[idx];
-        document.getElementById('adminSpecialDate').value = qItem["Special Date"] || "";
-        document.getElementById('adminSpecialTimings').value = qItem["Special Timings"] || "";
-        document.getElementById('adminSpecialNote').value = qItem["Special Note"] || "";
-
-        document.getElementById('adminModal').classList.add('active');
-    }
-
-    function downloadMasterQueueJSON() {
-        const queueKeys = Object.keys(pendingQueueUpdates);
-        if (queueKeys.length === 0) {
-            alert("Your update queue is empty. Please save at least one doctor update before downloading.");
-            return;
-        }
-        openPreviewModal();
-    }
-
-    function confirmAndDownloadFromPreview() {
-        const queueKeys = Object.keys(pendingQueueUpdates);
-        if (queueKeys.length === 0) {
-            alert("Queue is empty.");
-            return;
-        }
-
-        queueKeys.forEach(idx => {
-            const updates = pendingQueueUpdates[idx];
-            doctorData[idx]["Special Date"] = updates["Special Date"];
-            doctorData[idx]["Special Timings"] = updates["Special Timings"];
-            doctorData[idx]["Special Note"] = updates["Special Note"];
-        });
-
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doctorData, null, 4));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "doctors.json");
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-
-        alert("Master 'doctors.json' file successfully downloaded with all verified modifications!");
-        
-        pendingQueueUpdates = {};
-        updateQueueBadge();
-        closePreviewModal();
-        closeAdminModal();
-        renderStarredAccordion();
-        applyFilters();
-    }
-</script>
-
-</body>
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Find Doctor - CARE Hospitals</title> 
+    <style> 
+        :root { 
+            --bg-color: #0b132b; 
+            --card-bg: #16223f; 
+            --text-main: #ffffff; 
+            --text-secondary: #94a3b8; 
+            --accent: #3b82f6; 
+            --accent-glow: rgba(59, 130, 246, 0.2); 
+            --border-color: #1e293b; 
+            --radius: 16px; 
+        } 
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 30px 16px 0 16px; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+        } 
+        .container { 
+            width: 100%; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            flex: 1; 
+        } 
+        /* Branding Header */ 
+        .brand-header { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            margin-bottom: 24px; 
+        } 
+        .brand-left { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        } 
+        .logo-image { 
+            width: 48px; 
+            height: 48px; 
+            object-fit: contain; 
+            flex-shrink: 0; 
+        } 
+        .brand-title { 
+            font-size: 20px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            letter-spacing: -0.01em; 
+        } 
+        /* Admin Quick Trigger Button */ 
+        .admin-trigger-btn { 
+            background: rgba(59, 130, 246, 0.15); 
+            border: 1px solid rgba(59, 130, 246, 0.3); 
+            color: #60a5fa; 
+            font-size: 13px; 
+            font-weight: 600; 
+            padding: 8px 12px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        } 
+        .admin-trigger-btn:hover { 
+            background: rgba(59, 130, 246, 0.3); 
+            color: #ffffff; 
+        } 
+        /* Search Bar Style */ 
+        .search-box-wrapper { 
+            position: relative; 
+            margin-bottom: 14px; 
+        } 
+        input[type="text"], input[type="date"], select, input[type="password"] { 
+            width: 100%; 
+            padding: 14px 16px; 
+            font-size: 15px; 
+            background: #0b132b; 
+            border: 1px solid #2d3748; 
+            border-radius: 12px; 
+            color: var(--text-main); 
+            outline: none; 
+            box-sizing: border-box; 
+            transition: all 0.2s ease; 
+        } 
+        .search-box-wrapper input[type="text"] { 
+            padding-left: 44px; 
+            padding-right: 44px; 
+            border-radius: var(--radius); 
+            background: var(--card-bg); 
+        } 
+        input[type="text"]:focus, input[type="date"]:focus, select:focus, input[type="password"]:focus { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 0 4px var(--accent-glow); 
+        } 
+        .search-icon { 
+            position: absolute; 
+            left: 14px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: 18px; 
+            height: 18px; 
+            fill: var(--text-secondary); 
+        } 
+        .apple-spinner { 
+            position: absolute; 
+            right: 14px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: 20px; 
+            height: 20px; 
+            display: none; 
+        } 
+        .apple-spinner div { 
+            width: 100%; 
+            height: 100%; 
+            background: transparent; 
+            border-radius: 50%; 
+            box-sizing: border-box; 
+            border: 2px solid rgba(255, 255, 255, 0.2); 
+            border-top-color: var(--accent); 
+            animation: appleSpin 0.8s linear infinite; 
+        } 
+        @keyframes appleSpin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        } 
+        /* Suggestion Dropdown List */ 
+        .suggestions-list { 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            right: 0; 
+            background: var(--card-bg); 
+            border: 1px solid #2d3748; 
+            border-radius: 12px; 
+            margin-top: 6px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
+            max-height: 220px; 
+            overflow-y: auto; 
+            z-index: 1000; 
+            display: none; 
+        } 
+        .suggestion-item { 
+            padding: 12px 16px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            border-bottom: 1px solid #1e293b; 
+            color: var(--text-main); 
+            transition: background 0.15s ease; 
+        } 
+        .suggestion-item:last-child { 
+            border-bottom: none; 
+        } 
+        .suggestion-item:hover { 
+            background: rgba(59, 130, 246, 0.15); 
+            color: #60a5fa; 
+        } 
+        /* Filters Container */ 
+        .filters-container { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            margin-bottom: 24px; 
+        } 
+        /* Dashboard Accordion Style for Starred Doctors */ 
+        .accordion-wrapper { 
+            background: var(--card-bg); 
+            border: 1px solid #2d3748; 
+            border-radius: var(--radius); 
+            margin-bottom: 24px; 
+            overflow: hidden; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2); 
+        } 
+        .accordion-header { 
+            padding: 16px 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            background: rgba(22, 34, 63, 0.95); 
+            cursor: pointer; 
+            user-select: none; 
+            transition: background 0.2s ease; 
+        } 
+        .accordion-header:hover { 
+            background: rgba(30, 41, 59, 0.8); 
+        } 
+        .accordion-title-area { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        } 
+        .accordion-title { 
+            font-size: 15px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            margin: 0; 
+        } 
+        .accordion-badge { 
+            background: rgba(59, 130, 246, 0.2); 
+            color: #60a5fa; 
+            font-size: 12px; 
+            font-weight: 600; 
+            padding: 2px 8px; 
+            border-radius: 10px; 
+        } 
+        .accordion-arrow { 
+            font-size: 14px; 
+            color: var(--text-secondary); 
+            transition: transform 0.3s ease; 
+        } 
+        .accordion-wrapper.open .accordion-arrow { 
+            transform: rotate(180deg); 
+        } 
+        .accordion-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1); 
+            background: rgba(11, 19, 43, 0.5); 
+        } 
+        .accordion-wrapper.open .accordion-content { 
+            max-height: 260px; 
+            overflow-y: auto; 
+        } 
+        .starred-row-item { 
+            padding: 12px 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            border-bottom: 1px solid #1e293b; 
+            cursor: pointer; 
+            transition: background 0.15s ease; 
+        } 
+        .starred-row-item:last-child { 
+            border-bottom: none; 
+        } 
+        .starred-row-item:hover { 
+            background: rgba(59, 130, 246, 0.1); 
+        } 
+        /* Results Container Style */ 
+        .results-container { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 14px; 
+            margin-bottom: 40px; 
+        } 
+        .doctor-card-minimal { 
+            background: var(--card-bg); 
+            border-radius: 14px; 
+            padding: 18px; 
+            border: 1px solid #2d3748; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); 
+            cursor: pointer; 
+            position: relative; 
+            overflow: hidden; 
+            transition: all 0.2s ease; 
+        } 
+        .doctor-card-minimal::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 4px; 
+            height: 100%; 
+            background: var(--accent); 
+            opacity: 0.8; 
+        } 
+        .doctor-card-minimal:hover { 
+            transform: translateY(-2px); 
+            border-color: var(--accent); 
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.15); 
+        } 
+        .card-top-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            margin-bottom: 8px; 
+        } 
+        .doctor-name-min { 
+            font-size: 17px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            margin: 0 0 2px 0; 
+        } 
+        .branch-tag { 
+            font-size: 11px; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            background: rgba(59, 130, 246, 0.15); 
+            color: #60a5fa; 
+            padding: 3px 8px; 
+            border-radius: 6px; 
+        } 
+        .doctor-spec-min { 
+            font-size: 13.5px; 
+            color: var(--text-secondary); 
+            margin-bottom: 10px; 
+        } 
+        .meta-pills-container { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 6px; 
+            margin-bottom: 12px; 
+        } 
+        .credit-pill { 
+            font-size: 10.5px; 
+            font-weight: 600; 
+            background: rgba(16, 185, 129, 0.15); 
+            color: #34d399; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+        } 
+        .callday-pill { 
+            font-size: 10.5px; 
+            font-weight: 600; 
+            background: rgba(245, 158, 11, 0.15); 
+            color: #fbbf24; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            border: 1px dashed rgba(245, 158, 11, 0.4); 
+        } 
+        .age-pill { 
+            font-size: 10.5px; 
+            font-weight: 600; 
+            background: rgba(168, 85, 247, 0.15); 
+            color: #c084fc; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            border: 1px dashed rgba(168, 85, 247, 0.4); 
+        } 
+        .card-details-footer { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 13px; 
+            padding-top: 10px; 
+            border-top: 1px solid #1e293b; 
+            color: var(--text-secondary); 
+        } 
+        .update-banner { 
+            background: rgba(245, 158, 11, 0.15); 
+            border-left: 3px solid #f59e0b; 
+            padding: 8px 10px; 
+            border-radius: 6px; 
+            font-size: 12.5px; 
+            color: #fbbf24; 
+            margin-top: 10px; 
+        } 
+        .section-heading { 
+            font-size: 13px; 
+            font-weight: 600; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            margin-bottom: 10px; 
+        } 
+        .no-results { 
+            text-align: center; 
+            color: var(--text-secondary); 
+            font-size: 15px; 
+            padding: 20px; 
+        } 
+        /* FOOTER */ 
+        .site-footer { 
+            width: 100%; 
+            max-width: 600px; 
+            margin: 40px auto 24px auto; 
+            background: rgba(22, 34, 63, 0.75); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: var(--radius); 
+            padding: 16px 20px; 
+            box-sizing: border-box; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+            font-size: 12px; 
+            color: var(--text-secondary); 
+        } 
+        .footer-item { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+        } 
+        .footer-divider { 
+            color: #334155; 
+            font-weight: 300; 
+        } 
+        .live-dot { 
+            width: 6px; 
+            height: 6px; 
+            background-color: #10b981; 
+            border-radius: 50%; 
+            display: inline-block; 
+            animation: livePulse 2s infinite; 
+        } 
+        @keyframes livePulse { 
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 
+            70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); } 
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } 
+        } 
+        .refresh-countdown { 
+            background: rgba(59, 130, 246, 0.15); 
+            color: #60a5fa; 
+            font-weight: 600; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-variant-numeric: tabular-nums; 
+        } 
+        .developer-credit { 
+            display: inline-block; 
+            font-weight: 600; 
+            background: linear-gradient(90deg, #38bdf8 0%, #818cf8 35%, #c084fc 70%, #38bdf8 100%); 
+            background-size: 200% auto; 
+            color: transparent; 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            animation: colorShine 4s linear infinite; 
+        } 
+        @keyframes colorShine { 
+            0% { background-position: 200% center; } 
+            100% { background-position: -200% center; } 
+        } 
+        /* Modal Overlay */ 
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            background: rgba(0, 0, 0, 0.7); 
+            backdrop-filter: blur(6px); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+            z-index: 2000; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 0.25s ease; 
+        } 
+        .modal-overlay.active { 
+            opacity: 1; 
+            pointer-events: auto; 
+        } 
+        .modal-card { 
+            background: var(--card-bg); 
+            width: 100%; 
+            max-width: 500px; 
+            border-radius: 20px; 
+            padding: 28px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5); 
+            border: 1px solid #2d3748; 
+            transform: translateY(20px); 
+            transition: transform 0.25s ease; 
+            position: relative; 
+            box-sizing: border-box; 
+            color: var(--text-main); 
+            max-height: 90vh; 
+            overflow-y: auto; 
+        } 
+        .modal-overlay.active .modal-card { 
+            transform: translateY(0); 
+        } 
+        .modal-close { 
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            background: #1e293b; 
+            border: none; 
+            width: 32px; 
+            height: 32px; 
+            border-radius: 50%; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: var(--text-secondary); 
+        } 
+        .modal-title { 
+            font-size: 20px; 
+            font-weight: 700; 
+            margin: 0 0 20px 0; 
+        } 
+        .modal-details-grid { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 14px; 
+            font-size: 15px; 
+            background: #0b132b; 
+            padding: 16px; 
+            border-radius: 12px; 
+            border: 1px solid #1e293b; 
+        } 
+        .modal-detail-row { 
+            display: flex; 
+            justify-content: space-between; 
+        } 
+        .modal-detail-row span:first-child { 
+            color: var(--text-secondary); 
+        } 
+        .modal-detail-row span:last-child { 
+            font-weight: 600; 
+            color: var(--text-main); 
+            text-align: right; 
+        } 
+        .admin-btn { 
+            background: var(--accent); 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 12px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            width: 100%; 
+            margin-top: 16px; 
+            transition: background 0.2s ease; 
+        } 
+        .admin-btn:hover { 
+            background: #2563eb; 
+        } 
+        .admin-secondary-btn { 
+            background: #1e293b; 
+            color: #94a3b8; 
+            border: 1px solid #2d3748; 
+            padding: 10px 16px; 
+            border-radius: 10px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            width: 100%; 
+            margin-top: 8px; 
+            transition: all 0.2s ease; 
+        } 
+        .admin-secondary-btn:hover { 
+            background: #2d3748; 
+            color: #ffffff; 
+        } 
+        .queue-badge { 
+            background: rgba(16, 185, 129, 0.2); 
+            color: #34d399; 
+            font-size: 11px; 
+            font-weight: 600; 
+            padding: 2px 8px; 
+            border-radius: 10px; 
+            display: inline-block; 
+            margin-bottom: 8px; 
+        } 
+        .preview-item-card { 
+            background: #0b132b; 
+            border: 1px solid #1e293b; 
+            border-radius: 12px; 
+            padding: 14px; 
+            margin-bottom: 10px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+        } 
+        .preview-item-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        } 
+        .preview-doctor-name { 
+            font-weight: 600; 
+            font-size: 15px; 
+            color: var(--text-main); 
+        } 
+        .preview-actions { 
+            display: flex; 
+            gap: 8px; 
+        } 
+        .preview-btn-sm { 
+            padding: 4px 10px; 
+            font-size: 11.5px; 
+            font-weight: 600; 
+            border-radius: 6px; 
+            border: none; 
+            cursor: pointer; 
+        } 
+        .btn-edit-sm { 
+            background: rgba(59, 130, 246, 0.2); 
+            color: #60a5fa; 
+        } 
+        .btn-edit-sm:hover { 
+            background: rgba(59, 130, 246, 0.35); 
+        } 
+        .btn-del-sm { 
+            background: rgba(239, 68, 68, 0.2); 
+            color: #f87171; 
+        } 
+        .btn-del-sm:hover { 
+            background: rgba(239, 68, 68, 0.35); 
+        } 
+    </style> 
+</head> 
+<body> 
+    <div class="container"> 
+        <div class="brand-header"> 
+            <div class="brand-left"> 
+                <img src="images-removebg-preview.png" alt="Logo" class="logo-image" id="brandLogo" onerror="this.style.display='none'"> 
+                <div class="brand-title">Find Doctor</div> 
+            </div> 
+            <button class="admin-trigger-btn" onclick="promptAdminPassword()"> 
+                <span>⚙️ Office Update</span> 
+            </button> 
+        </div> 
+
+        <div class="search-box-wrapper"> 
+            <svg class="search-icon" viewBox="0 0 24 24"> 
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/> 
+            </svg> 
+            <input type="text" id="searchInput" placeholder="Search doctor name..." oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off"> 
+            <div id="searchSpinner" class="apple-spinner"><div></div></div> 
+            <div id="suggestionsList" class="suggestions-list"></div> 
+        </div> 
+
+        <!-- FILTER DROPDOWNS --> 
+        <div class="filters-container"> 
+            <select id="deptFilter" onchange="applyFilters()"> 
+                <option value="">All Departments</option> 
+            </select> 
+            <select id="branchFilter" onchange="applyFilters()"> 
+                <option value="">All Branches</option> 
+            </select> 
+        </div> 
+
+        <!-- Starred Doctors Accordion --> 
+        <div id="starredAccordion" class="accordion-wrapper"> 
+            <div class="accordion-header" onclick="toggleAccordion()"> 
+                <div class="accordion-title-area"> 
+                    <span style="font-size: 16px;">⭐</span> 
+                    <h3 class="accordion-title">Starred Doctors Quick List</h3> 
+                    <span id="starredCountBadge" class="accordion-badge">0</span> 
+                </div> 
+                <div class="accordion-arrow">▼</div> 
+            </div> 
+            <div class="accordion-content"> 
+                <div id="starredAccordionList"> 
+                    <div style="color: var(--text-secondary); font-size: 14px; padding: 14px 20px;">Loading Starred Doctors...</div> 
+                </div> 
+            </div> 
+        </div> 
+
+        <div class="section-heading" id="resultsHeading">Search Results</div> 
+        <div id="resultsContainer" class="results-container"> 
+            <div class="no-results">Type name, or select filters above to find doctors.</div> 
+        </div> 
+    </div> 
+
+    <!-- FOOTER --> 
+    <footer class="site-footer"> 
+        <div class="footer-item"> 
+            <span class="live-dot"></span> 
+            <span id="backendTimestamp">Backend Sync: Loading...</span> 
+        </div> 
+        <span class="footer-divider">|</span> 
+        <div class="footer-item"> 
+            <span>Auto-refresh in <span id="countdownTimer" class="refresh-countdown">05:00</span></span> 
+        </div> 
+        <span class="footer-divider">|</span> 
+        <div class="footer-item"> 
+            <span class="developer-credit">Website Build & Developed by Murali Manohar</span> 
+        </div> 
+    </footer> 
+
+    <!-- DOCTOR DETAILS MODAL --> 
+    <div id="doctorModal" class="modal-overlay" onclick="closeModalOnBg(event)"> 
+        <div class="modal-card"> 
+            <button class="modal-close" onclick="closeModal()">✕</button> 
+            <h2 class="modal-title">Doctor Info</h2> 
+            <div class="modal-details-grid"> 
+                <div class="modal-detail-row"> 
+                    <span>Doctor Name:</span> 
+                    <span id="modalDoctorName"></span> 
+                </div> 
+                <div class="modal-detail-row"> 
+                    <span>Department:</span> 
+                    <span id="modalDept"></span> 
+                </div> 
+                <div class="modal-detail-row"> 
+                    <span>Location:</span> 
+                    <span id="modalBranch"></span> 
+                </div> 
+                <div class="modal-detail-row"> 
+                    <span>Age Criteria:</span> 
+                    <span id="modalAgeLimit" style="text-align: right; color: #c084fc;"></span> 
+                </div> 
+                <div class="modal-detail-row"> 
+                    <span>Call day:</span> 
+                    <span id="modalCallDay" style="text-align: right; color: #fbbf24;"></span> 
+                </div> 
+                <div class="modal-detail-row"> 
+                    <span>Credit Schemes:</span> 
+                    <span id="modalCredits" style="text-align: right;"></span> 
+                </div> 
+                <div class="modal-detail-row"> 
+                    <span>Fee:</span> 
+                    <span id="modalFee"></span> 
+                </div> 
+                <div class="modal-detail-row" style="flex-direction: column; gap: 4px;"> 
+                    <span>Timing:</span> 
+                    <span id="modalTimings" style="text-align: left;"></span> 
+                </div> 
+            </div> 
+            <div id="modalUpdateContainer"></div> 
+        </div> 
+    </div> 
+
+    <!-- ADMIN PASSWORD MODAL --> 
+    <div id="passwordModal" class="modal-overlay" onclick="closePasswordOnBg(event)"> 
+        <div class="modal-card" style="max-width: 400px;"> 
+            <button class="modal-close" onclick="closePasswordModal()">✕</button> 
+            <h2 class="modal-title">Admin Access Required</h2> 
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
+                Please enter the office password to modify schedules. 
+            </p> 
+            <div style="display: flex; flex-direction: column; gap: 14px;"> 
+                <input type="password" id="adminPasswordInput" placeholder="Enter password..." onkeydown="handlePasswordKey(event)"> 
+                <button class="admin-btn" onclick="verifyAdminPassword()">Verify & Open Panel</button> 
+            </div> 
+        </div> 
+    </div> 
+
+    <!-- OFFICE UPDATE ADMIN MODAL WITH AUTO-QUEUE & PREVIEW --> 
+    <div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)"> 
+        <div class="modal-card"> 
+            <button class="modal-close" onclick="closeAdminModal()">✕</button> 
+            <h2 class="modal-title">Office Schedule Update Panel</h2> 
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
+                Every update you save is automatically added to your session queue. Preview or modify items below before downloading the master file! 
+            </p> 
+            <div style="display: flex; flex-direction: column; gap: 14px;"> 
+                <div style="position: relative;" id="adminSearchWrapper"> 
+                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Find Doctor to Edit:</label> 
+                    <input type="text" id="adminSearchInput" placeholder="Type doctor name to search..." oninput="handleAdminSearchInput()" autocomplete="off"> 
+                    <div id="adminSuggestionsList" class="suggestions-list"></div> 
+                </div> 
+                <div> 
+                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Selected Doctor:</label> 
+                    <input type="text" id="adminSelectedDoctorDisplay" readonly style="background: #1e293b; color: #60a5fa; font-weight: 600;" placeholder="No doctor selected yet"> 
+                </div> 
+                <div> 
+                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Target Date (Day of change):</label> 
+                    <input type="date" id="adminSpecialDate"> 
+                </div> 
+                <div> 
+                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Special Timings / Note:</label> 
+                    <input type="text" id="adminSpecialTimings" placeholder="e.g. 1:00 PM - 3:00 PM"> 
+                </div> 
+                <div> 
+                    <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Office Update Reason / Note:</label> 
+                    <input type="text" id="adminSpecialNote" placeholder="e.g. Special clinic hours"> 
+                </div> 
+                <button class="admin-secondary-btn" onclick="saveToQueueAction()">💾 Save Update to Queue</button> 
+                <div style="border-top: 1px solid #2d3748; padding-top: 14px; margin-top: 4px;"> 
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"> 
+                        <div id="queueCounterBadge" class="queue-badge" style="margin-bottom: 0;">Queue: 0 updates waiting</div> 
+                        <button class="admin-secondary-btn" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 12px;" onclick="openPreviewModal()">👁️ Preview All Updates</button> 
+                    </div> 
+                    <button class="admin-btn" onclick="downloadMasterQueueJSON()">📥 Download Master doctors.json</button> 
+                </div> 
+            </div> 
+        </div> 
+    </div> 
+
+    <!-- PREVIEW MODAL --> 
+    <div id="previewModal" class="modal-overlay" onclick="closePreviewOnBg(event)"> 
+        <div class="modal-card"> 
+            <button class="modal-close" onclick="closePreviewModal()">✕</button> 
+            <h2 class="modal-title">Queue Preview & Verification</h2> 
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
+                Review all queued modifications below. You can modify or remove any entry before downloading. 
+            </p> 
+            <div id="previewContainerList" style="max-height: 280px; overflow-y: auto; margin-bottom: 16px;"> 
+                <!-- Rendered dynamically --> 
+            </div> 
+            <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">📥 Verify & Download Master File</button> 
+        </div> 
+    </div> 
+
+    <script> 
+        const defaultSampleDoctors = [ 
+            { "Doctor Name": "Dr. Rajesh Sharma", "Department": "Cardiology", "Branch": "Banjara Hills", "OP Fee": "₹800", "OP Timings": "10:00 AM - 02:00 PM", "Starred": "Yes", "Call Day": "Monday", "Age Criteria": "All Ages", "Credit Accepted": "Arogyasri, CGHS" }, 
+            { "Doctor Name": "Dr. Priya Reddy", "Department": "Pediatrics", "Branch": "Hitech City", "OP Fee": "₹600", "OP Timings": "09:00 AM - 01:00 PM", "Starred": "Yes", "Call Day": "Wednesday", "Age Criteria": "0 - 15 Years", "Credit Accepted": "CGHS" }, 
+            { "Doctor Name": "Dr. Anil Kumar", "Department": "Orthopedics", "Branch": "Banjara Hills", "OP Fee": "₹700", "OP Timings": "04:00 PM - 08:00 PM", "Starred": "No", "Call Day": "Friday", "Age Criteria": "All Ages", "Credit Accepted": "Cash Only" } 
+        ]; 
+
+        let doctorData = []; 
+        let selectedAdminDoctorIndex = null; 
+        let pendingQueueUpdates = {}; 
+        const ADMIN_SECRET_PASSWORD = "careoffice123"; 
+
+        function loadDoctorData() { 
+            fetch('doctors.json') 
+                .then(response => { 
+                    if (!response.ok) throw new Error("File not found"); 
+                    return response.json(); 
+                }) 
+                .then(data => { 
+                    doctorData = data; 
+                    initApp(); 
+                }) 
+                .catch(error => { 
+                    console.warn('Could not load external doctors.json (likely due to local browser CORS restriction). Using built-in sample data instead.', error); 
+                    doctorData = defaultSampleDoctors; 
+                    initApp(); 
+                }); 
+        } 
+
+        function initApp() { 
+            renderStarredAccordion(); 
+            populateFilterDropdowns(); 
+            checkBackendSync(); 
+        } 
+
+        loadDoctorData(); 
+
+        function formatBackendDate(dateObj) { 
+            let hours = dateObj.getHours(); 
+            let minutes = dateObj.getMinutes(); 
+            const ampm = hours >= 12 ? 'pm' : 'am'; 
+            hours = hours % 12; 
+            hours = hours ? hours : 12; 
+            minutes = minutes < 10 ? '0' + minutes : minutes; 
+            const day = dateObj.getDate(); 
+            const getOrdinal = (n) => { 
+                const s = ["th", "st", "nd", "rd"]; 
+                const v = n % 100; 
+                return n + (s[(v - 20) % 10] || s[v] || s[0]); 
+            }; 
+            const formattedDay = getOrdinal(day); 
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]; 
+            const month = months[dateObj.getMonth()]; 
+            const year = dateObj.getFullYear(); 
+            return `${hours}:${minutes}${ampm} on ${formattedDay} ${month} ${year}`; 
+        } 
+
+        function checkBackendSync() { 
+            const timestampEl = document.getElementById('backendTimestamp'); 
+            if (timestampEl) { 
+                timestampEl.textContent = `Backend Sync: ${formatBackendDate(new Date())}`; 
+            } 
+        } 
+
+        const REFRESH_INTERVAL_SECONDS = 300; 
+        let timeLeft = REFRESH_INTERVAL_SECONDS; 
+
+        function updateCountdownDisplay() { 
+            const minutes = Math.floor(timeLeft / 60); 
+            const seconds = timeLeft % 60; 
+            const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; 
+            const timerEl = document.getElementById('countdownTimer'); 
+            if (timerEl) { 
+                timerEl.textContent = formattedTime; 
+            } 
+        } 
+
+        setInterval(() => { 
+            timeLeft--; 
+            if (timeLeft <= 0) { 
+                loadDoctorData(); 
+                timeLeft = REFRESH_INTERVAL_SECONDS; 
+            } 
+            updateCountdownDisplay(); 
+        }, 1000); 
+
+        updateCountdownDisplay(); 
+
+        function getActiveSchedule(doc) { 
+            const today = new Date(); 
+            const year = today.getFullYear(); 
+            const month = String(today.getMonth() + 1).padStart(2, '0'); 
+            const day = String(today.getDate()).padStart(2, '0'); 
+            const currentDateStr = `${year}-${month}-${day}`; 
+
+            const targetDate = doc["Special Date"] ? String(doc["Special Date"]).trim() : ""; 
+            if (targetDate && targetDate === currentDateStr) { 
+                return { 
+                    timings: doc["Special Timings"] || doc["OP Timings"], 
+                    note: doc["Special Note"] || doc["Leave / Timing Updates"] || "Special schedule for today" 
+                }; 
+            } 
+            return { 
+                timings: doc["OP Timings"] || 'N/A', 
+                note: (doc["Leave / Timing Updates"] && doc["Leave / Timing Updates"] !== "Regular Timings") ? doc["Leave / Timing Updates"] : "" 
+            }; 
+        } 
+
+        function toggleAccordion() { 
+            const wrapper = document.getElementById('starredAccordion'); 
+            wrapper.classList.toggle('open'); 
+        } 
+
+        function renderStarredAccordion() { 
+            const listContainer = document.getElementById('starredAccordionList'); 
+            const badge = document.getElementById('starredCountBadge'); 
+            if (!listContainer) return; 
+
+            const starredDocs = doctorData.filter(doc => doc["Starred"] && String(doc["Starred"]).trim().toLowerCase() === "yes"); 
+            badge.textContent = starredDocs.length; 
+
+            if (starredDocs.length === 0) { 
+                listContainer.innerHTML = `<div style="color: var(--text-secondary); font-size: 14px; padding: 14px 20px;">No starred doctors available.</div>`; 
+                return; 
+            } 
+
+            listContainer.innerHTML = ''; 
+            starredDocs.forEach(doc => { 
+                const row = document.createElement('div'); 
+                row.className = 'starred-row-item'; 
+                row.onclick = () => openModal(doc); 
+
+                const callDayText = doc["Call Day"] || doc["Call Days"] || doc["Duty Day"] || ''; 
+                const ageText = doc["Age Criteria"] || doc["Age Limit"] || ''; 
+                let subInfoText = `${doc["Department"] || 'Department'}`; 
+                if (callDayText) subInfoText += ` • <span style="color:#fbbf24;">Call day: ${callDayText}</span>`; 
+                if (ageText) subInfoText += ` • <span style="color:#c084fc;">Age: ${ageText}</span>`; 
+
+                row.innerHTML = ` 
+                    <div> 
+                        <div style="font-weight: 600; font-size: 14.5px; color: var(--text-main); margin-bottom: 2px;">${doc["Doctor Name"] || 'N/A'}</div> 
+                        <div style="font-size: 12.5px; color: var(--text-secondary);">${subInfoText}</div> 
+                    </div> 
+                    <span class="branch-tag">${doc["Branch"] || 'Location'}</span> 
+                `; 
+                listContainer.appendChild(row); 
+            }); 
+        } 
+
+        function populateFilterDropdowns() { 
+            const deptSelect = document.getElementById('deptFilter'); 
+            const branchSelect = document.getElementById('branchFilter'); 
+
+            const departments = [...new Set(doctorData.map(d => d["Department"]).filter(Boolean))].sort(); 
+            const branches = [...new Set(doctorData.map(d => d["Branch"]).filter(Boolean))].sort(); 
+
+            deptSelect.innerHTML = `<option value="">All Departments</option>` + departments.map(d => `<option value="${d}">${d}</option>`).join(''); 
+            branchSelect.innerHTML = `<option value="">All Branches</option>` + branches.map(b => `<option value="${b}">${b}</option>`).join(''); 
+        } 
+
+        function applyFilters() { 
+            const selectedDept = document.getElementById('deptFilter').value.toLowerCase(); 
+            const selectedBranch = document.getElementById('branchFilter').value.toLowerCase(); 
+            const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
+
+            const filtered = doctorData.filter(doc => { 
+                const matchesName = query === "" || (doc["Doctor Name"] && doc["Doctor Name"].toLowerCase().includes(query)); 
+                const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
+                const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
+                return matchesName && matchesDept && matchesBranch; 
+            }); 
+
+            renderDoctors(filtered); 
+        } 
+
+        function handleSearchInput() { 
+            const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
+            const suggestionsBox = document.getElementById('suggestionsList'); 
+            applyFilters(); 
+
+            if (query === "") { 
+                suggestionsBox.style.display = 'none'; 
+                document.getElementById('searchSpinner').style.display = 'none'; 
+                return; 
+            } 
+
+            const selectedDept = document.getElementById('deptFilter').value.toLowerCase(); 
+            const selectedBranch = document.getElementById('branchFilter').value.toLowerCase(); 
+
+            const filtered = doctorData.filter(doc => { 
+                const matchesQuery = Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
+                const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
+                const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
+                return matchesQuery && matchesDept && matchesBranch; 
+            }); 
+
+            showSuggestions(filtered); 
+        } 
+
+        function handleKeyDown(event) { 
+            if (event.key === 'Enter') { 
+                event.preventDefault(); 
+                document.getElementById('suggestionsList').style.display = 'none'; 
+                applyFilters(); 
+            } 
+        } 
+
+        function showSuggestions(doctors) { 
+            const suggestionsBox = document.getElementById('suggestionsList'); 
+            suggestionsBox.innerHTML = ''; 
+            if (doctors.length === 0) { 
+                suggestionsBox.style.display = 'none'; 
+                return; 
+            } 
+
+            const topMatches = doctors.slice(0, 5); 
+            topMatches.forEach(doc => { 
+                const item = document.createElement('div'); 
+                item.className = 'suggestion-item'; 
+                item.innerHTML = `<strong>${doc["Doctor Name"]}</strong> <span style="color:var(--text-secondary); font-size:13px;">(${doc["Department"]} - ${doc["Branch"]})</span>`; 
+                item.onclick = function() { 
+                    document.getElementById('searchInput').value = doc["Doctor Name"]; 
+                    suggestionsBox.style.display = 'none'; 
+                    renderDoctors([doc]); 
+                }; 
+                suggestionsBox.appendChild(item); 
+            }); 
+            suggestionsBox.style.display = 'block'; 
+        } 
+
+        document.addEventListener('click', function(e) { 
+            if (!e.target.closest('.search-box-wrapper')) { 
+                document.getElementById('suggestionsList').style.display = 'none'; 
+            } 
+            if (!e.target.closest('#adminSearchWrapper')) { 
+                const adminSuggestions = document.getElementById('adminSuggestionsList'); 
+                if (adminSuggestions) adminSuggestions.style.display = 'none'; 
+            } 
+        }); 
+
+        function renderDoctors(doctors) { 
+            const container = document.getElementById('resultsContainer'); 
+            container.innerHTML = ''; 
+
+            if (doctors.length === 0) { 
+                container.innerHTML = `<div class="no-results">No doctors found matching your criteria.</div>`; 
+                return; 
+            } 
+
+            doctors.forEach((doc) => { 
+                const card = document.createElement('div'); 
+                card.className = 'doctor-card-minimal'; 
+                card.onclick = () => openModal(doc); 
+
+                const schedule = getActiveSchedule(doc); 
+
+                let creditsValue = doc["Credit Accepted"] || doc["Credits"] || "None"; 
+                let creditPillsHTML = ''; 
+                if (creditsValue && creditsValue !== "None") { 
+                    let creditArray = creditsValue.split(',').map(item => item.trim()); 
+                    creditPillsHTML = creditArray.map(c => `<span class="credit-pill">✓ ${c}</span>`).join(''); 
+                } 
+
+                let callDayValue = doc["Call Day"] || doc["Call Days"] || ""; 
+                let callDayHTML = callDayValue ? `<span class="callday-pill">Call day: ${callDayValue}</span>` : ''; 
+
+                let ageValue = doc["Age Criteria"] || doc["Age Limit"] || ""; 
+                let ageHTML = ageValue ? `<span class="age-pill">Age: ${ageValue}</span>` : ''; 
+
+                let metaCombinedHTML = (creditPillsHTML || callDayHTML || ageHTML) ? `<div class="meta-pills-container">${ageHTML}${callDayHTML}${creditPillsHTML}</div>` : ''; 
+
+                card.innerHTML = ` 
+                    <div class="card-top-row"> 
+                        <div> 
+                            <h3 class="doctor-name-min">${doc["Doctor Name"] || 'N/A'}</h3> 
+                            <div class="doctor-spec-min">${doc["Department"] || 'Department'}</div> 
+                        </div> 
+                        <span class="branch-tag">${doc["Branch"] || 'Location'}</span> 
+                    </div> 
+                    ${metaCombinedHTML} 
+                    <div class="card-details-footer"> 
+                        <span>Fee: <strong>${doc["OP Fee"] || 'N/A'}</strong></span> 
+                        <span style="max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Timing: ${schedule.timings}</span> 
+                    </div> 
+                    ${schedule.note ? ` 
+                        <div class="update-banner"> 
+                            ⚠️ <strong>Notice:</strong> ${schedule.note} 
+                        </div> 
+                    ` : ''} 
+                `; 
+                container.appendChild(card); 
+            }); 
+        } 
+
+        function openModal(doc) { 
+            document.getElementById('modalDoctorName').textContent = doc["Doctor Name"] || 'N/A'; 
+            document.getElementById('modalDept').textContent = doc["Department"] || 'Department'; 
+            document.getElementById('modalBranch').textContent = doc["Branch"] || 'N/A'; 
+            document.getElementById('modalFee').textContent = doc["OP Fee"] || 'N/A'; 
+
+            const schedule = getActiveSchedule(doc); 
+            document.getElementById('modalTimings').textContent = schedule.timings; 
+            document.getElementById('modalCredits').textContent = doc["Credit Accepted"] || 'Not Specified'; 
+            document.getElementById('modalCallDay').textContent = doc["Call Day"] || 'Not Assigned'; 
+            document.getElementById('modalAgeLimit').textContent = doc["Age Criteria"] || 'All Ages'; 
+
+            const updateContainer = document.getElementById('modalUpdateContainer'); 
+            if (schedule.note) { 
+                updateContainer.innerHTML = ` 
+                    <div class="update-banner" style="margin-top: 14px;"> 
+                        ⚠️ <strong>Notice:</strong> ${schedule.note} 
+                    </div> 
+                `; 
+            } else { 
+                updateContainer.innerHTML = ''; 
+            } 
+
+            document.getElementById('doctorModal').classList.add('active'); 
+        } 
+
+        function closeModal() { 
+            document.getElementById('doctorModal').classList.remove('active'); 
+        } 
+
+        function closeModalOnBg(event) { 
+            if (event.target.id === 'doctorModal') { 
+                closeModal(); 
+            } 
+        } 
+
+        function promptAdminPassword() { 
+            document.getElementById('adminPasswordInput').value = ""; 
+            document.getElementById('passwordModal').classList.add('active'); 
+        } 
+
+        function closePasswordModal() { 
+            document.getElementById('passwordModal').classList.remove('active'); 
+        } 
+
+        function closePasswordOnBg(event) { 
+            if (event.target.id === 'passwordModal') { 
+                closePasswordModal(); 
+            } 
+        } 
+
+        function handlePasswordKey(event) { 
+            if (event.key === 'Enter') { 
+                verifyAdminPassword(); 
+            } 
+        } 
+
+        function verifyAdminPassword() { 
+            const enteredPwd = document.getElementById('adminPasswordInput').value; 
+            if (enteredPwd === ADMIN_SECRET_PASSWORD) { 
+                closePasswordModal(); 
+                openAdminModal(); 
+            } else { 
+                alert("Incorrect office password."); 
+            } 
+        } 
+
+        function openAdminModal() { 
+            selectedAdminDoctorIndex = null; 
+            document.getElementById('adminSearchInput').value = ""; 
+            document.getElementById('adminSelectedDoctorDisplay').value = ""; 
+            document.getElementById('adminSpecialDate').value = ""; 
+            document.getElementById('adminSpecialTimings').value = ""; 
+            document.getElementById('adminSpecialNote').value = ""; 
+            updateQueueBadge(); 
+            document.getElementById('adminModal').classList.add('active'); 
+        } 
+
+        function closeAdminModal() { 
+            document.getElementById('adminModal').classList.remove('active'); 
+        } 
+
+        function closeAdminOnBg(event) { 
+            if (event.target.id === 'adminModal') { 
+                closeAdminModal(); 
+            } 
+        } 
+
+        function handleAdminSearchInput() { 
+            const query = document.getElementById('adminSearchInput').value.toLowerCase().trim(); 
+            const suggestionsBox = document.getElementById('adminSuggestionsList'); 
+
+            if (query === "") { 
+                suggestionsBox.style.display = 'none'; 
+                return; 
+            } 
+
+            const matched = []; 
+            doctorData.forEach((doc, idx) => { 
+                if (doc["Doctor Name"].toLowerCase().includes(query) || (doc["Department"] && doc["Department"].toLowerCase().includes(query))) { 
+                    matched.push({ doc, idx }); 
+                } 
+            }); 
+
+            suggestionsBox.innerHTML = ''; 
+            if (matched.length === 0) { 
+                suggestionsBox.style.display = 'none'; 
+                return; 
+            } 
+
+            matched.slice(0, 6).forEach(item => { 
+                const div = document.createElement('div'); 
+                div.className = 'suggestion-item'; 
+                div.innerHTML = `<strong>${item.doc["Doctor Name"]}</strong> <span style="color:var(--text-secondary); font-size:13px;">(${item.doc["Department"]} - ${item.doc["Branch"]})</span>`; 
+                div.onclick = function() { 
+                    selectedAdminDoctorIndex = item.idx; 
+                    document.getElementById('adminSearchInput').value = item.doc["Doctor Name"]; 
+                    document.getElementById('adminSelectedDoctorDisplay').value = `${item.doc["Doctor Name"]} (${item.doc["Department"]} - ${item.doc["Branch"]})`; 
+
+                    const existingQueueItem = pendingQueueUpdates[item.idx]; 
+                    if (existingQueueItem) { 
+                        document.getElementById('adminSpecialDate').value = existingQueueItem["Special Date"] || ""; 
+                        document.getElementById('adminSpecialTimings').value = existingQueueItem["Special Timings"] || ""; 
+                        document.getElementById('adminSpecialNote').value = existingQueueItem["Special Note"] || ""; 
+                    } else { 
+                        document.getElementById('adminSpecialDate').value = item.doc["Special Date"] || ""; 
+                        document.getElementById('adminSpecialTimings').value = item.doc["Special Timings"] || ""; 
+                        document.getElementById('adminSpecialNote').value = item.doc["Special Note"] || ""; 
+                    } 
+                    suggestionsBox.style.display = 'none'; 
+                }; 
+                suggestionsBox.appendChild(div); 
+            }); 
+            suggestionsBox.style.display = 'block'; 
+        } 
+
+        function saveToQueueAction() { 
+            if (selectedAdminDoctorIndex === null || selectedAdminDoctorIndex === undefined) { 
+                alert("Please search and select a doctor first."); 
+                return; 
+            } 
+
+            pendingQueueUpdates[selectedAdminDoctorIndex] = { 
+                "Special Date": document.getElementById('adminSpecialDate').value, 
+                "Special Timings": document.getElementById('adminSpecialTimings').value, 
+                "Special Note": document.getElementById('adminSpecialNote').value 
+            }; 
+
+            updateQueueBadge(); 
+            selectedAdminDoctorIndex = null; 
+            document.getElementById('adminSearchInput').value = ""; 
+            document.getElementById('adminSelectedDoctorDisplay').value = ""; 
+            document.getElementById('adminSpecialDate').value = ""; 
+            document.getElementById('adminSpecialTimings').value = ""; 
+            document.getElementById('adminSpecialNote').value = ""; 
+
+            alert("Update saved to queue automatically!"); 
+        } 
+
+        function updateQueueBadge() { 
+            const count = Object.keys(pendingQueueUpdates).length; 
+            const badge = document.getElementById('queueCounterBadge'); 
+            if (badge) { 
+                badge.textContent = `Queue: ${count} update(s) saved`; 
+            } 
+        } 
+
+        function openPreviewModal() { 
+            const queueKeys = Object.keys(pendingQueueUpdates); 
+            const container = document.getElementById('previewContainerList'); 
+            container.innerHTML = ''; 
+
+            if (queueKeys.length === 0) { 
+                container.innerHTML = `<div style="color: var(--text-secondary); font-size: 14px; text-align: center; padding: 20px;">No updates saved in queue yet.</div>`; 
+            } else { 
+                queueKeys.forEach(idx => { 
+                    const item = pendingQueueUpdates[idx]; 
+                    const doc = doctorData[idx] || {}; 
+
+                    const cardDiv = document.createElement('div'); 
+                    cardDiv.className = 'preview-item-card'; 
+                    cardDiv.innerHTML = ` 
+                        <div class="preview-item-header"> 
+                            <span class="preview-doctor-name">${doc["Doctor Name"] || 'Doctor'}</span> 
+                            <div class="preview-actions"> 
+                                <button class="preview-btn-sm btn-edit-sm" onclick="editQueueItem(${idx})">Edit</button> 
+                                <button class="preview-btn-sm btn-del-sm" onclick="removeQueueItem(${idx})">Remove</button> 
+                            </div> 
+                        </div> 
+                        <div style="font-size: 13px; color: var(--text-secondary);"> 
+                            <div><strong>Branch:</strong> ${doc["Branch"] || 'N/A'} | <strong>Dept:</strong> ${doc["Department"] || 'N/A'}</div> 
+                            <div><strong>Date:</strong> ${item["Special Date"] || 'None'}</div> 
+                            <div><strong>Timings:</strong> ${item["Special Timings"] || 'Regular'}</div> 
+                            <div><strong>Note:</strong> ${item["Special Note"] || 'None'}</div> 
+                        </div> 
+                    `; 
+                    container.appendChild(cardDiv); 
+                }); 
+            } 
+            document.getElementById('previewModal').classList.add('active'); 
+        } 
+
+        function closePreviewModal() { 
+            document.getElementById('previewModal').classList.remove('active'); 
+        } 
+
+        function closePreviewOnBg(event) { 
+            if (event.target.id === 'previewModal') { 
+                closePreviewModal(); 
+            } 
+        } 
+
+        function removeQueueItem(idx) { 
+            delete pendingQueueUpdates[idx]; 
+            updateQueueBadge(); 
+            openPreviewModal(); 
+        } 
+
+        function editQueueItem(idx) { 
+            closePreviewModal(); 
+            closeAdminModal(); 
+
+            const doc = doctorData[idx]; 
+            selectedAdminDoctorIndex = idx; 
+            document.getElementById('adminSearchInput').value = doc["Doctor Name"]; 
+            document.getElementById('adminSelectedDoctorDisplay').value = `${doc["Doctor Name"]} (${doc["Department"]} - ${doc["Branch"]})`; 
+
+            const qItem = pendingQueueUpdates[idx]; 
+            document.getElementById('adminSpecialDate').value = qItem["Special Date"] || ""; 
+            document.getElementById('adminSpecialTimings').value = qItem["Special Timings"] || ""; 
+            document.getElementById('adminSpecialNote').value = qItem["Special Note"] || ""; 
+
+            document.getElementById('adminModal').classList.add('active'); 
+        } 
+
+        function downloadMasterQueueJSON() { 
+            const queueKeys = Object.keys(pendingQueueUpdates); 
+            if (queueKeys.length === 0) { 
+                alert("Your update queue is empty. Please save at least one doctor update before downloading."); 
+                return; 
+            } 
+            openPreviewModal(); 
+        } 
+
+        function confirmAndDownloadFromPreview() { 
+            const queueKeys = Object.keys(pendingQueueUpdates); 
+            if (queueKeys.length === 0) { 
+                alert("Queue is empty."); 
+                return; 
+            } 
+
+            queueKeys.forEach(idx => { 
+                const updates = pendingQueueUpdates[idx]; 
+                doctorData[idx]["Special Date"] = updates["Special Date"]; 
+                doctorData[idx]["Special Timings"] = updates["Special Timings"]; 
+                doctorData[idx]["Special Note"] = updates["Special Note"]; 
+            }); 
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doctorData, null, 4)); 
+            const downloadAnchor = document.createElement('a'); 
+            downloadAnchor.setAttribute("href", dataStr); 
+            downloadAnchor.setAttribute("download", "doctors.json"); 
+            document.body.appendChild(downloadAnchor); 
+            downloadAnchor.click(); 
+            downloadAnchor.remove(); 
+
+            alert("Master 'doctors.json' file successfully downloaded with all verified modifications!"); 
+            pendingQueueUpdates = {}; 
+            updateQueueBadge(); 
+            closePreviewModal(); 
+            closeAdminModal(); 
+            renderStarredAccordion(); 
+            applyFilters(); 
+        } 
+    </script> 
+</body> 
 </html>
