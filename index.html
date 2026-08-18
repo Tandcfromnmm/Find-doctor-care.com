@@ -174,7 +174,7 @@
             color: #60a5fa; 
         } 
 
-        /* High-Performance Hardware-Accelerated Draggable Floating Icon */
+        /* High-Performance Hardware-Accelerated Draggable Floating Icon with Magnetic Snap anywhere */
         .floating-symptom-btn {
             position: fixed;
             bottom: 24px;
@@ -718,7 +718,7 @@
             </div>
         </div> 
 
-        <!-- Draggable Floating Symptom Triage Icon with Magnetic Return Snap -->
+        <!-- Draggable Floating Symptom Triage Icon with Magnetic Snap anywhere -->
         <button id="floating-symptom-btn" class="floating-symptom-btn" onclick="handleSymptomClick(event)" title="AI Symptom Triage">
             🩺
         </button>
@@ -1059,7 +1059,7 @@
 
         updateCountdownDisplay(); 
 
-        /* High-Performance Hardware-Accelerated Draggable & Magnetic Return Logic */
+        /* High-Performance Hardware-Accelerated Draggable & Magnetic Return Logic (Anywhere Snap) */
         const icon = document.getElementById('floating-symptom-btn');
         let isDragging = false;
         let startX = 0, startY = 0;
@@ -1098,7 +1098,7 @@
             isDragging = false;
             try { icon.releasePointerCapture(e.pointerId); } catch(err) {}
 
-            // Magnetic Return Snap to original position
+            // Magnetic Return Snap to original position from anywhere
             icon.classList.add('snapping');
             currentX = 0;
             currentY = 0;
@@ -1371,7 +1371,9 @@
             } 
 
             let filtered = doctorData.filter(doc => { 
-                const matchesName = query === "" || (doc["Doctor Name"] && doc["Doctor Name"].toLowerCase().includes(query)) || Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
+                // Flexible partial matching for name or any field when search is typed or entered
+                const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
+                const matchesName = query === "" || docName.includes(query) || Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
                 const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selectedDept; 
                 const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch; 
                 return matchesName && matchesDept && matchesBranch; 
@@ -1409,7 +1411,7 @@
 
             const filtered = doctorData.filter(doc => { 
                 const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
-                const matchesQuery = docName.startsWith(query) || docName.includes("dr. " + query); 
+                const matchesQuery = docName.includes(query); 
                 const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
                 const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
                 return matchesQuery && matchesDept && matchesBranch; 
@@ -1643,7 +1645,7 @@
             const matched = []; 
             doctorData.forEach((doc, idx) => { 
                 const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
-                if (docName.startsWith(query) || docName.includes("dr. " + query)) { 
+                if (docName.includes(query)) { 
                     matched.push({ doc, idx }); 
                 } 
             }); 
