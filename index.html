@@ -56,6 +56,10 @@
             color: var(--text-main); 
             letter-spacing: -0.01em; 
         } 
+        .admin-trigger-group {
+            display: flex;
+            gap: 8px;
+        }
         /* Admin Quick Trigger Button */ 
         .admin-trigger-btn { 
             background: rgba(59, 130, 246, 0.15); 
@@ -169,6 +173,40 @@
             background: rgba(59, 130, 246, 0.15); 
             color: #60a5fa; 
         } 
+
+        /* AI Symptom Checker Banner */
+        .symptom-checker-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px dashed rgba(16, 185, 129, 0.4);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+        }
+        .symptom-input-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .symptom-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13.5px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            white-space: nowrap;
+        }
+        .symptom-btn:hover { background: #059669; }
+        .symptom-result-box {
+            font-size: 13px;
+            color: #34d399;
+            margin-top: 8px;
+            display: none;
+        }
+
         /* Filters Container */ 
         .filters-container { 
             display: grid; 
@@ -663,6 +701,43 @@
             line-height: 1.4; 
             cursor: pointer; 
         } 
+
+        /* Rota Calendar Styles */
+        .rota-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .rota-day-cell {
+            background: #0b132b;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 12px;
+            min-height: 60px;
+        }
+        .rota-day-name {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+        .rota-day-date {
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .rota-count-badge {
+            margin-top: 4px;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 4px;
+            display: inline-block;
+        }
     </style> 
 </head> 
 <body> 
@@ -672,10 +747,28 @@
                 <img src="images-removebg-preview.png" alt="Logo" class="logo-image" id="brandLogo" onerror="this.style.display='none'"> 
                 <div class="brand-title">Find Doctor</div> 
             </div> 
-            <button class="admin-trigger-btn" onclick="promptAdminPassword()"> 
-                <span>⚙️ Reschedule</span> 
-            </button> 
+            <div class="admin-trigger-group">
+                <button class="admin-trigger-btn" onclick="openRotaCalendarModal()" title="View Monthly Rota Calendar"> 
+                    <span>📅 Rota</span> 
+                </button>
+                <button class="admin-trigger-btn" onclick="promptAdminPassword()"> 
+                    <span>⚙️ Reschedule</span> 
+                </button> 
+            </div>
         </div> 
+
+        <!-- AI Symptom-to-Department Triage Box -->
+        <div class="symptom-checker-box">
+            <div style="font-size: 13.5px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                <span>💡 AI Symptom Triage</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Type your symptom or issue to find the recommended department instantly:</div>
+            <div class="symptom-input-row">
+                <input type="text" id="symptomInput" placeholder="e.g. chest pain, cough, joint pain..." style="padding: 10px 12px; font-size: 13.5px;" onkeydown="handleSymptomKey(event)">
+                <button class="symptom-btn" onclick="checkSymptomTriage()">Analyze</button>
+            </div>
+            <div id="symptomResult" class="symptom-result-box"></div>
+        </div>
 
         <div class="search-box-wrapper"> 
             <svg class="search-icon" viewBox="0 0 24 24"> 
@@ -783,6 +876,18 @@
         </div> 
     </div> 
 
+    <!-- ROTA CALENDAR MODAL -->
+    <div id="rotaCalendarModal" class="modal-overlay" onclick="closeRotaOnBg(event)">
+        <div class="modal-card" style="max-width: 550px;">
+            <button class="modal-close" onclick="closeRotaCalendarModal()">✕</button>
+            <h2 class="modal-title">📅 Monthly Rota Calendar</h2>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
+                Overview of on-call availability for the next 7 days across active filters.
+            </p>
+            <div id="rotaCalendarContent"></div>
+        </div>
+    </div>
+
     <!-- ADMIN PASSWORD MODAL --> 
     <div id="passwordModal" class="modal-overlay" onclick="closePasswordOnBg(event)"> 
         <div class="modal-card" style="max-width: 400px;"> 
@@ -884,6 +989,7 @@
         ]; 
 
         let doctorData = []; 
+        let activityAuditTrail = [];
         let selectedAdminDoctorIndex = null; 
         let pendingQueueUpdates = {}; 
         const ADMIN_SECRET_PASSWORD = "careoffice123"; 
@@ -907,12 +1013,14 @@
 
                     if (serializedNew !== serializedCurrent) {
                         doctorData = newJsonData;
+                        logAuditTrail("System synced updated doctor dataset from backend.");
                         checkBackendSync(); 
                         initApp();
                     } else {
                         checkBackendSync();
                         if (!isAutoRefresh && doctorData.length === 0) {
                             doctorData = newJsonData;
+                            logAuditTrail("Initial doctor dataset loaded successfully.");
                             initApp();
                         }
                     }
@@ -921,11 +1029,18 @@
                     console.warn('Could not load external doctors.json. Using sample data.', error); 
                     if (doctorData.length === 0) {
                         doctorData = defaultSampleDoctors;
+                        logAuditTrail("Loaded default sample doctor dataset.");
                         checkBackendSync();
                         initApp();
                     }
                 }); 
         } 
+
+        function logAuditTrail(actionMessage) {
+            const timestamp = formatBackendDate(new Date());
+            activityAuditTrail.unshift({ time: timestamp, message: actionMessage });
+            if (activityAuditTrail.length > 50) activityAuditTrail.pop();
+        }
 
         function initApp() { 
             renderStarredAccordion(); 
@@ -986,6 +1101,50 @@
         }, 1000); 
 
         updateCountdownDisplay(); 
+
+        /* AI Symptom Triage Feature */
+        function handleSymptomKey(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkSymptomTriage();
+            }
+        }
+
+        function checkSymptomTriage() {
+            const query = document.getElementById('symptomInput').value.toLowerCase().trim();
+            const resultBox = document.getElementById('symptomResult');
+            if (!query) {
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            let matchedDept = "General Medicine";
+            if (query.includes("chest") || query.includes("heart") || query.includes("palpitation") || query.includes("bp") || query.includes("blood pressure")) {
+                matchedDept = "Cardiology";
+            } else.includes("child") || query.includes("baby") || query.includes("infant") || query.includes("pediatric") {
+                matchedDept = "Pediatrics";
+            } else if (query.includes("bone") || query.includes("joint") || query.includes("knee") || query.includes("fracture") || query.includes("spine") || query.includes("ortho")) {
+                matchedDept = "Orthopedics";
+            } else if (query.includes("brain") || query.includes("headache") || query.includes("nerve") || query.includes("dizzy") || query.includes("seizure")) {
+                matchedDept = "Neurology";
+            } else if (query.includes("stomach") || query.includes("abdomen") || query.includes("digestion") || query.includes("liver")) {
+                matchedDept = "Gastroenterology";
+            }
+
+            resultBox.innerHTML = `Recommended Department: <strong>${matchedDept}</strong>. Click to auto-filter department.`;
+            resultBox.style.display = 'block';
+            logAuditTrail(`AI Triage analyzed symptom '${query}' -> Recommended ${matchedDept}`);
+
+            // Auto-select department filter
+            const deptSelect = document.getElementById('deptFilter');
+            for (let option of deptSelect.options) {
+                if (option.value.toLowerCase() === matchedDept.toLowerCase()) {
+                    deptSelect.value = option.value;
+                    onDepartmentOrBranchChange();
+                    break;
+                }
+            }
+        }
 
         function getActiveSchedule(doc) { 
             const today = new Date(); 
@@ -1129,21 +1288,19 @@
             
             const entries = callDayRaw.split(/[,&]/).map(d => d.trim().toLowerCase());
             
-            // 1. Check if it matches the weekday name
             if (targetDayName && entries.includes(targetDayName.toLowerCase())) {
                 return true;
             }
 
-            // 2. If a specific date is provided, check if the JSON entries match specific date formats across any month/year
             if (targetDateString) {
                 const dateObj = new Date(targetDateString);
-                const isoDate = targetDateString.toLowerCase(); // e.g. "2026-08-20"
+                const isoDate = targetDateString.toLowerCase(); 
                 const shortMonthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
                 const monthStr = shortMonthNames[dateObj.getMonth()];
                 const dayNum = dateObj.getDate();
                 
-                const format1 = `${monthStr} ${dayNum}`.toLowerCase(); // e.g. "aug 20"
-                const format2 = `${monthStr}-${dayNum}`.toLowerCase(); // e.g. "aug-20"
+                const format1 = `${monthStr} ${dayNum}`.toLowerCase(); 
+                const format2 = `${monthStr}-${dayNum}`.toLowerCase(); 
                 
                 for (let entry of entries) {
                     if (entry === isoDate || entry === format1 || entry === format2 || entry.includes(isoDate)) {
@@ -1378,6 +1535,68 @@
             } 
         } 
 
+        /* Interactive Monthly Rota Calendar Modal */
+        function openRotaCalendarModal() {
+            const content = document.getElementById('rotaCalendarContent');
+            const deptSelect = document.getElementById('deptFilter');
+            const branchSelect = document.getElementById('branchFilter');
+            const selDept = deptSelect.value;
+            const selBranch = branchSelect.value;
+
+            let filteredDocs = doctorData;
+            if (selDept) filteredDocs = filteredDocs.filter(d => d["Department"] === selDept);
+            if (selBranch) filteredDocs = filteredDocs.filter(d => d["Branch"] === selBranch);
+
+            let gridHTML = `<div class="rota-calendar-grid">`;
+            const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const fullDaysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            
+            const today = new Date();
+            for (let i = 0; i < 7; i++) {
+                const targetDate = new Date(today);
+                targetDate.setDate(today.getDate() + i);
+                const dayNameFull = fullDaysOfWeek[targetDate.getDay()];
+                const year = targetDate.getFullYear();
+                const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+                const day = String(targetDate.getDate()).padStart(2, '0');
+                const dateIsoStr = `${year}-${month}-${day}`;
+
+                const onCallCount = filteredDocs.filter(doc => checkIsOnCall(doc, dayNameFull, dateIsoStr)).length;
+
+                gridHTML += `
+                    <div class="rota-day-cell">
+                        <div class="rota-day-name">${daysOfWeek[targetDate.getDay()]}</div>
+                        <div class="rota-day-date">${targetDate.getDate()}</div>
+                        <span class="rota-count-badge">${onCallCount} on duty</span>
+                    </div>
+                `;
+            }
+            gridHTML += `</div>`;
+
+            let auditLogHTML = `<div style="margin-top: 20px;"><div class="section-heading">Activity Audit Trail (${activityAuditTrail.length} entries)</div><div style="background:#0b132b; border:1px solid #1e293b; border-radius:10px; padding:10px; max-height:120px; overflow-y:auto; font-size:12px; color:var(--text-secondary);">`;
+            if (activityAuditTrail.length === 0) {
+                auditLogHTML += `<div>No activities recorded yet.</div>`;
+            } else {
+                activityAuditTrail.forEach(log => {
+                    auditLogHTML += `<div style="margin-bottom:6px; border-bottom:1px solid #1e293b; padding-bottom:4px;"><span style="color:#60a5fa;">[${log.time}]</span> ${log.message}</div>`;
+                });
+            }
+            auditLogHTML += `</div></div>`;
+
+            content.innerHTML = gridHTML + auditLogHTML;
+            document.getElementById('rotaCalendarModal').classList.add('active');
+        }
+
+        function closeRotaCalendarModal() {
+            document.getElementById('rotaCalendarModal').classList.remove('active');
+        }
+
+        function closeRotaOnBg(event) {
+            if (event.target.id === 'rotaCalendarModal') {
+                closeRotaCalendarModal();
+            }
+        }
+
         function promptAdminPassword() { 
             document.getElementById('adminPasswordInput').value = ""; 
             document.getElementById('passwordModal').classList.add('active'); 
@@ -1403,8 +1622,10 @@
             const enteredPwd = document.getElementById('adminPasswordInput').value; 
             if (enteredPwd === ADMIN_SECRET_PASSWORD) { 
                 closePasswordModal(); 
+                logAuditTrail("Administrator successfully authenticated into Reschedule Panel.");
                 openAdminModal(); 
             } else { 
+                logAuditTrail("Failed administrator authentication attempt.");
                 alert("Incorrect office password."); 
             } 
         } 
@@ -1504,6 +1725,9 @@
                 "Special Timings": timings, 
                 "Special Note": note 
             }; 
+
+            const docName = doctorData[selectedAdminDoctorIndex]["Doctor Name"] || "Doctor";
+            logAuditTrail(`Saved update to queue for ${docName} (${fromDate} to ${toDate})`);
 
             updateQueueBadge(); 
             selectedAdminDoctorIndex = null; 
@@ -1644,6 +1868,8 @@
                 doctorData[idx]["Rescheduled By"] = rescheduledByName; 
                 doctorData[idx]["Rescheduled At"] = timestampNow; 
             }); 
+
+            logAuditTrail(`Master JSON downloaded and committed by ${rescheduledByName}`);
 
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doctorData, null, 4)); 
             const downloadAnchor = document.createElement('a'); 
