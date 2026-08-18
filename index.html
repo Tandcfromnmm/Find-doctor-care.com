@@ -1267,22 +1267,22 @@
         } 
 
         function getFormattedDateString(d) {
-            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
             const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const dayName = days[d.getDay()];
-            const dateNum = d.getDate();
+            const dayNum = d.getDate();
             const getOrdinal = (n) => {
                 const s = ["th", "st", "nd", "rd"];
                 const v = n % 100;
                 return n + (s[(v - 20) % 10] || s[v] || s[0]);
             };
-            return `${dayName} (${getOrdinal(dateNum)} ${months[d.getMonth()]})`;
+            return `on ${getOrdinal(dayNum)} ${months[d.getMonth()]}`;
         }
 
-        // Updated helper to calculate the relative call day text for a doctor matching the selected department and branch
-        function getDoctorNextCallDayText(doc) {
+        function getNextCallDayInfo(doc) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
+
+            let bestMatchDaysAhead = 999;
+            let bestText = "upcoming schedule";
 
             for (let i = 0; i < 7; i++) {
                 const targetDate = new Date(today);
@@ -1296,12 +1296,18 @@
                 const dateValue = `${year}-${month}-${day}`;
 
                 if (checkIsOnCall(doc, dayName, dateValue)) {
-                    if (i === 0) return "today";
-                    if (i === 1) return "tomorrow";
-                    return getFormattedDateString(targetDate);
+                    bestMatchDaysAhead = i;
+                    if (i === 0) {
+                        bestText = "today";
+                    } else if (i === 1) {
+                        bestText = "tomorrow";
+                    } else {
+                        bestText = getFormattedDateString(targetDate);
+                    }
+                    break;
                 }
             }
-            return "upcoming schedule";
+            return { daysAhead: bestMatchDaysAhead, text: bestText };
         }
 
         function updateCallDayDropdownOptions() {
@@ -1321,20 +1327,25 @@
 
             callDaySelect.disabled = false;
             
-            // Filter doctors matching selected department and branch
-            const filteredDoctors = doctorData.filter(doc => {
+            let filteredDoctors = doctorData.filter(doc => {
                 const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selDept.toLowerCase();
                 const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selBranch.toLowerCase();
                 return matchesDept && matchesBranch;
+            });
+
+            // Sort doctors chronologically by their next upcoming call day (today -> tomorrow -> future dates)
+            filteredDoctors.sort((a, b) => {
+                const infoA = getNextCallDayInfo(a);
+                const infoB = getNextCallDayInfo(b);
+                return infoA.daysAhead - infoB.daysAhead;
             });
 
             let optionsHTML = `<option value="" selected>Select Doctor / Call Day...</option>`;
 
             filteredDoctors.forEach(doc => {
                 const docName = doc["Doctor Name"] || "Doctor";
-                const callDayText = getDoctorNextCallDayText(doc);
-                // Option value can be tracked by doctor name or ID, text formatted as requested: "Dr. Name call day today/tomorrow/date"
-                optionsHTML += `<option value="${docName}">${docName} call day ${callDayText}</option>`;
+                const info = getNextCallDayInfo(doc);
+                optionsHTML += `<option value="${docName}">${docName} call day ${info.text}</option>`;
             });
 
             callDaySelect.innerHTML = optionsHTML;
@@ -1382,7 +1393,7 @@
 
             const selectedDept = deptSelect.value.toLowerCase(); 
             const selectedBranch = branchSelect.value.toLowerCase(); 
-            const selectedDoctorFilter = callDaySelect.value; // Now holds selected doctor's name from dropdown
+            const selectedDoctorFilter = callDaySelect.value; 
             const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
 
             const container = document.getElementById('resultsContainer'); 
@@ -1407,7 +1418,6 @@
                 }
             }); 
 
-            // If a specific doctor option is selected from the dropdown, filter specifically for that doctor
             if (selectedDoctorFilter && !callDaySelect.disabled) {
                 filtered = filtered.filter(doc => doc["Doctor Name"] === selectedDoctorFilter);
             }
