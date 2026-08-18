@@ -630,7 +630,7 @@
             <div id="suggestionsList" class="suggestions-list"></div> 
         </div> 
 
-        <!-- FILTER DROPDOWNS (Optional, independent defaults) --> 
+        <!-- FILTER DROPDOWNS --> 
         <div class="filters-container"> 
             <select id="deptFilter" onchange="applyFilters()"> 
                 <option value="" selected>Select Department</option> 
@@ -798,7 +798,7 @@
             <div id="previewContainerList" style="max-height: 280px; overflow-y: auto; margin-bottom: 16px;"> 
                 <!-- Rendered dynamically --> 
             </div> 
-            <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">Download Verifed Master File</button> 
+            <button class="admin-btn" onclick="confirmAndDownloadFromPreview()" style="margin-top: 0;">Download Verified Master File</button> 
         </div> 
     </div> 
 
@@ -852,7 +852,7 @@
         function initApp() { 
             renderStarredAccordion(); 
             populateFilterDropdowns(); 
-            // DO NOT auto-apply filters on init so results container stays clean/empty until user action.
+            applyFilters(); // Automatically render filtered results on load
         } 
 
         loadDoctorData(false); 
@@ -993,14 +993,6 @@
             const selectedDept = deptSelect.value.toLowerCase(); 
             const selectedBranch = branchSelect.value.toLowerCase(); 
             const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
-
-            const container = document.getElementById('resultsContainer');
-
-            // If nothing is searched and no filter is chosen, keep results container blank with placeholder text
-            if (query === "" && selectedDept === "" && selectedBranch === "") {
-                container.innerHTML = `<div class="no-results">Start typing a doctor's name or select filters to view doctors.</div>`;
-                return;
-            }
 
             const filtered = doctorData.filter(doc => { 
                 const matchesName = query === "" || (doc["Doctor Name"] && doc["Doctor Name"].toLowerCase().includes(query)) || Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
