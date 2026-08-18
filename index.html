@@ -835,8 +835,12 @@
                         doctorData = newJsonData;
                         checkBackendSync(); 
                         initApp();
-                    } else if (!isAutoRefresh) {
-                        initApp();
+                    } else {
+                        checkBackendSync();
+                        if (!isAutoRefresh && doctorData.length === 0) {
+                            doctorData = newJsonData;
+                            initApp();
+                        }
                     }
                 }) 
                 .catch(error => { 
@@ -852,7 +856,7 @@
         function initApp() { 
             renderStarredAccordion(); 
             populateFilterDropdowns(); 
-            applyFilters(); // Automatically render filtered results on load
+            applyFilters(); 
         } 
 
         loadDoctorData(false); 
@@ -993,6 +997,13 @@
             const selectedDept = deptSelect.value.toLowerCase(); 
             const selectedBranch = branchSelect.value.toLowerCase(); 
             const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
+
+            // Require an active search query or filter selection to show results cards
+            if (query === "" && selectedDept === "" && selectedBranch === "") { 
+                const container = document.getElementById('resultsContainer'); 
+                container.innerHTML = `<div class="no-results">Start typing a doctor's name or select filters to view doctors.</div>`; 
+                return; 
+            } 
 
             const filtered = doctorData.filter(doc => { 
                 const matchesName = query === "" || (doc["Doctor Name"] && doc["Doctor Name"].toLowerCase().includes(query)) || Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
@@ -1326,7 +1337,7 @@
                                 <button class="preview-btn-sm btn-del-sm" onclick="removeQueueItem(${idx})">Remove</button> 
                             </div> 
                         </div> 
-                        <div style="font-size: 13px; color: var(--text-secondary);"> 
+                        <div style="font-size: 13.5px; color: var(--text-secondary);"> 
                             <div><strong>Branch:</strong> ${doc["Branch"] || 'N/A'} | <strong>Dept:</strong> ${doc["Department"] || 'N/A'}</div> 
                             <div><strong>Date Range:</strong> ${dateRangeDisplay}</div> 
                             <div><strong>Timings:</strong> ${item["Special Timings"] || 'Regular'}</div> 
