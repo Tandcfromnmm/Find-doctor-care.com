@@ -174,38 +174,51 @@
             color: #60a5fa; 
         } 
 
-        /* High-Performance Hardware-Accelerated Draggable Floating Icon with Magnetic Snap anywhere */
-        .floating-symptom-btn {
+        /* Floating Action Group Container */
+        .floating-actions-container {
             position: fixed;
             bottom: 24px;
             left: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1500;
+        }
+
+        /* High-Performance Hardware-Accelerated Draggable Floating Icon with Magnetic Snap */
+        .floating-symptom-btn, .floating-near-btn {
             width: 56px;
             height: 56px;
-            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             border: none;
             border-radius: 50%;
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
-            cursor: grab;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            z-index: 1500;
             touch-action: none;
             user-select: none;
             will-change: transform;
             transform: translate3d(0, 0, 0);
             transition: box-shadow 0.2s ease;
         }
-        .floating-symptom-btn.snapping {
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+        .floating-symptom-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
         }
         .floating-symptom-btn:hover {
             box-shadow: 0 12px 30px rgba(16, 185, 129, 0.6);
         }
-        .floating-symptom-btn:active {
-            cursor: grabbing;
+        .floating-near-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        .floating-near-btn:hover {
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.6);
+        }
+        .floating-symptom-btn.snapping, .floating-near-btn.snapping {
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
         }
 
         /* Filters Container */ 
@@ -736,10 +749,15 @@
             </div>
         </div> 
 
-        <!-- Draggable Floating Symptom Triage Icon with Magnetic Snap anywhere -->
-        <button id="floating-symptom-btn" class="floating-symptom-btn" onclick="handleSymptomClick(event)" title="AI Symptom Triage">
-            🩺
-        </button>
+        <!-- Floating Actions Group (AI Triage & Find Near Care) -->
+        <div class="floating-actions-container">
+            <button id="floating-symptom-btn" class="floating-symptom-btn" onclick="handleSymptomClick(event)" title="AI Symptom Triage">
+                🩺
+            </button>
+            <button id="floating-near-btn" class="floating-near-btn" onclick="handleNearCareClick(event)" title="Find Near Care">
+                📍
+            </button>
+        </div>
 
         <div class="search-box-wrapper"> 
             <svg class="search-icon" viewBox="0 0 24 24"> 
@@ -863,6 +881,21 @@
                 <input type="text" id="symptomInput" placeholder="e.g. foot pain, knee swelling..." onkeydown="handleSymptomKey(event)">
                 <button class="admin-btn" onclick="checkSymptomTriage()" style="margin-top: 0;">Analyze & Filter Department</button>
                 <div id="symptomResult" style="font-size: 13.5px; color: #34d399; display: none; background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIND NEAR CARE MODAL -->
+    <div id="nearCareModal" class="modal-overlay" onclick="closeNearCareOnBg(event)">
+        <div class="modal-card" style="max-width: 450px;">
+            <button class="modal-close" onclick="closeNearCareModal()">✕</button>
+            <h2 class="modal-title">📍 Find Near Care</h2>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
+                Locate the nearest CARE Hospitals branch based on your current location.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="admin-btn" onclick="detectNearestBranch()" style="margin-top: 0;">Detect My Location & Find Branch</button>
+                <div id="nearCareResult" style="font-size: 13.5px; color: var(--text-main); display: none; background: rgba(59, 130, 246, 0.1); padding: 14px; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.3);"></div>
             </div>
         </div>
     </div>
@@ -1097,56 +1130,61 @@
 
         updateCountdownDisplay(); 
 
-        /* High-Performance Hardware-Accelerated Draggable & Magnetic Return Logic (Anywhere Snap) */
-        const icon = document.getElementById('floating-symptom-btn');
-        let isDragging = false;
-        let startX = 0, startY = 0;
-        let currentX = 0, currentY = 0;
-        let hasMoved = false;
+        /* High-Performance Hardware-Accelerated Draggable & Magnetic Return Logic (Anywhere Snap) for Floating Buttons */
+        function setupDraggable(buttonId) {
+            const icon = document.getElementById(buttonId);
+            let isDragging = false;
+            let startX = 0, startY = 0;
+            let currentX = 0, currentY = 0;
+            let hasMoved = false;
 
-        icon.addEventListener('pointerdown', (e) => {
-            isDragging = true;
-            hasMoved = false;
-            icon.classList.remove('snapping');
-            icon.setPointerCapture(e.pointerId);
+            icon.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                hasMoved = false;
+                icon.classList.remove('snapping');
+                icon.setPointerCapture(e.pointerId);
 
-            startX = e.clientX - currentX;
-            startY = e.clientY - currentY;
-        });
+                startX = e.clientX - currentX;
+                startY = e.clientY - currentY;
+            });
 
-        icon.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
-            
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
+            icon.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
 
-            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-                hasMoved = true;
-            }
+                if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+                    hasMoved = true;
+                }
 
-            currentX = dx;
-            currentY = dy;
+                currentX = dx;
+                currentY = dy;
 
-            // Hardware-accelerated GPU translation
-            icon.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-        });
+                icon.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+            });
 
-        icon.addEventListener('pointerup', (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            try { icon.releasePointerCapture(e.pointerId); } catch(err) {}
+            icon.addEventListener('pointerup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                try { icon.releasePointerCapture(e.pointerId); } catch(err) {}
 
-            // Magnetic Return Snap to original position from anywhere
-            icon.classList.add('snapping');
-            currentX = 0;
-            currentY = 0;
-            icon.style.transform = `translate3d(0px, 0px, 0)`;
-        });
+                icon.classList.add('snapping');
+                currentX = 0;
+                currentY = 0;
+                icon.style.transform = `translate3d(0px, 0px, 0)`;
+            });
+        }
+
+        setupDraggable('floating-symptom-btn');
+        setupDraggable('floating-near-btn');
 
         function handleSymptomClick(e) {
-            if (!hasMoved) {
-                openSymptomModal();
-            }
+            openSymptomModal();
+        }
+
+        function handleNearCareClick(e) {
+            openNearCareModal();
         }
 
         /* AI Symptom Triage Modal Controls & Logic */
@@ -1223,6 +1261,76 @@
             setTimeout(() => {
                 closeSymptomModal();
             }, 1200);
+        }
+
+        /* Find Near Care Modal Controls & Logic */
+        function openNearCareModal() {
+            document.getElementById('nearCareResult').style.display = 'none';
+            document.getElementById('nearCareModal').classList.add('active');
+        }
+
+        function closeNearCareModal() {
+            document.getElementById('nearCareModal').classList.remove('active');
+        }
+
+        function closeNearCareOnBg(event) {
+            if (event.target.id === 'nearCareModal') {
+                closeNearCareModal();
+            }
+        }
+
+        function detectNearestBranch() {
+            const resultBox = document.getElementById('nearCareResult');
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = "Detecting your location...";
+
+            if (!navigator.geolocation) {
+                resultBox.innerHTML = "Geolocation is not supported by your browser.";
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    // Mock branches with coordinates (e.g., Hyderabad branches)
+                    const branches = [
+                        { name: "Banjara Hills", lat: 17.4156, lon: 78.4347 },
+                        { name: "Hitech City", lat: 17.4483, lon: 78.3915 }
+                    ];
+
+                    const userLat = position.coords.latitude;
+                    const userLon = position.coords.longitude;
+
+                    let closestBranch = branches[0];
+                    let minDistance = Infinity;
+
+                    branches.forEach(b => {
+                        const dist = Math.sqrt(Math.pow(b.lat - userLat, 2) + Math.pow(b.lon - userLon, 2));
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            closestBranch = b;
+                        }
+                    });
+
+                    resultBox.innerHTML = `Nearest Hospital Branch: <strong>CARE Hospitals, ${closestBranch.name}</strong>. Applying branch filter...`;
+                    logAuditTrail(`Find Near Care located closest branch: ${closestBranch.name}`);
+
+                    const branchSelect = document.getElementById('branchFilter');
+                    for (let option of branchSelect.options) {
+                        if (option.value.toLowerCase() === closestBranch.name.toLowerCase()) {
+                            branchSelect.value = option.value;
+                            onDepartmentOrBranchChange();
+                            break;
+                        }
+                    }
+
+                    setTimeout(() => {
+                        closeNearCareModal();
+                    }, 1500);
+                },
+                (error) => {
+                    resultBox.innerHTML = "Unable to retrieve your location. Please select a branch manually from the dropdown.";
+                }
+            );
         }
 
         function getActiveSchedule(doc) { 
@@ -1371,7 +1479,6 @@
                 return matchesDept && matchesBranch;
             });
 
-            // Sort doctors chronologically by their next upcoming call day (today -> tomorrow -> future dates)
             filteredDoctors.sort((a, b) => {
                 const infoA = getNextCallDayInfo(a);
                 const infoB = getNextCallDayInfo(b);
