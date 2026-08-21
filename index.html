@@ -79,41 +79,11 @@
             background: rgba(59, 130, 246, 0.3); 
             color: #ffffff; 
         } 
-
-        /* Search & Find Near Care Row Layout */
-        .search-action-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 14px;
-        }
+        /* Search Bar Style */ 
         .search-box-wrapper { 
             position: relative; 
-            flex: 1; 
+            margin-bottom: 14px; 
         } 
-        /* Find Near Care Button */
-        .find-near-care-btn {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            border: none;
-            padding: 0 16px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: var(--radius);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-            flex-shrink: 0;
-        }
-        .find-near-care-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
-        }
-
         input[type="text"], input[type="date"], select, input[type="password"] { 
             width: 100%; 
             padding: 14px 16px; 
@@ -204,7 +174,7 @@
             color: #60a5fa; 
         } 
 
-        /* High-Performance Hardware-Accelerated Draggable Floating Icon with Magnetic Snap anywhere */
+        /* High-Performance Hardware-Accelerated Draggable Floating Icons */
         .floating-symptom-btn {
             position: fixed;
             bottom: 24px;
@@ -235,6 +205,40 @@
             box-shadow: 0 12px 30px rgba(16, 185, 129, 0.6);
         }
         .floating-symptom-btn:active {
+            cursor: grabbing;
+        }
+
+        /* Floating Find Near Care Button (Positioned Right Above Triage Icon) */
+        .floating-nearcare-btn {
+            position: fixed;
+            bottom: 92px;
+            left: 24px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1500;
+            touch-action: none;
+            user-select: none;
+            will-change: transform;
+            transform: translate3d(0, 0, 0);
+            transition: box-shadow 0.2s ease;
+        }
+        .floating-nearcare-btn.snapping {
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+        }
+        .floating-nearcare-btn:hover {
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.6);
+        }
+        .floating-nearcare-btn:active {
             cursor: grabbing;
         }
 
@@ -771,19 +775,18 @@
             🩺
         </button>
 
-        <!-- Search Bar and Find Near Care Option -->
-        <div class="search-action-row">
-            <div class="search-box-wrapper"> 
-                <svg class="search-icon" viewBox="0 0 24 24"> 
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/> 
-                </svg> 
-                <input type="text" id="searchInput" placeholder="Search doctor name..." enterkeyhint="search" oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off"> 
-                <div id="searchSpinner" class="apple-spinner"><div></div></div> 
-                <div id="suggestionsList" class="suggestions-list"></div> 
-            </div>
-            <button class="find-near-care-btn" onclick="handleFindNearCare()" title="Find nearest CARE hospital branch">
-                📍 Find Near Care
-            </button>
+        <!-- Draggable Floating Find Near Care Icon with Magnetic Snap anywhere -->
+        <button id="floating-nearcare-btn" class="floating-nearcare-btn" onclick="handleNearCareClick(event)" title="Find Near Care">
+            📍
+        </button>
+
+        <div class="search-box-wrapper"> 
+            <svg class="search-icon" viewBox="0 0 24 24"> 
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/> 
+            </svg> 
+            <input type="text" id="searchInput" placeholder="Search doctor name..." enterkeyhint="search" oninput="handleSearchInput()" onkeydown="handleKeyDown(event)" autocomplete="off"> 
+            <div id="searchSpinner" class="apple-spinner"><div></div></div> 
+            <div id="suggestionsList" class="suggestions-list"></div> 
         </div> 
 
         <!-- FILTER DROPDOWNS --> 
@@ -899,6 +902,22 @@
                 <input type="text" id="symptomInput" placeholder="e.g. foot pain, knee swelling..." onkeydown="handleSymptomKey(event)">
                 <button class="admin-btn" onclick="checkSymptomTriage()" style="margin-top: 0;">Analyze & Filter Department</button>
                 <div id="symptomResult" style="font-size: 13.5px; color: #34d399; display: none; background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIND NEAR CARE HOSPITAL MODAL -->
+    <div id="nearCareModal" class="modal-overlay" onclick="closeNearCareOnBg(event)">
+        <div class="modal-card" style="max-width: 450px;">
+            <button class="modal-close" onclick="closeNearCareModal()">✕</button>
+            <h2 class="modal-title">📍 Find Near Care</h2>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
+                Enter your location or area (e.g. Banjara Hills, HITEC City, Gachibowli, Malakpet) to find the closest CARE facility.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <input type="text" id="nearCareInput" placeholder="e.g. Banjara Hills, Jubilee Hills..." onkeydown="handleNearCareKey(event)">
+                <button class="admin-btn" onclick="locateNearestCareBranch()" style="margin-top: 0;">Find Nearest Branch</button>
+                <div id="nearCareResult" style="font-size: 13.5px; color: #60a5fa; display: none; background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);"></div>
             </div>
         </div>
     </div>
@@ -1133,106 +1152,82 @@
 
         updateCountdownDisplay(); 
 
-        /* Find Near Care Geolocation Logic */
-        function handleFindNearCare() {
-            if (!navigator.geolocation) {
-                alert("Geolocation is not supported by your browser");
-                return;
-            }
+        /* High-Performance Hardware-Accelerated Draggable & Magnetic Return Logic for Triage Icon */
+        const symptomIcon = document.getElementById('floating-symptom-btn');
+        let isDraggingSymptom = false;
+        let startXSym = 0, startYSym = 0;
+        let currentXSym = 0, currentYSym = 0;
+        let hasMovedSym = false;
 
-            const branchSelect = document.getElementById('branchFilter');
-            
-            // Approximate coordinates for CARE Hospitals branches (Hyderabad example reference)
-            const hospitalBranches = [
-                { name: "Banjara Hills", lat: 17.4156, lon: 78.4355 },
-                { name: "Hitech City", lat: 17.4483, lon: 78.3752 },
-                { name: "Musheerabad", lat: 17.4085, lon: 78.5022 },
-                { name: "Nampally", lat: 17.3944, lon: 78.4738 },
-                { name: "Malakpet", lat: 17.3753, lon: 78.5085 },
-                { name: "Tolichowki", lat: 17.4042, lon: 78.4124 }
-            ];
-
-            navigator.geolocation.getCurrentPosition((position) => {
-                const userLat = position.coords.latitude;
-                const userLon = position.coords.longitude;
-
-                let nearestBranch = hospitalBranches[0];
-                let minDistance = Infinity;
-
-                hospitalBranches.forEach(branch => {
-                    // Haversine distance formula approximation
-                    const dist = Math.sqrt(Math.pow(branch.lat - userLat, 2) + Math.pow(branch.lon - userLon, 2));
-                    if (dist < minDistance) {
-                        minDistance = dist;
-                        nearestBranch = branch;
-                    }
-                });
-
-                // Set branch dropdown to nearest branch
-                for (let option of branchSelect.options) {
-                    if (option.value.toLowerCase() === nearestBranch.name.toLowerCase()) {
-                        branchSelect.value = option.value;
-                        onDepartmentOrBranchChange();
-                        alert(`Nearest CARE Hospital branch found: ${nearestBranch.name}`);
-                        return;
-                    }
-                }
-                alert(`Nearest branch is ${nearestBranch.name}, but it wasn't found in active filters.`);
-            }, () => {
-                alert("Unable to retrieve your location. Please check your device permission settings.");
-            });
-        }
-
-        /* High-Performance Hardware-Accelerated Draggable & Magnetic Return Logic (Anywhere Snap) */
-        const icon = document.getElementById('floating-symptom-btn');
-        let isDragging = false;
-        let startX = 0, startY = 0;
-        let currentX = 0, currentY = 0;
-        let hasMoved = false;
-
-        icon.addEventListener('pointerdown', (e) => {
-            isDragging = true;
-            hasMoved = false;
-            icon.classList.remove('snapping');
-            icon.setPointerCapture(e.pointerId);
-
-            startX = e.clientX - currentX;
-            startY = e.clientY - currentY;
+        symptomIcon.addEventListener('pointerdown', (e) => {
+            isDraggingSymptom = true;
+            hasMovedSym = false;
+            symptomIcon.classList.remove('snapping');
+            symptomIcon.setPointerCapture(e.pointerId);
+            startXSym = e.clientX - currentXSym;
+            startYSym = e.clientY - currentYSym;
         });
 
-        icon.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
-            
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-
-            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-                hasMoved = true;
-            }
-
-            currentX = dx;
-            currentY = dy;
-
-            // Hardware-accelerated GPU translation
-            icon.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+        symptomIcon.addEventListener('pointermove', (e) => {
+            if (!isDraggingSymptom) return;
+            const dx = e.clientX - startXSym;
+            const dy = e.clientY - startYSym;
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMovedSym = true;
+            currentXSym = dx;
+            currentYSym = dy;
+            symptomIcon.style.transform = `translate3d(${currentXSym}px, ${currentYSym}px, 0)`;
         });
 
-        icon.addEventListener('pointerup', (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            try { icon.releasePointerCapture(e.pointerId); } catch(err) {}
-
-            // Magnetic Return Snap to original position from anywhere
-            icon.classList.add('snapping');
-            currentX = 0;
-            currentY = 0;
-            icon.style.transform = `translate3d(0px, 0px, 0)`;
+        symptomIcon.addEventListener('pointerup', (e) => {
+            if (!isDraggingSymptom) return;
+            isDraggingSymptom = false;
+            try { symptomIcon.releasePointerCapture(e.pointerId); } catch(err) {}
+            symptomIcon.classList.add('snapping');
+            currentXSym = 0; currentYSym = 0;
+            symptomIcon.style.transform = `translate3d(0px, 0px, 0)`;
         });
 
         function handleSymptomClick(e) {
-            if (!hasMoved) {
-                openSymptomModal();
-            }
+            if (!hasMovedSym) openSymptomModal();
+        }
+
+        /* High-Performance Hardware-Accelerated Draggable & Magnetic Return Logic for Near Care Icon */
+        const nearCareIcon = document.getElementById('floating-nearcare-btn');
+        let isDraggingNear = false;
+        let startXNear = 0, startYNear = 0;
+        let currentXNear = 0, currentYNear = 0;
+        let hasMovedNear = false;
+
+        nearCareIcon.addEventListener('pointerdown', (e) => {
+            isDraggingNear = true;
+            hasMovedNear = false;
+            nearCareIcon.classList.remove('snapping');
+            nearCareIcon.setPointerCapture(e.pointerId);
+            startXNear = e.clientX - currentXNear;
+            startYNear = e.clientY - currentYNear;
+        });
+
+        nearCareIcon.addEventListener('pointermove', (e) => {
+            if (!isDraggingNear) return;
+            const dx = e.clientX - startXNear;
+            const dy = e.clientY - startYNear;
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMovedNear = true;
+            currentXNear = dx;
+            currentYNear = dy;
+            nearCareIcon.style.transform = `translate3d(${currentXNear}px, ${currentYNear}px, 0)`;
+        });
+
+        nearCareIcon.addEventListener('pointerup', (e) => {
+            if (!isDraggingNear) return;
+            isDraggingNear = false;
+            try { nearCareIcon.releasePointerCapture(e.pointerId); } catch(err) {}
+            nearCareIcon.classList.add('snapping');
+            currentXNear = 0; currentYNear = 0;
+            nearCareIcon.style.transform = `translate3d(0px, 0px, 0)`;
+        });
+
+        function handleNearCareClick(e) {
+            if (!hasMovedNear) openNearCareModal();
         }
 
         /* AI Symptom Triage Modal Controls & Logic */
@@ -1247,9 +1242,7 @@
         }
 
         function closeSymptomOnBg(event) {
-            if (event.target.id === 'symptomModal') {
-                closeSymptomModal();
-            }
+            if (event.target.id === 'symptomModal') closeSymptomModal();
         }
 
         function handleSymptomKey(event) {
@@ -1274,14 +1267,11 @@
                 { dept: "Neurosurgery", keywords: ["brain tumor", "severe head injury", "aneurysm", "hydrocephalus"] },
                 { dept: "Spine Surgery", keywords: ["back pain", "slipped disc", "sciatica", "spinal injury", "neck pain", "disc herniation"] },
                 { dept: "Orthopedics", keywords: ["foot", "bone", "joint", "knee", "fracture", "spine", "ortho", "ankle", "toe", "heel", "arthritis"] },
-                { dept: "Gastroenterology", keywords: ["stomach", "abdomen", "digestion", "liver", "jaundice", "ibs", "ulcer", "acidity", "diarrhea", "constipation", "aids"] },
-                { dept: "Surgical Gastroenterology", keywords: ["severe gallstones", "complex liver resection", "pancreatic surgery", "intestinal obstruction"] },
+                { dept: "Gastroenterology", keywords: ["stomach", "abdomen", "digestion", "liver", "jaundice", "ibs", "ulcer", "acidity", "diarrhea", "constipation"] },
                 { dept: "Pulmonology", keywords: ["cough", "asthma", "breathing difficulty", "shortness of breath", "lung", "chest infection", "wheezing", "tuberculosis"] },
                 { dept: "Oncology", keywords: ["cancer", "tumor", "chemotherapy", "malignancy", "growth", "lump"] },
-                { dept: "Hematology", keywords: ["blood disorder", "anemia", "leukemia", "bleeding disorder", "low platelets", "hemophilia"] },
                 { dept: "Endocrinology", keywords: ["diabetes", "thyroid", "hormonal imbalance", "metabolic", "insulin", "weight gain", "weight loss", "pcos"] },
                 { dept: "General Surgery", keywords: ["hernia", "appendix", "gallstones", "minor cuts", "abscess", "tissue lumps", "piles", "fistula"] },
-                { dept: "Vascular Surgery", keywords: ["varicose veins", "blocked blood vessels", "dvt", "deep vein thrombosis", "peripheral artery", "circulation"] },
                 { dept: "Pediatrics", keywords: ["child", "baby", "infant", "pediatric", "newborn", "kid"] }
             ];
 
@@ -1306,9 +1296,70 @@
                 }
             }
 
-            setTimeout(() => {
-                closeSymptomModal();
-            }, 1200);
+            setTimeout(() => { closeSymptomModal(); }, 1200);
+        }
+
+        /* Find Near Care Modal Controls & Logic */
+        function openNearCareModal() {
+            document.getElementById('nearCareInput').value = "";
+            document.getElementById('nearCareResult').style.display = 'none';
+            document.getElementById('nearCareModal').classList.add('active');
+        }
+
+        function closeNearCareModal() {
+            document.getElementById('nearCareModal').classList.remove('active');
+        }
+
+        function closeNearCareOnBg(event) {
+            if (event.target.id === 'nearCareModal') closeNearCareModal();
+        }
+
+        function handleNearCareKey(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                locateNearestCareBranch();
+            }
+        }
+
+        function locateNearestCareBranch() {
+            const locQuery = document.getElementById('nearCareInput').value.toLowerCase().trim();
+            const resultBox = document.getElementById('nearCareResult');
+            if (!locQuery) {
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            // Map standard locations to CARE branches present in the system
+            const branchMapping = [
+                { keywords: ["banjara", "jubilee", "panjagutta", "ameerpet", "somajiguda", "road no"], branch: "Banjara Hills" },
+                { keywords: ["hitec", "gachibowli", "kondapur", "madhapur", "financial district", "raidurg"], branch: "Hitech City" },
+                { keywords: ["malakpet", "chaderghat", "dilsukhnagar", "kothapet", "santoshnagar"], branch: "Malakpet" },
+                { keywords: ["nampally", "abids", "lakdi", "begum bazar", "koti"], branch: "Nampally" },
+                { keywords: ["musheerabad", "bakaram", "secunderabad", "ashok nagar", "chikkadpally"], branch: "Musheerabad" }
+            ];
+
+            let matchedBranch = "Banjara Hills"; // Default flagship branch
+            for (let map of branchMapping) {
+                if (map.keywords.some(kw => locQuery.includes(kw))) {
+                    matchedBranch = map.branch;
+                    break;
+                }
+            }
+
+            resultBox.innerHTML = `Nearest Facility Found: <strong>CARE Hospitals, ${matchedBranch}</strong>. Applying location filter...`;
+            resultBox.style.display = 'block';
+            logAuditTrail(`Find Near Care located branch '${matchedBranch}' for input '${locQuery}'`);
+
+            const branchSelect = document.getElementById('branchFilter');
+            for (let option of branchSelect.options) {
+                if (option.value.toLowerCase() === matchedBranch.toLowerCase()) {
+                    branchSelect.value = option.value;
+                    onDepartmentOrBranchChange();
+                    break;
+                }
+            }
+
+            setTimeout(() => { closeNearCareModal(); }, 1300);
         }
 
         function getActiveSchedule(doc) { 
@@ -1421,13 +1472,9 @@
 
                 if (checkIsOnCall(doc, dayName, dateValue)) {
                     bestMatchDaysAhead = i;
-                    if (i === 0) {
-                        bestText = "today";
-                    } else if (i === 1) {
-                        bestText = "tomorrow";
-                    } else {
-                        bestText = getFormattedDateString(targetDate);
-                    }
+                    if (i === 0) bestText = "today";
+                    else if (i === 1) bestText = "tomorrow";
+                    else bestText = getFormattedDateString(targetDate);
                     break;
                 }
             }
@@ -1450,7 +1497,6 @@
             }
 
             callDaySelect.disabled = false;
-            
             let filteredDoctors = doctorData.filter(doc => {
                 const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selDept.toLowerCase();
                 const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selBranch.toLowerCase();
@@ -1464,7 +1510,6 @@
             });
 
             let optionsHTML = `<option value="" selected>Select Doctor / Call Day...</option>`;
-
             filteredDoctors.forEach(doc => {
                 const docName = doc["Doctor Name"] || "Doctor";
                 const info = getNextCallDayInfo(doc);
@@ -1484,10 +1529,7 @@
             if (!callDayRaw) return false;
             
             const entries = callDayRaw.split(/[,&]/).map(d => d.trim().toLowerCase());
-            
-            if (targetDayName && entries.includes(targetDayName.toLowerCase())) {
-                return true;
-            }
+            if (targetDayName && entries.includes(targetDayName.toLowerCase())) return true;
 
             if (targetDateString) {
                 const dateObj = new Date(targetDateString);
@@ -1495,17 +1537,13 @@
                 const shortMonthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
                 const monthStr = shortMonthNames[dateObj.getMonth()];
                 const dayNum = dateObj.getDate();
-                
                 const format1 = `${monthStr} ${dayNum}`.toLowerCase(); 
                 const format2 = `${monthStr}-${dayNum}`.toLowerCase(); 
                 
                 for (let entry of entries) {
-                    if (entry === isoDate || entry === format1 || entry === format2 || entry.includes(isoDate)) {
-                        return true;
-                    }
+                    if (entry === isoDate || entry === format1 || entry === format2 || entry.includes(isoDate)) return true;
                 }
             }
-
             return false;
         }
 
@@ -1518,7 +1556,6 @@
             const selectedBranch = branchSelect.value.toLowerCase(); 
             const selectedDoctorFilter = callDaySelect.value; 
             const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
-
             const container = document.getElementById('resultsContainer'); 
 
             if (query === "" && (selectedDept === "" || selectedBranch === "")) { 
@@ -1583,8 +1620,7 @@
                 return; 
             } 
 
-            const topMatches = doctors.slice(0, 5); 
-            topMatches.forEach(doc => { 
+            doctors.slice(0, 5).forEach(doc => { 
                 const item = document.createElement('div'); 
                 item.className = 'suggestion-item'; 
                 item.innerHTML = `<strong>${doc["Doctor Name"]}</strong> <span style="color:var(--text-secondary); font-size:13px;">(${doc["Department"]} - ${doc["Branch"]})</span>`; 
@@ -1628,17 +1664,14 @@
                 card.onclick = () => openModal(doc); 
 
                 const schedule = getActiveSchedule(doc); 
-
                 let creditsValue = doc["Credit Accepted"] || doc["Credits"] || "None"; 
                 let creditPillsHTML = ''; 
                 if (creditsValue && creditsValue !== "None") { 
-                    let creditArray = creditsValue.split(',').map(item => item.trim()); 
-                    creditPillsHTML = creditArray.map(c => `<span class="credit-pill">✓ ${c}</span>`).join(''); 
+                    creditPillsHTML = creditsValue.split(',').map(c => `<span class="credit-pill">✓ ${c.trim()}</span>`).join(''); 
                 } 
 
                 let callDayValue = doc["Call Day"] || doc["Call Days"] || ""; 
                 let callDayHTML = callDayValue ? `<span class="callday-pill">Call Days: ${callDayValue}</span>` : ''; 
-
                 let ageValue = doc["Age Criteria"] || doc["Age Limit"] || ""; 
                 let ageHTML = ageValue ? `<span class="age-pill">Age: ${ageValue}</span>` : ''; 
 
@@ -1662,11 +1695,7 @@
                         <span>Fee: <strong>${doc["OP Fee"] || 'N/A'}</strong></span> 
                         <span style="max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Timing: ${schedule.timings}</span> 
                     </div> 
-                    ${schedule.note ? ` 
-                        <div class="update-banner"> 
-                            ⚠️ <strong>Notice:</strong> ${schedule.note} 
-                        </div> 
-                    ` : ''} 
+                    ${schedule.note ? `<div class="update-banner">⚠️ <strong>Notice:</strong> ${schedule.note}</div>` : ''} 
                 `; 
                 container.appendChild(card); 
             }); 
@@ -1686,15 +1715,10 @@
 
             const updateContainer = document.getElementById('modalUpdateContainer'); 
             if (schedule.note) { 
-                updateContainer.innerHTML = ` 
-                    <div class="update-banner" style="margin-top: 14px;"> 
-                        ⚠️ <strong>Notice:</strong> ${schedule.note} 
-                    </div> 
-                `; 
+                updateContainer.innerHTML = `<div class="update-banner" style="margin-top: 14px;">⚠️ <strong>Notice:</strong> ${schedule.note}</div>`; 
             } else { 
                 updateContainer.innerHTML = ''; 
             } 
-
             document.getElementById('doctorModal').classList.add('active'); 
         } 
 
@@ -1703,9 +1727,7 @@
         } 
 
         function closeModalOnBg(event) { 
-            if (event.target.id === 'doctorModal') { 
-                closeModal(); 
-            } 
+            if (event.target.id === 'doctorModal') closeModal(); 
         } 
 
         function promptAdminPassword() { 
@@ -1718,15 +1740,11 @@
         } 
 
         function closePasswordOnBg(event) { 
-            if (event.target.id === 'passwordModal') { 
-                closePasswordModal(); 
-            } 
+            if (event.target.id === 'passwordModal') closePasswordModal(); 
         } 
 
         function handlePasswordKey(event) { 
-            if (event.key === 'Enter') { 
-                verifyAdminPassword(); 
-            } 
+            if (event.key === 'Enter') verifyAdminPassword(); 
         } 
 
         function verifyAdminPassword() { 
@@ -1761,17 +1779,14 @@
         } 
 
         function closeAdminOnBg(event) { 
-            if (event.target.id === 'adminModal') { 
-                closeAdminModal(); 
-            } 
+            if (event.target.id === 'adminModal') closeAdminModal(); 
         } 
 
         function toggleChangeCallDaySection() {
             const toggleVal = document.getElementById('adminChangeCallDayToggle').value;
             const container = document.getElementById('newCallDayCalendarContainer');
-            if (toggleVal === "Yes") {
-                container.style.display = 'block';
-            } else {
+            if (toggleVal === "Yes") container.style.display = 'block';
+            else {
                 container.style.display = 'none';
                 document.getElementById('adminNewCallDayDate').value = "";
             }
@@ -1789,9 +1804,7 @@
             const matched = []; 
             doctorData.forEach((doc, idx) => { 
                 const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
-                if (docName.includes(query)) { 
-                    matched.push({ doc, idx }); 
-                } 
+                if (docName.includes(query)) matched.push({ doc, idx }); 
             }); 
 
             suggestionsBox.innerHTML = ''; 
@@ -1884,16 +1897,13 @@
             document.getElementById('adminChangeCallDayToggle').value = "No";
             document.getElementById('adminNewCallDayDate').value = "";
             toggleChangeCallDaySection();
-
             alert("Update with date range saved to queue automatically!"); 
         } 
 
         function updateQueueBadge() { 
             const count = Object.keys(pendingQueueUpdates).length; 
             const badge = document.getElementById('queueCounterBadge'); 
-            if (badge) { 
-                badge.textContent = `Queue: ${count} update(s) saved`; 
-            } 
+            if (badge) badge.textContent = `Queue: ${count} update(s) saved`; 
         } 
 
         function openPreviewModal() { 
@@ -1907,7 +1917,6 @@
                 queueKeys.forEach(idx => { 
                     const item = pendingQueueUpdates[idx]; 
                     const doc = doctorData[idx] || {}; 
-
                     const dateRangeDisplay = item["Special Date From"] === item["Special Date To"] || !item["Special Date To"] 
                         ? (item["Special Date From"] || 'None') 
                         : `${item["Special Date From"]} to ${item["Special Date To"]}`; 
@@ -1939,7 +1948,6 @@
             document.getElementById('rescheduledByInput').value = ""; 
             document.getElementById('acknowledgeCheckbox').checked = false; 
             validatePreviewDownloadForm(); 
-
             document.getElementById('previewModal').classList.add('active'); 
         } 
 
@@ -1948,9 +1956,7 @@
         } 
 
         function closePreviewOnBg(event) { 
-            if (event.target.id === 'previewModal') { 
-                closePreviewModal(); 
-            } 
+            if (event.target.id === 'previewModal') closePreviewModal(); 
         } 
 
         function removeQueueItem(idx) { 
@@ -1981,7 +1987,6 @@
                 document.getElementById('adminNewCallDayDate').value = "";
             }
             toggleChangeCallDaySection();
-
             document.getElementById('adminModal').classList.add('active'); 
         } 
 
@@ -1999,19 +2004,13 @@
             const isChecked = document.getElementById('acknowledgeCheckbox').checked; 
             const downloadBtn = document.getElementById('downloadVerifiedBtn'); 
 
-            if (nameVal.length > 0 && isChecked) { 
-                downloadBtn.removeAttribute('disabled'); 
-            } else { 
-                downloadBtn.setAttribute('disabled', 'true'); 
-            } 
+            if (nameVal.length > 0 && isChecked) downloadBtn.removeAttribute('disabled'); 
+            else downloadBtn.setAttribute('disabled', 'true'); 
         } 
 
         function confirmAndDownloadFromPreview() { 
             const queueKeys = Object.keys(pendingQueueUpdates); 
-            if (queueKeys.length === 0) { 
-                alert("Queue is empty."); 
-                return; 
-            } 
+            if (queueKeys.length === 0) return; 
 
             const rescheduledByName = document.getElementById('rescheduledByInput').value.trim(); 
             const timestampNow = formatBackendDate(new Date()); 
@@ -2042,7 +2041,7 @@
             downloadAnchor.click(); 
             downloadAnchor.remove(); 
 
-            alert(`Master 'doctors.json' file successfully downloaded! Recorded under Rescheduled By: ${rescheduledByName}. Remember to upload it to the server before making other modifications.`); 
+            alert(`Master 'doctors.json' file successfully downloaded! Recorded under Rescheduled By: ${rescheduledByName}.`); 
             pendingQueueUpdates = {}; 
             updateQueueBadge(); 
             closePreviewModal(); 
