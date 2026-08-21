@@ -1,11 +1,10 @@
-
 <!DOCTYPE html> 
 <html lang="en"> 
 <head> 
     <meta charset="UTF-8"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Find Doctor - CARE Hospitals</title> 
-    <!-- Leaflet CSS for OpenStreetMap -->
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style> 
         :root { 
@@ -63,6 +62,7 @@
             display: flex;
             gap: 8px;
         }
+        /* Admin Quick Trigger Button */ 
         .admin-trigger-btn { 
             background: rgba(59, 130, 246, 0.15); 
             border: 1px solid rgba(59, 130, 246, 0.3); 
@@ -81,7 +81,7 @@
             background: rgba(59, 130, 246, 0.3); 
             color: #ffffff; 
         } 
-        /* Search Bar */ 
+        /* Search Bar Style */ 
         .search-box-wrapper { 
             position: relative; 
             margin-bottom: 14px; 
@@ -144,6 +144,7 @@
             0% { transform: rotate(0deg); } 
             100% { transform: rotate(360deg); } 
         } 
+        /* Suggestion Dropdown List */ 
         .suggestions-list { 
             position: absolute; 
             top: 100%; 
@@ -175,53 +176,75 @@
             color: #60a5fa; 
         } 
 
-        /* Floating Actions Container */
-        .floating-actions-container {
+        /* High-Performance Hardware-Accelerated Draggable Floating Icons */
+        .floating-symptom-btn {
             position: fixed;
             bottom: 24px;
             left: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 1500;
-        }
-
-        .floating-symptom-btn, .floating-near-btn {
             width: 56px;
             height: 56px;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             border: none;
             border-radius: 50%;
-            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            cursor: grab;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
+            z-index: 1500;
             touch-action: none;
             user-select: none;
             will-change: transform;
             transform: translate3d(0, 0, 0);
             transition: box-shadow 0.2s ease;
         }
-        .floating-symptom-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        .floating-symptom-btn.snapping {
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
         }
         .floating-symptom-btn:hover {
             box-shadow: 0 12px 30px rgba(16, 185, 129, 0.6);
         }
-        .floating-near-btn {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-        }
-        .floating-near-btn:hover {
-            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.6);
-        }
-        .floating-symptom-btn.snapping, .floating-near-btn.snapping {
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+        .floating-symptom-btn:active {
+            cursor: grabbing;
         }
 
-        /* Filters */ 
+        /* Floating Find Near Care Button (Positioned Right Above Triage Icon) */
+        .floating-nearcare-btn {
+            position: fixed;
+            bottom: 92px;
+            left: 24px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1500;
+            touch-action: none;
+            user-select: none;
+            will-change: transform;
+            transform: translate3d(0, 0, 0);
+            transition: box-shadow 0.2s ease;
+        }
+        .floating-nearcare-btn.snapping {
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+        }
+        .floating-nearcare-btn:hover {
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.6);
+        }
+        .floating-nearcare-btn:active {
+            cursor: grabbing;
+        }
+
+        /* Filters Container */ 
         .filters-container { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
@@ -231,6 +254,7 @@
         .filters-container-single { 
             margin-bottom: 24px; 
         } 
+        /* Dashboard Accordion Style for Starred Doctors */ 
         .accordion-wrapper { 
             background: var(--card-bg); 
             border: 1px solid #2d3748; 
@@ -304,6 +328,7 @@
         .starred-row-item:hover { 
             background: rgba(59, 130, 246, 0.1); 
         } 
+        /* Results Container Style */ 
         .results-container { 
             display: grid; 
             grid-template-columns: 1fr; 
@@ -446,7 +471,6 @@
             font-size: 15px; 
             padding: 20px; 
         } 
-
         /* FOOTER */ 
         .site-footer { 
             width: 100%; 
@@ -530,8 +554,7 @@
             0% { background-position: 200% center; } 
             100% { background-position: -200% center; } 
         } 
-
-        /* Modals */ 
+        /* Modal Overlay */ 
         .modal-overlay { 
             position: fixed; 
             top: 0; 
@@ -588,7 +611,6 @@
             align-items: center; 
             justify-content: center; 
             color: var(--text-secondary); 
-            z-index: 10;
         } 
         .modal-title { 
             font-size: 20px; 
@@ -653,70 +675,147 @@
             background: #2d3748; 
             color: #ffffff; 
         } 
-        
-        /* Leaflet Map Styling */
-        #leafletMapContainer {
+        .queue-badge { 
+            background: rgba(16, 185, 129, 0.2); 
+            color: #34d399; 
+            font-size: 11px; 
+            font-weight: 600; 
+            padding: 2px 8px; 
+            border-radius: 10px; 
+            display: inline-block; 
+            margin-bottom: 8px; 
+        } 
+        .preview-item-card { 
+            background: #0b132b; 
+            border: 1px solid #1e293b; 
+            border-radius: 12px; 
+            padding: 14px; 
+            margin-bottom: 10px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+        } 
+        .preview-item-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        } 
+        .preview-doctor-name { 
+            font-weight: 600; 
+            font-size: 15px; 
+            color: var(--text-main); 
+        } 
+        .preview-actions { 
+            display: flex; 
+            gap: 8px; 
+        } 
+        .preview-btn-sm { 
+            padding: 4px 10px; 
+            font-size: 11.5px; 
+            font-weight: 600; 
+            border-radius: 6px; 
+            border: none; 
+            cursor: pointer; 
+        } 
+        .btn-edit-sm { 
+            background: rgba(59, 130, 246, 0.2); 
+            color: #60a5fa; 
+        } 
+        .btn-edit-sm:hover { 
+            background: rgba(59, 130, 246, 0.35); 
+        } 
+        .btn-del-sm { 
+            background: rgba(239, 68, 68, 0.2); 
+            color: #f87171; 
+        } 
+        .btn-del-sm:hover { 
+            background: rgba(239, 68, 68, 0.35); 
+        } 
+        /* Acknowledge Checkbox Layout */ 
+        .acknowledge-wrapper { 
+            background: #0b132b; 
+            border: 1px solid #1e293b; 
+            border-radius: 12px; 
+            padding: 14px; 
+            margin-top: 14px; 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 12px; 
+            cursor: pointer; 
+        } 
+        .acknowledge-wrapper input[type="checkbox"] { 
+            width: 18px; 
+            height: 18px; 
+            accent-color: var(--accent); 
+            margin-top: 2px; 
+            cursor: pointer; 
+        } 
+        .acknowledge-wrapper label { 
+            font-size: 13.5px; 
+            color: var(--text-secondary); 
+            line-height: 1.4; 
+            cursor: pointer; 
+        } 
+        /* Leaflet Map Customizations */
+        #map {
             width: 100%;
-            height: 180px;
+            height: 220px;
             border-radius: 12px;
-            margin-top: 10px;
             border: 1px solid #2d3748;
+            margin-bottom: 16px;
             z-index: 1;
         }
-
-        .location-card-item {
+        .branch-result-card {
             background: #0b132b;
             border: 1px solid #1e293b;
-            padding: 14px;
-            border-radius: 14px;
-            margin-bottom: 12px;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .branch-info-left {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            transition: border-color 0.2s ease;
+            gap: 4px;
         }
-        .location-card-item:hover {
-            border-color: var(--accent);
-        }
-        .location-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .location-name {
+        .branch-card-title {
+            font-weight: 600;
             font-size: 15px;
-            font-weight: 600;
-            color: #ffffff;
+            color: var(--text-main);
         }
-        .location-metrics-row {
-            display: flex;
-            gap: 12px;
-            font-size: 13px;
-        }
-        .metric-badge-km {
-            color: #34d399;
-            background: rgba(16, 185, 129, 0.15);
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-        .metric-badge-time {
+        .branch-maps-link {
+            font-size: 12.5px;
             color: #60a5fa;
-            background: rgba(59, 130, 246, 0.15);
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-        .gmap-link-btn {
-            display: inline-block;
-            font-size: 12px;
-            color: #fbbf24;
             text-decoration: none;
-            font-weight: 500;
-            margin-top: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
-        .gmap-link-btn:hover {
+        .branch-maps-link:hover {
             text-decoration: underline;
+        }
+        .branch-metrics-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .distance-pill {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+        .time-pill {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 8px;
         }
     </style> 
 </head> 
@@ -734,15 +833,15 @@
             </div>
         </div> 
 
-        <!-- Floating Actions Group (AI Triage & Find Near Care) -->
-        <div class="floating-actions-container">
-            <button id="floating-symptom-btn" class="floating-symptom-btn" onclick="handleSymptomClick(event)" title="AI Symptom Triage">
-                🩺
-            </button>
-            <button id="floating-near-btn" class="floating-near-btn" onclick="handleNearCareClick(event)" title="Find Near Care Locations">
-                📍
-            </button>
-        </div>
+        <!-- Draggable Floating Symptom Triage Icon with Magnetic Snap anywhere -->
+        <button id="floating-symptom-btn" class="floating-symptom-btn" onclick="handleSymptomClick(event)" title="AI Symptom Triage">
+            🩺
+        </button>
+
+        <!-- Draggable Floating Find Near Care Icon with Magnetic Snap anywhere -->
+        <button id="floating-nearcare-btn" class="floating-nearcare-btn" onclick="handleNearCareClick(event)" title="Find Near Care">
+            📍
+        </button>
 
         <div class="search-box-wrapper"> 
             <svg class="search-icon" viewBox="0 0 24 24"> 
@@ -870,34 +969,32 @@
         </div>
     </div>
 
-    <!-- FIND NEAR CARE MODAL WITH LEAFLET OPENSTREETMAP -->
+    <!-- FIND NEAR CARE HOSPITAL MODAL (WITH LEAFLET MAP) -->
     <div id="nearCareModal" class="modal-overlay" onclick="closeNearCareOnBg(event)">
         <div class="modal-card" style="max-width: 520px;">
             <button class="modal-close" onclick="closeNearCareModal()">✕</button>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; padding-right: 30px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 24px;">📍</span>
-                    <h2 class="modal-title" style="margin: 0;">All CARE Locations</h2>
-                </div>
-            </div>
-            <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
+            <h2 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+                <span style="color: #ef4444;">📍</span> All CARE Locations
+            </h2>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;">
                 Distance (km) and estimated travel times dynamically calculated across all CARE Hospitals locations.
             </p>
             
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <div style="display: flex; gap: 8px;">
-                    <input type="text" id="nearCareLocationInput" placeholder="Type starting area (e.g., Ameerpet, Gachibowli)" onkeydown="handleNearCareKey(event)" style="flex: 1;">
-                    <button class="admin-btn" onclick="searchNearCareHospitals()" style="margin-top: 0; width: auto; padding: 0 16px;">Search</button>
-                </div>
-                <button class="admin-secondary-btn" onclick="useCurrentDeviceLocation()" style="margin-top:0; font-size: 12.5px; display:flex; align-items:center; justify-content:center; gap:6px;">
-                    🎯 Use My Live Location (GPS)
-                </button>
-                
-                <div id="leafletMapContainer"></div>
-                
-                <div id="nearCareResultsContainer" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 4px;">
-                    <!-- Dynamically computed JSON locations rendered here -->
-                </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <input type="text" id="nearCareInput" placeholder="Type starting area (e.g., Ameerpet, Gachibowli...)" onkeydown="handleNearCareKey(event)" style="flex: 1;">
+                <button class="admin-btn" onclick="locateNearestCareBranch()" style="margin-top: 0; width: auto; padding: 0 20px;">Search</button>
+            </div>
+            
+            <button class="admin-secondary-btn" onclick="useLiveGpsLocation()" style="margin-top: 0; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <span style="color: #ef4444;">🎯</span> Use My Live Location (GPS)
+            </button>
+
+            <!-- Leaflet Map Container -->
+            <div id="map"></div>
+
+            <!-- Dynamic Branch Cards List -->
+            <div id="branchResultsList" style="display: flex; flex-direction: column; gap: 10px; max-height: 220px; overflow-y: auto;">
+                <!-- Populated dynamically -->
             </div>
         </div>
     </div>
@@ -917,13 +1014,13 @@
         </div> 
     </div> 
 
-    <!-- RESCHEDULE ADMIN MODAL --> 
+    <!-- OFFICE UPDATE ADMIN MODAL WITH AUTO-QUEUE & PREVIEW --> 
     <div id="adminModal" class="modal-overlay" onclick="closeAdminOnBg(event)"> 
         <div class="modal-card"> 
             <button class="modal-close" onclick="closeAdminModal()">✕</button> 
             <h2 class="modal-title">Reschedule Panel</h2> 
             <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
-                Update schedules for a single date or across a custom date range. 
+                Update schedules for a single date or across a custom date range (From Date & To Date). All fields below are mandatory to save an update. 
             </p> 
             <div style="display: flex; flex-direction: column; gap: 14px;"> 
                 <div style="position: relative;" id="adminSearchWrapper"> 
@@ -956,6 +1053,7 @@
                     <input type="text" id="adminSpecialNote" placeholder="e.g. OP Time / Doctor on leave"> 
                 </div> 
 
+                <!-- CHANGE CALL DAY TOGGLE & CALENDAR SECTION -->
                 <div style="background: #0b132b; border: 1px solid #1e293b; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <label style="font-size: 13px; font-weight: 600; color: var(--text-main);">Change Call Day:</label>
@@ -982,21 +1080,25 @@
         </div> 
     </div> 
 
-    <!-- PREVIEW & DOWNLOAD MODAL --> 
+    <!-- PREVIEW & DOWNLOAD AUTHOR MODAL --> 
     <div id="previewModal" class="modal-overlay" onclick="closePreviewOnBg(event)"> 
         <div class="modal-card"> 
             <button class="modal-close" onclick="closePreviewModal()">✕</button> 
             <h2 class="modal-title">Queue Preview & Verification</h2> 
             <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: -10px; margin-bottom: 16px;"> 
-                Review all queued modifications below before downloading. 
+                Review all queued modifications below. Provide your name and check the acknowledgment box before downloading. 
             </p> 
-            <div id="previewContainerList" style="max-height: 220px; overflow-y: auto; margin-bottom: 16px;"></div> 
-
-            <div style="margin-bottom: 12px;"> 
-                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Rescheduled By (Your Name):</label> 
-                <input type="text" id="rescheduledByInput" placeholder="Enter your full name..." oninput="validatePreviewDownloadForm()"> 
+            <div id="previewContainerList" style="max-height: 220px; overflow-y: auto; margin-bottom: 16px;"> 
+                <!-- Rendered dynamically --> 
             </div> 
 
+            <!-- Administrator Identification Field --> 
+            <div style="margin-bottom: 12px;"> 
+                <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Rescheduled By (Your Name):</label> 
+                <input type="text" id="rescheduledByInput" placeholder="Enter your full name or ID..." oninput="validatePreviewDownloadForm()"> 
+            </div> 
+
+            <!-- Acknowledgment Checkbox --> 
             <div class="acknowledge-wrapper"> 
                 <input type="checkbox" id="acknowledgeCheckbox" onchange="validatePreviewDownloadForm()"> 
                 <label for="acknowledgeCheckbox">The downloaded file will be uploaded to the server before committing any other modifications.</label> 
@@ -1006,114 +1108,80 @@
         </div> 
     </div> 
 
-    <!-- Leaflet OpenStreetMap JavaScript JS -->
+    <!-- Leaflet JS CDN -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
     <script> 
-        // Dynamic Hospital Locations JSON Database
-        const careLocationsData = [
-          {
-            "name": "Care Banjara IP",
-            "lat": 17.4125702,
-            "lon": 78.4502685,
-            "gmap": "https://www.google.com/maps/place/CARE+Hospitals,+Banjara+Hills+Hyderabad"
-          },
-          {
-            "name": "Care Banjara COPC",
-            "lat": 17.4142629,
-            "lon": 78.4464917,
-            "gmap": "https://www.google.com/maps/place/CARE+Hospitals+Outpatient+Centre,+Banjara+Hills"
-          },
-          {
-            "name": "Care Hitech",
-            "lat": 17.4305523,
-            "lon": 78.3722322,
-            "gmap": "https://www.google.com/maps/place/CARE+Hospitals,+HITEC+City"
-          },
-          {
-            "name": "Care Musheerabad",
-            "lat": 17.4154651,
-            "lon": 78.4978348,
-            "gmap": "https://www.google.com/maps/place/Guru+Nanak-+CARE+Hospitals+-+Musheerabad,+HYD"
-          },
-          {
-            "name": "Care Malakpet",
-            "lat": 17.3768915,
-            "lon": 78.4905862,
-            "gmap": "https://www.google.com/maps/place/CARE+Hospitals,+Malakpet"
-          },
-          {
-            "name": "Care Nampally",
-            "lat": 17.3857416,
-            "lon": 78.4741384,
-            "gmap": "https://www.google.com/maps/place/CARE+Hospitals+-+Nampally,+Hyderabad"
-          },
-          {
-            "name": "Care Ramnagar (Vizag)",
-            "lat": 17.7203227,
-            "lon": 83.3128185,
-            "gmap": "https://www.google.com/maps/place/CARE+Hospitals+-+Ram+Nagar,+Visakhapatnam"
-          },
-          {
-            "name": "Care Aarilova (Vizag)",
-            "lat": 17.7614443,
-            "lon": 83.3153646,
-            "gmap": "https://www.google.com/maps/place/CARE+Hospitals,+Health+City,+Arilova"
-          },
-          {
-            "name": "Care Bhubaneswar",
-            "lat": 20.3216144,
-            "lon": 85.8130766,
-            "gmap": "https://www.google.com/maps/place/CARE+Hospitals,+Bhubaneswar"
-          },
-          {
-            "name": "Care Indore",
-            "lat": 22.7322578,
-            "lon": 75.8893409,
-            "gmap": "https://www.google.com/maps/place/CARE+CHL+Hospitals,+Indore"
-          },
-          {
-            "name": "Care Raipur",
-            "lat": 21.2130464,
-            "lon": 81.6536938,
-            "gmap": "https://www.google.com/maps/place/Ramkrishna+CARE+Hospitals,+Raipur"
-          },
-          {
-            "name": "Care Aurangabad",
-            "lat": 19.8593755,
-            "lon": 75.3362985,
-            "gmap": "https://www.google.com/maps/place/United+CIIGMA+Hospital"
-          },
-          {
-            "name": "Care Nagpur",
-            "lat": 21.138545,
-            "lon": 79.0791634,
-            "gmap": "https://www.google.com/maps/place/CARE+Hospitals,+Nagpur"
-          }
-        ];
-
         const defaultSampleDoctors = [ 
-            { "Doctor Name": "Dr. Rajesh Sharma", "Department": "Cardiology", "Branch": "Banjara Hills", "OP Fee": "₹800", "OP Timings": "10:00 AM - 02:00 PM", "Starred": "Yes", "Call Day": "Monday, Friday", "Age Criteria": "All Ages", "Credit Accepted": "Arogyasri, CGHS" }, 
+            { "Doctor Name": "Dr. Rajesh Sharma", "Department": "Cardiology", "Branch": "Banjara Hills", "OP Fee": "₹800", "OP Timings": "10:00 AM - 02:00 PM", "Starred": "Yes", "Call Day": "Monday, Friday, Aug 20, 2026-08-28", "Age Criteria": "All Ages", "Credit Accepted": "Arogyasri, CGHS" }, 
             { "Doctor Name": "Dr. Priya Reddy", "Department": "Pediatrics", "Branch": "Hitech City", "OP Fee": "₹600", "OP Timings": "09:00 AM - 01:00 PM", "Starred": "Yes", "Call Day": "Wednesday", "Age Criteria": "0 - 15 Years", "Credit Accepted": "CGHS" }, 
             { "Doctor Name": "Dr. Anil Kumar", "Department": "Orthopedics", "Branch": "Banjara Hills", "OP Fee": "₹700", "OP Timings": "04:00 PM - 08:00 PM", "Starred": "No", "Call Day": "Monday, Wednesday, Friday", "Age Criteria": "All Ages", "Credit Accepted": "Cash Only" } 
         ]; 
 
         let doctorData = []; 
+        let activityAuditTrail = [];
+        let selectedAdminDoctorIndex = null; 
+        let pendingQueueUpdates = {}; 
+        const ADMIN_SECRET_PASSWORD = "careoffice123"; 
+
+        // CARE Hospitals Branches Coordinates Database
+        const careBranches = [
+            { name: "CARE Banjara IP", lat: 17.4156, lng: 78.4350, address: "Road No 1, Banjara Hills, Hyderabad" },
+            { name: "CARE Hitech City", lat: 17.4483, lng: 78.3807, address: "Old Mumbai Highway, Gachibowli, Hyderabad" },
+            { name: "CARE Malakpet", lat: 17.3753, lng: 78.5083, address: "Main Road, Malakpet, Hyderabad" },
+            { name: "CARE Nampally", lat: 17.3912, lng: 78.4735, address: "Public Garden Road, Nampally, Hyderabad" },
+            { name: "CARE Musheerabad", lat: 17.4098, lng: 78.5012, address: "Main Road, Musheerabad, Hyderabad" }
+        ];
+
         let leafletMap = null;
         let mapMarkers = [];
 
-        function loadDoctorData() { 
+        function loadDoctorData(isAutoRefresh = false) { 
             fetch('doctors.json', { cache: 'no-cache' }) 
-                .then(res => res.json()) 
-                .then(data => { 
-                    doctorData = data; 
-                    initApp(); 
+                .then(response => { 
+                    if (!response.ok) throw new Error("File not found"); 
+                    return response.text();
                 }) 
-                .catch(() => { 
-                    doctorData = defaultSampleDoctors; 
-                    initApp(); 
+                .then(textData => { 
+                    let newJsonData;
+                    try {
+                        newJsonData = JSON.parse(textData);
+                    } catch(e) {
+                        newJsonData = defaultSampleDoctors;
+                    }
+
+                    const serializedNew = JSON.stringify(newJsonData);
+                    const serializedCurrent = JSON.stringify(doctorData);
+
+                    if (serializedNew !== serializedCurrent) {
+                        doctorData = newJsonData;
+                        logAuditTrail("System synced updated doctor dataset from backend.");
+                        checkBackendSync(); 
+                        initApp();
+                    } else {
+                        checkBackendSync();
+                        if (!isAutoRefresh && doctorData.length === 0) {
+                            doctorData = newJsonData;
+                            logAuditTrail("Initial doctor dataset loaded successfully.");
+                            initApp();
+                        }
+                    }
+                }) 
+                .catch(error => { 
+                    console.warn('Could not load external doctors.json. Using sample data.', error); 
+                    if (doctorData.length === 0) {
+                        doctorData = defaultSampleDoctors;
+                        logAuditTrail("Loaded default sample doctor dataset.");
+                        checkBackendSync();
+                        initApp();
+                    }
                 }); 
         } 
+
+        function logAuditTrail(actionMessage) {
+            const timestamp = formatBackendDate(new Date());
+            activityAuditTrail.unshift({ time: timestamp, message: actionMessage });
+            if (activityAuditTrail.length > 50) activityAuditTrail.pop();
+        }
 
         function initApp() { 
             renderStarredAccordion(); 
@@ -1122,132 +1190,223 @@
             applyFilters(); 
         } 
 
-        loadDoctorData(); 
+        loadDoctorData(false); 
 
-        /* HAVERSINE FORMULA CALCULATIONS */
-        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Earth radius in km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = 
-                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c; // Distance in KM
+        function formatBackendDate(dateObj) { 
+            let hours = dateObj.getHours(); 
+            let minutes = dateObj.getMinutes(); 
+            const ampm = hours >= 12 ? 'pm' : 'am'; 
+            hours = hours % 12; 
+            hours = hours ? hours : 12; 
+            minutes = minutes < 10 ? '0' + minutes : minutes; 
+            const day = dateObj.getDate(); 
+            const getOrdinal = (n) => { 
+                const s = ["th", "st", "nd", "rd"]; 
+                const v = n % 100; 
+                return n + (s[(v - 20) % 10] || s[v] || s[0]); 
+            }; 
+            const formattedDay = getOrdinal(day); 
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]; 
+            const month = months[dateObj.getMonth()]; 
+            const year = dateObj.getFullYear(); 
+            return `${hours}:${minutes}${ampm} on ${formattedDay} ${month} ${year}`; 
+        } 
+
+        function checkBackendSync() { 
+            const timestampEl = document.getElementById('backendTimestamp'); 
+            if (timestampEl) { 
+                timestampEl.textContent = `Backend Sync: ${formatBackendDate(new Date())}`; 
+            } 
+        } 
+
+        const REFRESH_INTERVAL_SECONDS = 300; 
+        let timeLeft = REFRESH_INTERVAL_SECONDS; 
+
+        function updateCountdownDisplay() { 
+            const minutes = Math.floor(timeLeft / 60); 
+            const seconds = timeLeft % 60; 
+            const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; 
+            const timerEl = document.getElementById('countdownTimer'); 
+            if (timerEl) { 
+                timerEl.textContent = formattedTime; 
+            } 
+        } 
+
+        setInterval(() => { 
+            timeLeft--; 
+            if (timeLeft <= 0) { 
+                loadDoctorData(true); 
+                timeLeft = REFRESH_INTERVAL_SECONDS; 
+            } 
+            updateCountdownDisplay(); 
+        }, 1000); 
+
+        updateCountdownDisplay(); 
+
+        /* High-Performance Hardware-Accelerated Draggable & Magnetic Return Logic for Triage Icon */
+        const symptomIcon = document.getElementById('floating-symptom-btn');
+        let isDraggingSymptom = false;
+        let startXSym = 0, startYSym = 0;
+        let currentXSym = 0, currentYSym = 0;
+        let hasMovedSym = false;
+
+        symptomIcon.addEventListener('pointerdown', (e) => {
+            isDraggingSymptom = true;
+            hasMovedSym = false;
+            symptomIcon.classList.remove('snapping');
+            symptomIcon.setPointerCapture(e.pointerId);
+            startXSym = e.clientX - currentXSym;
+            startYSym = e.clientY - currentYSym;
+        });
+
+        symptomIcon.addEventListener('pointermove', (e) => {
+            if (!isDraggingSymptom) return;
+            const dx = e.clientX - startXSym;
+            const dy = e.clientY - startYSym;
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMovedSym = true;
+            currentXSym = dx;
+            currentYSym = dy;
+            symptomIcon.style.transform = `translate3d(${currentXSym}px, ${currentYSym}px, 0)`;
+        });
+
+        symptomIcon.addEventListener('pointerup', (e) => {
+            if (!isDraggingSymptom) return;
+            isDraggingSymptom = false;
+            try { symptomIcon.releasePointerCapture(e.pointerId); } catch(err) {}
+            symptomIcon.classList.add('snapping');
+            currentXSym = 0; currentYSym = 0;
+            symptomIcon.style.transform = `translate3d(0px, 0px, 0)`;
+        });
+
+        function handleSymptomClick(e) {
+            if (!hasMovedSym) openSymptomModal();
         }
 
-        function estimateTravelTimeMinutes(distanceKm) {
-            // Assumes average city driving speed with traffic factors (~25 km/h)
-            let mins = Math.round((distanceKm / 25) * 60);
-            return mins < 3 ? 3 : mins;
+        /* High-Performance Hardware-Accelerated Draggable & Magnetic Return Logic for Near Care Icon */
+        const nearCareIcon = document.getElementById('floating-nearcare-btn');
+        let isDraggingNear = false;
+        let startXNear = 0, startYNear = 0;
+        let currentXNear = 0, currentYNear = 0;
+        let hasMovedNear = false;
+
+        nearCareIcon.addEventListener('pointerdown', (e) => {
+            isDraggingNear = true;
+            hasMovedNear = false;
+            nearCareIcon.classList.remove('snapping');
+            nearCareIcon.setPointerCapture(e.pointerId);
+            startXNear = e.clientX - currentXNear;
+            startYNear = e.clientY - currentYNear;
+        });
+
+        nearCareIcon.addEventListener('pointermove', (e) => {
+            if (!isDraggingNear) return;
+            const dx = e.clientX - startXNear;
+            const dy = e.clientY - startYNear;
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMovedNear = true;
+            currentXNear = dx;
+            currentYSym = dy;
+            nearCareIcon.style.transform = `translate3d(${currentXNear}px, ${currentYSym}px, 0)`;
+        });
+
+        nearCareIcon.addEventListener('pointerup', (e) => {
+            if (!isDraggingNear) return;
+            isDraggingNear = false;
+            try { nearCareIcon.releasePointerCapture(e.pointerId); } catch(err) {}
+            nearCareIcon.classList.add('snapping');
+            currentXNear = 0; currentYNear = 0;
+            nearCareIcon.style.transform = `translate3d(0px, 0px, 0)`;
+        });
+
+        function handleNearCareClick(e) {
+            if (!hasMovedNear) openNearCareModal();
         }
 
-        /* LEAFLET MAP & LOCATION CALCULATION LOGIC */
-        function initLeafletMap(defaultLat = 17.4125702, defaultLon = 78.4502685) {
-            if (!leafletMap) {
-                leafletMap = L.map('leafletMapContainer').setView([defaultLat, defaultLon], 11);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
-                }).addTo(leafletMap);
-            } else {
-                leafletMap.setView([defaultLat, defaultLon], 11);
+        /* AI Symptom Triage Modal Controls & Logic */
+        function openSymptomModal() {
+            document.getElementById('symptomInput').value = "";
+            document.getElementById('symptomResult').style.display = 'none';
+            document.getElementById('symptomModal').classList.add('active');
+        }
+
+        function closeSymptomModal() {
+            document.getElementById('symptomModal').classList.remove('active');
+        }
+
+        function closeSymptomOnBg(event) {
+            if (event.target.id === 'symptomModal') closeSymptomModal();
+        }
+
+        function handleSymptomKey(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkSymptomTriage();
             }
-
-            // Clear existing markers
-            mapMarkers.forEach(m => leafletMap.removeLayer(m));
-            mapMarkers = [];
-
-            // Add Markers for all CARE Locations
-            careLocationsData.forEach(loc => {
-                const marker = L.marker([loc.lat, loc.lon]).addTo(leafletMap);
-                marker.bindPopup(`<b>${loc.name}</b>`);
-                mapMarkers.push(marker);
-            });
         }
 
-        function calculateAndRenderAllLocations(originLat, originLon) {
-            const resultsContainer = document.getElementById('nearCareResultsContainer');
-            resultsContainer.innerHTML = '';
-
-            // Calculate distance & travel time for every JSON location
-            const computedLocations = careLocationsData.map(loc => {
-                const dist = calculateHaversineDistance(originLat, originLon, loc.lat, loc.lon);
-                const time = estimateTravelTimeMinutes(dist);
-                return { ...loc, distanceKm: dist.toFixed(1), travelTimeMins: time };
-            });
-
-            // Sort by nearest distance
-            computedLocations.sort((a, b) => parseFloat(a.distanceKm) - parseFloat(b.distanceKm));
-
-            computedLocations.forEach(loc => {
-                const card = document.createElement('div');
-                card.className = 'location-card-item';
-                card.innerHTML = `
-                    <div class="location-header-row">
-                        <span class="location-name">${loc.name}</span>
-                        <div class="location-metrics-row">
-                            <span class="metric-badge-km">${loc.distanceKm} km</span>
-                            <span class="metric-badge-time">~${loc.travelTimeMins} mins</span>
-                        </div>
-                    </div>
-                    <a href="${loc.gmap || loc.googleMaps}" target="_blank" class="gmap-link-btn">🗺️ Open in Google Maps ↗</a>
-                `;
-                resultsContainer.appendChild(card);
-            });
-
-            initLeafletMap(originLat, originLon);
-            setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 300);
-        }
-
-        function searchNearCareHospitals() {
-            const query = document.getElementById('nearCareLocationInput').value.trim().toLowerCase();
+        function checkSymptomTriage() {
+            const query = document.getElementById('symptomInput').value.toLowerCase().trim();
+            const resultBox = document.getElementById('symptomResult');
             if (!query) {
-                // Default center to Hyderabad if empty
-                calculateAndRenderAllLocations(17.4065, 78.4772);
+                resultBox.style.display = 'none';
                 return;
             }
 
-            // Geocode query using OpenStreetMap Nominatim API
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        const lat = parseFloat(data[0].lat);
-                        const lon = parseFloat(data[0].lon);
-                        calculateAndRenderAllLocations(lat, lon);
-                    } else {
-                        alert("Location not found. Showing distances relative to central Hyderabad.");
-                        calculateAndRenderAllLocations(17.4065, 78.4772);
-                    }
-                })
-                .catch(() => {
-                    calculateAndRenderAllLocations(17.4065, 78.4772);
-                });
-        }
+            const symptomRules = [
+                { dept: "Cardiology", keywords: ["chest pain", "heart", "palpitation", "bp", "blood pressure", "chest tightness", "angina", "cardiac"] },
+                { dept: "Cardio-Thoracic Surgery", keywords: ["bypass", "valve replacement", "open-heart", "congenital heart", "thoracic surgery"] },
+                { dept: "Neurology", keywords: ["brain", "headache", "nerve", "dizzy", "seizure", "migraine", "stroke", "numbness", "tingling"] },
+                { dept: "Neurosurgery", keywords: ["brain tumor", "severe head injury", "aneurysm", "hydrocephalus"] },
+                { dept: "Spine Surgery", keywords: ["back pain", "slipped disc", "sciatica", "spinal injury", "neck pain", "disc herniation"] },
+                { dept: "Orthopedics", keywords: ["foot", "bone", "joint", "knee", "fracture", "spine", "ortho", "ankle", "toe", "heel", "arthritis"] },
+                { dept: "Gastroenterology", keywords: ["stomach", "abdomen", "digestion", "liver", "jaundice", "ibs", "ulcer", "acidity", "diarrhea", "constipation"] },
+                { dept: "Pulmonology", keywords: ["cough", "asthma", "breathing difficulty", "shortness of breath", "lung", "chest infection", "wheezing", "tuberculosis"] },
+                { dept: "Oncology", keywords: ["cancer", "tumor", "chemotherapy", "malignancy", "growth", "lump"] },
+                { dept: "Endocrinology", keywords: ["diabetes", "thyroid", "hormonal imbalance", "metabolic", "insulin", "weight gain", "weight loss", "pcos"] },
+                { dept: "General Surgery", keywords: ["hernia", "appendix", "gallstones", "minor cuts", "abscess", "tissue lumps", "piles", "fistula"] },
+                { dept: "Pediatrics", keywords: ["child", "baby", "infant", "pediatric", "newborn", "kid"] }
+            ];
 
-        function useCurrentDeviceLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        calculateAndRenderAllLocations(pos.coords.latitude, pos.coords.longitude);
-                    },
-                    () => {
-                        alert("Geolocation permission denied. Defaulting to Hyderabad location.");
-                        calculateAndRenderAllLocations(17.4065, 78.4772);
-                    }
-                );
-            } else {
-                alert("Geolocation is not supported by your browser.");
+            let matchedDept = "General Medicine"; 
+            for (let rule of symptomRules) {
+                if (rule.keywords.some(kw => query.includes(kw))) {
+                    matchedDept = rule.dept;
+                    break;
+                }
             }
+
+            resultBox.innerHTML = `Recommended Department: <strong>${matchedDept}</strong>. Filtering results...`;
+            resultBox.style.display = 'block';
+            logAuditTrail(`AI Triage analyzed symptom '${query}' -> Recommended ${matchedDept}`);
+
+            const deptSelect = document.getElementById('deptFilter');
+            for (let option of deptSelect.options) {
+                if (option.value.toLowerCase() === matchedDept.toLowerCase()) {
+                    deptSelect.value = option.value;
+                    onDepartmentOrBranchChange();
+                    break;
+                }
+            }
+
+            setTimeout(() => { closeSymptomModal(); }, 1200);
         }
 
+        /* Find Near Care Modal Controls & Leaflet Map Logic */
         function openNearCareModal() {
-            document.getElementById('nearCareLocationInput').value = "";
+            document.getElementById('nearCareInput').value = "";
             document.getElementById('nearCareModal').classList.add('active');
-            // Default load centered on Hyderabad
-            calculateAndRenderAllLocations(17.4065, 78.4772);
+            
+            // Initialize Leaflet Map after modal becomes visible
+            setTimeout(() => {
+                if (!leafletMap) {
+                    leafletMap = L.map('map').setView([17.4156, 78.4350], 12);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(leafletMap);
+                } else {
+                    leafletMap.invalidateSize();
+                }
+                renderCareLocationsList(careBranches);
+            }, 200);
         }
 
         function closeNearCareModal() {
@@ -1258,145 +1417,234 @@
             if (event.target.id === 'nearCareModal') closeNearCareModal();
         }
 
-        function handleNearCareKey(e) {
-            if (e.key === 'Enter') searchNearCareHospitals();
-        }
-
-        /* DRAGGABLE FLOATING BUTTONS */
-        function setupDraggable(buttonId) {
-            const icon = document.getElementById(buttonId);
-            let isDragging = false, startX = 0, startY = 0, currentX = 0, currentY = 0;
-
-            icon.addEventListener('pointerdown', (e) => {
-                isDragging = true;
-                icon.classList.remove('snapping');
-                icon.setPointerCapture(e.pointerId);
-                startX = e.clientX - currentX;
-                startY = e.clientY - currentY;
-            });
-
-            icon.addEventListener('pointermove', (e) => {
-                if (!isDragging) return;
-                currentX = e.clientX - startX;
-                currentY = e.clientY - startY;
-                icon.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-            });
-
-            icon.addEventListener('pointerup', (e) => {
-                if (!isDragging) return;
-                isDragging = false;
-                try { icon.releasePointerCapture(e.pointerId); } catch(err) {}
-                icon.classList.add('snapping');
-                currentX = 0; currentY = 0;
-                icon.style.transform = `translate3d(0px, 0px, 0)`;
-            });
-        }
-
-        setupDraggable('floating-symptom-btn');
-        setupDraggable('floating-near-btn');
-
-        function handleSymptomClick() { openSymptomModal(); }
-        function handleNearCareClick() { openNearCareModal(); }
-
-        /* SYMPTOM TRIAGE LOGIC */
-        function openSymptomModal() {
-            document.getElementById('symptomInput').value = "";
-            document.getElementById('symptomResult').style.display = 'none';
-            document.getElementById('symptomModal').classList.add('active');
-        }
-        function closeSymptomModal() { document.getElementById('symptomModal').classList.remove('active'); }
-        function closeSymptomOnBg(e) { if (e.target.id === 'symptomModal') closeSymptomModal(); }
-        function handleSymptomKey(e) { if (e.key === 'Enter') checkSymptomTriage(); }
-
-        function checkSymptomTriage() {
-            const query = document.getElementById('symptomInput').value.toLowerCase().trim();
-            const resultBox = document.getElementById('symptomResult');
-            if (!query) return;
-
-            const rules = [
-                { dept: "Cardiology", keywords: ["chest pain", "heart", "bp", "cardiac"] },
-                { dept: "Neurology", keywords: ["brain", "headache", "dizzy", "stroke"] },
-                { dept: "Orthopedics", keywords: ["foot", "bone", "knee", "fracture", "joint"] },
-                { dept: "Pediatrics", keywords: ["child", "baby", "pediatric"] }
-            ];
-
-            let matched = "General Medicine";
-            for (let r of rules) {
-                if (r.keywords.some(k => query.includes(k))) { matched = r.dept; break; }
+        function handleNearCareKey(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                locateNearestCareBranch();
             }
+        }
 
-            resultBox.innerHTML = `Recommended Department: <strong>${matched}</strong>`;
-            resultBox.style.display = 'block';
+        function renderCareLocationsList(branches) {
+            const listContainer = document.getElementById('branchResultsList');
+            listContainer.innerHTML = '';
 
-            const deptSelect = document.getElementById('deptFilter');
-            for (let opt of deptSelect.options) {
-                if (opt.value.toLowerCase() === matched.toLowerCase()) {
-                    deptSelect.value = opt.value;
-                    onDepartmentOrBranchChange();
+            // Clear old markers
+            mapMarkers.forEach(m => leafletMap.removeLayer(m));
+            mapMarkers = [];
+
+            branches.forEach((branch, index) => {
+                // Generate pseudo distances for demonstration
+                const dummyDist = (1.5 + (index * 0.7)).toFixed(1);
+                const dummyMins = Math.round(dummyDist * 2.5 + 3);
+
+                const marker = L.marker([branch.lat, branch.lng]).addTo(leafletMap)
+                    .bindPopup(`<b>${branch.name}</b><br>${branch.address}`);
+                mapMarkers.push(marker);
+
+                const card = document.createElement('div');
+                card.className = 'branch-result-card';
+                card.innerHTML = `
+                    <div class="branch-info-left">
+                        <span class="branch-card-title">${branch.name}</span>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branch.name + ' ' + branch.address)}" target="_blank" class="branch-maps-link">
+                            🗺️ Open in Google Maps ↗
+                        </a>
+                    </div>
+                    <div class="branch-metrics-right">
+                        <span class="distance-pill">${dummyDist} km</span>
+                        <span class="time-pill">~${dummyMins} mins</span>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function locateNearestCareBranch() {
+            const query = document.getElementById('nearCareInput').value.toLowerCase().trim();
+            if (!query) {
+                renderCareLocationsList(careBranches);
+                return;
+            }
+            // Filter or re-sort based on input match
+            const filtered = careBranches.filter(b => b.name.toLowerCase().includes(query) || b.address.toLowerCase().includes(query));
+            renderCareLocationsList(filtered.length > 0 ? filtered : careBranches);
+        }
+
+        function useLiveGpsLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    if (leafletMap) {
+                        leafletMap.setView([userLat, userLng], 13);
+                        L.marker([userLat, userLng], {
+                            icon: L.divIcon({ className: 'user-gps-marker', html: '📍', iconSize: [24, 24] })
+                        }).addTo(leafletMap).bindPopup("Your Current Location").openPopup();
+                    }
+                    alert("GPS location acquired successfully!");
+                }, () => {
+                    alert("Unable to retrieve your location via GPS.");
+                });
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+
+        function getActiveSchedule(doc) { 
+            const today = new Date(); 
+            today.setHours(0, 0, 0, 0); 
+
+            const fromDateStr = doc["Special Date From"] ? String(doc["Special Date From"]).trim() : (doc["Special Date"] ? String(doc["Special Date"]).trim() : ""); 
+            const toDateStr = doc["Special Date To"] ? String(doc["Special Date To"]).trim() : fromDateStr; 
+
+            if (fromDateStr) { 
+                const fromDate = new Date(fromDateStr); 
+                const toDate = toDateStr ? new Date(toDateStr) : new Date(fromDateStr); 
+                fromDate.setHours(0, 0, 0, 0); 
+                toDate.setHours(23, 59, 59, 999); 
+
+                if (today >= fromDate && today <= toDate) { 
+                    return { 
+                        timings: doc["Special Timings"] || doc["OP Timings"], 
+                        note: doc["Special Note"] || doc["Leave / Timing Updates"] || "Special schedule active" 
+                    }; 
+                } 
+            } 
+
+            return { 
+                timings: doc["OP Timings"] || 'N/A', 
+                note: (doc["Leave / Timing Updates"] && doc["Leave / Timing Updates"] !== "Regular Timings") ? doc["Leave / Timing Updates"] : "" 
+            }; 
+        } 
+
+        function toggleAccordion() { 
+            const wrapper = document.getElementById('starredAccordion'); 
+            wrapper.classList.toggle('open'); 
+        } 
+
+        function renderStarredAccordion() { 
+            const listContainer = document.getElementById('starredAccordionList'); 
+            const badge = document.getElementById('starredCountBadge'); 
+            if (!listContainer) return; 
+
+            const starredDocs = doctorData.filter(doc => doc["Starred"] && String(doc["Starred"]).trim().toLowerCase() === "yes"); 
+            badge.textContent = starredDocs.length; 
+
+            if (starredDocs.length === 0) { 
+                listContainer.innerHTML = `<div style="color: var(--text-secondary); font-size: 14px; padding: 14px 20px;">No starred doctors available.</div>`; 
+                return; 
+            } 
+
+            listContainer.innerHTML = ''; 
+            starredDocs.forEach(doc => { 
+                const row = document.createElement('div'); 
+                row.className = 'starred-row-item'; 
+                row.onclick = () => openModal(doc); 
+
+                const callDayText = doc["Call Day"] || doc["Call Days"] || doc["Duty Day"] || ''; 
+                const ageText = doc["Age Criteria"] || doc["Age Limit"] || ''; 
+                let subInfoText = `${doc["Department"] || 'Department'}`; 
+                if (callDayText) subInfoText += ` • <span style="color:#fbbf24;">Call Day: ${callDayText}</span>`; 
+                if (ageText) subInfoText += ` • <span style="color:#c084fc;">Age: ${ageText}</span>`; 
+
+                row.innerHTML = ` 
+                    <div> 
+                        <div style="font-weight: 600; font-size: 14.5px; color: var(--text-main); margin-bottom: 2px;">${doc["Doctor Name"] || 'N/A'}</div> 
+                        <div style="font-size: 12.5px; color: var(--text-secondary);">${subInfoText}</div> 
+                    </div> 
+                    <span class="branch-tag">${doc["Branch"] || 'Location'}</span> 
+                `; 
+                listContainer.appendChild(row); 
+            }); 
+        } 
+
+        function populateFilterDropdowns() { 
+            const deptSelect = document.getElementById('deptFilter'); 
+            const branchSelect = document.getElementById('branchFilter'); 
+
+            const departments = [...new Set(doctorData.map(d => d["Department"]).filter(Boolean))].sort(); 
+            const branches = [...new Set(doctorData.map(d => d["Branch"]).filter(Boolean))].sort(); 
+
+            deptSelect.innerHTML = `<option value="" selected>Select Department</option>` + departments.map(d => `<option value="${d}">${d}</option>`).join(''); 
+            branchSelect.innerHTML = `<option value="" selected>Select Branch</option>` + branches.map(b => `<option value="${b}">${b}</option>`).join(''); 
+        } 
+
+        function getFormattedDateString(d) {
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const dayNum = d.getDate();
+            const getOrdinal = (n) => {
+                const s = ["th", "st", "nd", "rd"];
+                const v = n % 100;
+                return n + (s[(v - 20) % 10] || s[v] || s[0]);
+            };
+            return `on ${getOrdinal(dayNum)} ${months[d.getMonth()]}`;
+        }
+
+        function getNextCallDayInfo(doc) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let bestMatchDaysAhead = 999;
+            let bestText = "upcoming schedule";
+
+            for (let i = 0; i < 7; i++) {
+                const targetDate = new Date(today);
+                targetDate.setDate(today.getDate() + i);
+
+                const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                const dayName = daysOfWeek[targetDate.getDay()];
+                const year = targetDate.getFullYear();
+                const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+                const day = String(targetDate.getDate()).padStart(2, '0');
+                const dateValue = `${year}-${month}-${day}`;
+
+                if (checkIsOnCall(doc, dayName, dateValue)) {
+                    bestMatchDaysAhead = i;
+                    if (i === 0) bestText = "today";
+                    else if (i === 1) bestText = "tomorrow";
+                    else bestText = getFormattedDateString(targetDate);
                     break;
                 }
             }
-            setTimeout(() => closeSymptomModal(), 1200);
-        }
-
-        /* APP CORE FILTERS & RENDER LOGIC */
-        function toggleAccordion() { document.getElementById('starredAccordion').classList.toggle('open'); }
-
-        function renderStarredAccordion() {
-            const container = document.getElementById('starredAccordionList');
-            const badge = document.getElementById('starredCountBadge');
-            const starred = doctorData.filter(d => d["Starred"] && String(d["Starred"]).toLowerCase() === "yes");
-            badge.textContent = starred.length;
-
-            if (starred.length === 0) {
-                container.innerHTML = `<div style="color: var(--text-secondary); padding: 14px 20px;">No starred doctors.</div>`;
-                return;
-            }
-
-            container.innerHTML = '';
-            starred.forEach(doc => {
-                const row = document.createElement('div');
-                row.className = 'starred-row-item';
-                row.onclick = () => openModal(doc);
-                row.innerHTML = `
-                    <div>
-                        <div style="font-weight:600; color:var(--text-main);">${doc["Doctor Name"]}</div>
-                        <div style="font-size:12.5px; color:var(--text-secondary);">${doc["Department"]}</div>
-                    </div>
-                    <span class="branch-tag">${doc["Branch"]}</span>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        function populateFilterDropdowns() {
-            const deptSelect = document.getElementById('deptFilter');
-            const branchSelect = document.getElementById('branchFilter');
-            const depts = [...new Set(doctorData.map(d => d["Department"]).filter(Boolean))].sort();
-            const branches = [...new Set(doctorData.map(d => d["Branch"]).filter(Boolean))].sort();
-
-            deptSelect.innerHTML = `<option value="" selected>Select Department</option>` + depts.map(d => `<option value="${d}">${d}</option>`).join('');
-            branchSelect.innerHTML = `<option value="" selected>Select Branch</option>` + branches.map(b => `<option value="${b}">${b}</option>`).join('');
+            return { daysAhead: bestMatchDaysAhead, text: bestText };
         }
 
         function updateCallDayDropdownOptions() {
-            const selDept = document.getElementById('deptFilter').value;
-            const selBranch = document.getElementById('branchFilter').value;
+            const deptSelect = document.getElementById('deptFilter');
+            const branchSelect = document.getElementById('branchFilter');
             const callDaySelect = document.getElementById('callDayFilter');
 
+            const selDept = deptSelect.value;
+            const selBranch = branchSelect.value;
+
             if (!selDept || !selBranch) {
-                callDaySelect.innerHTML = `<option value="" selected>Select Doctor / Call Day (Select Dept & Branch first)</option>`;
+                callDaySelect.innerHTML = `<option value="" selected>Select Doctor / Call Day (Select Department & Branch first)</option>`;
+                callDaySelect.value = "";
                 callDaySelect.disabled = true;
                 return;
             }
 
             callDaySelect.disabled = false;
-            let filtered = doctorData.filter(d => d["Department"] === selDept && d["Branch"] === selBranch);
-            let html = `<option value="" selected>Select Doctor / Call Day...</option>`;
-            filtered.forEach(d => {
-                html += `<option value="${d["Doctor Name"]}">${d["Doctor Name"]} - Call Day (${d["Call Day"] || 'N/A'})</option>`;
+            let filteredDoctors = doctorData.filter(doc => {
+                const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selDept.toLowerCase();
+                const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selBranch.toLowerCase();
+                return matchesDept && matchesBranch;
             });
-            callDaySelect.innerHTML = html;
+
+            filteredDoctors.sort((a, b) => {
+                const infoA = getNextCallDayInfo(a);
+                const infoB = getNextCallDayInfo(b);
+                return infoA.daysAhead - infoB.daysAhead;
+            });
+
+            let optionsHTML = `<option value="" selected>Select Doctor / Call Day...</option>`;
+            filteredDoctors.forEach(doc => {
+                const docName = doc["Doctor Name"] || "Doctor";
+                const info = getNextCallDayInfo(doc);
+                optionsHTML += `<option value="${docName}">${docName} call day ${info.text}</option>`;
+            });
+
+            callDaySelect.innerHTML = optionsHTML;
         }
 
         function onDepartmentOrBranchChange() {
@@ -1404,94 +1652,531 @@
             applyFilters();
         }
 
-        function applyFilters() {
-            const selDept = document.getElementById('deptFilter').value.toLowerCase();
-            const selBranch = document.getElementById('branchFilter').value.toLowerCase();
-            const query = document.getElementById('searchInput').value.toLowerCase().trim();
-            const container = document.getElementById('resultsContainer');
+        function checkIsOnCall(doc, targetDayName, targetDateString = "") {
+            const callDayRaw = doc["Call Day"] || doc["Call Days"] || "";
+            if (!callDayRaw) return false;
+            
+            const entries = callDayRaw.split(/[,&]/).map(d => d.trim().toLowerCase());
+            if (targetDayName && entries.includes(targetDayName.toLowerCase())) return true;
 
-            if (query === "" && (!selDept || !selBranch)) {
-                container.innerHTML = `<div class="no-results">Type a doctor name or select Department and Branch to view doctors.</div>`;
+            if (targetDateString) {
+                const dateObj = new Date(targetDateString);
+                const isoDate = targetDateString.toLowerCase(); 
+                const shortMonthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+                const monthStr = shortMonthNames[dateObj.getMonth()];
+                const dayNum = dateObj.getDate();
+                const format1 = `${monthStr} ${dayNum}`.toLowerCase(); 
+                const format2 = `${monthStr}-${dayNum}`.toLowerCase(); 
+                
+                for (let entry of entries) {
+                    if (entry === isoDate || entry === format1 || entry === format2 || entry.includes(isoDate)) return true;
+                }
+            }
+            return false;
+        }
+
+        function applyFilters() { 
+            const deptSelect = document.getElementById('deptFilter');
+            const branchSelect = document.getElementById('branchFilter');
+            const callDaySelect = document.getElementById('callDayFilter');
+
+            const selectedDept = deptSelect.value.toLowerCase(); 
+            const selectedBranch = branchSelect.value.toLowerCase(); 
+            const selectedDoctorFilter = callDaySelect.value; 
+            const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
+            const container = document.getElementById('resultsContainer'); 
+
+            if (query === "" && (selectedDept === "" || selectedBranch === "")) { 
+                container.innerHTML = `<div class="no-results">Type a doctor name or select Department and Branch to view doctors.</div>`; 
+                return; 
+            } 
+
+            let filtered = doctorData.filter(doc => { 
+                const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
+                const matchesName = query === "" || docName.includes(query) || Object.values(doc).some(val => String(val).toLowerCase().includes(query)); 
+                
+                if (query !== "") {
+                    const matchesDept = selectedDept === "" || (doc["Department"] && doc["Department"].toLowerCase() === selectedDept); 
+                    const matchesBranch = selectedBranch === "" || (doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch); 
+                    return matchesName && matchesDept && matchesBranch;
+                } else {
+                    const matchesDept = doc["Department"] && doc["Department"].toLowerCase() === selectedDept; 
+                    const matchesBranch = doc["Branch"] && doc["Branch"].toLowerCase() === selectedBranch; 
+                    return matchesName && matchesDept && matchesBranch; 
+                }
+            }); 
+
+            if (selectedDoctorFilter && !callDaySelect.disabled) {
+                filtered = filtered.filter(doc => doc["Doctor Name"] === selectedDoctorFilter);
+            }
+
+            renderDoctors(filtered); 
+        } 
+
+        function handleSearchInput() { 
+            const query = document.getElementById('searchInput').value.toLowerCase().trim(); 
+            const suggestionsBox = document.getElementById('suggestionsList'); 
+            applyFilters(); 
+
+            if (query === "") { 
+                suggestionsBox.style.display = 'none'; 
+                document.getElementById('searchSpinner').style.display = 'none'; 
+                return; 
+            } 
+
+            const filtered = doctorData.filter(doc => { 
+                const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
+                return docName.includes(query); 
+            }); 
+
+            showSuggestions(filtered); 
+        } 
+
+        function handleKeyDown(event) { 
+            if (event.key === 'Enter') { 
+                event.preventDefault(); 
+                document.getElementById('suggestionsList').style.display = 'none'; 
+                applyFilters(); 
+            } 
+        } 
+
+        function showSuggestions(doctors) { 
+            const suggestionsBox = document.getElementById('suggestionsList'); 
+            suggestionsBox.innerHTML = ''; 
+            if (doctors.length === 0) { 
+                suggestionsBox.style.display = 'none'; 
+                return; 
+            } 
+
+            doctors.slice(0, 5).forEach(doc => { 
+                const item = document.createElement('div'); 
+                item.className = 'suggestion-item'; 
+                item.innerHTML = `<strong>${doc["Doctor Name"]}</strong> <span style="color:var(--text-secondary); font-size:13px;">(${doc["Department"]} - ${doc["Branch"]})</span>`; 
+                item.onclick = function() { 
+                    document.getElementById('searchInput').value = doc["Doctor Name"]; 
+                    suggestionsBox.style.display = 'none'; 
+                    renderDoctors([doc]); 
+                }; 
+                suggestionsBox.appendChild(item); 
+            }); 
+            suggestionsBox.style.display = 'block'; 
+        } 
+
+        document.addEventListener('click', function(e) { 
+            if (!e.target.closest('.search-box-wrapper')) { 
+                document.getElementById('suggestionsList').style.display = 'none'; 
+            } 
+            if (!e.target.closest('#adminSearchWrapper')) { 
+                const adminSuggestions = document.getElementById('adminSuggestionsList'); 
+                if (adminSuggestions) adminSuggestions.style.display = 'none'; 
+            } 
+        }); 
+
+        function renderDoctors(doctors) { 
+            const container = document.getElementById('resultsContainer'); 
+            container.innerHTML = ''; 
+
+            if (doctors.length === 0) { 
+                container.innerHTML = `<div class="no-results">No doctors found matching your criteria.</div>`; 
+                return; 
+            } 
+
+            const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const todayObj = new Date();
+            const currentActualDayName = daysOfWeek[todayObj.getDay()];
+            const todayIsoStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+
+            doctors.forEach((doc) => { 
+                const card = document.createElement('div'); 
+                card.className = 'doctor-card-minimal'; 
+                card.onclick = () => openModal(doc); 
+
+                const schedule = getActiveSchedule(doc); 
+                let creditsValue = doc["Credit Accepted"] || doc["Credits"] || "None"; 
+                let creditPillsHTML = ''; 
+                if (creditsValue && creditsValue !== "None") { 
+                    creditPillsHTML = creditsValue.split(',').map(c => `<span class="credit-pill">✓ ${c.trim()}</span>`).join(''); 
+                } 
+
+                let callDayValue = doc["Call Day"] || doc["Call Days"] || ""; 
+                let callDayHTML = callDayValue ? `<span class="callday-pill">Call Days: ${callDayValue}</span>` : ''; 
+                let ageValue = doc["Age Criteria"] || doc["Age Limit"] || ""; 
+                let ageHTML = ageValue ? `<span class="age-pill">Age: ${ageValue}</span>` : ''; 
+
+                const isOnCallToday = checkIsOnCall(doc, currentActualDayName, todayIsoStr);
+                let statusBadgeHTML = isOnCallToday 
+                    ? `<span class="status-badge-pill status-on-call">🟢 Call Day Today (${currentActualDayName})</span>` 
+                    : `<span class="status-badge-pill status-off-call">⚪ No Call Day Today (${currentActualDayName})</span>`;
+
+                let metaCombinedHTML = (creditPillsHTML || callDayHTML || ageHTML || statusBadgeHTML) ? `<div class="meta-pills-container">${statusBadgeHTML}${ageHTML}${callDayHTML}${creditPillsHTML}</div>` : ''; 
+
+                card.innerHTML = ` 
+                    <div class="card-top-row"> 
+                        <div> 
+                            <h3 class="doctor-name-min">${doc["Doctor Name"] || 'N/A'}</h3> 
+                            <div class="doctor-spec-min">${doc["Department"] || 'Department'}</div> 
+                        </div> 
+                        <span class="branch-tag">${doc["Branch"] || 'Location'}</span> 
+                    </div> 
+                    ${metaCombinedHTML} 
+                    <div class="card-details-footer"> 
+                        <span>Fee: <strong>${doc["OP Fee"] || 'N/A'}</strong></span> 
+                        <span style="max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Timing: ${schedule.timings}</span> 
+                    </div> 
+                    ${schedule.note ? `<div class="update-banner">⚠️ <strong>Notice:</strong> ${schedule.note}</div>` : ''} 
+                `; 
+                container.appendChild(card); 
+            }); 
+        } 
+
+        function openModal(doc) { 
+            document.getElementById('modalDoctorName').textContent = doc["Doctor Name"] || 'N/A'; 
+            document.getElementById('modalDept').textContent = doc["Department"] || 'Department'; 
+            document.getElementById('modalBranch').textContent = doc["Branch"] || 'N/A'; 
+            document.getElementById('modalFee').textContent = doc["OP Fee"] || 'N/A'; 
+
+            const schedule = getActiveSchedule(doc); 
+            document.getElementById('modalTimings').textContent = schedule.timings; 
+            document.getElementById('modalCredits').textContent = doc["Credit Accepted"] || 'Not Specified'; 
+            document.getElementById('modalCallDay').textContent = doc["Call Day"] || 'Not Assigned'; 
+            document.getElementById('modalAgeLimit').textContent = doc["Age Criteria"] || 'All Ages'; 
+
+            const updateContainer = document.getElementById('modalUpdateContainer'); 
+            if (schedule.note) { 
+                updateContainer.innerHTML = `<div class="update-banner" style="margin-top: 14px;">⚠️ <strong>Notice:</strong> ${schedule.note}</div>`; 
+            } else { 
+                updateContainer.innerHTML = ''; 
+            } 
+            document.getElementById('doctorModal').classList.add('active'); 
+        } 
+
+        function closeModal() { 
+            document.getElementById('doctorModal').classList.remove('active'); 
+        } 
+
+        function closeModalOnBg(event) { 
+            if (event.target.id === 'doctorModal') closeModal(); 
+        } 
+
+        function promptAdminPassword() { 
+            document.getElementById('adminPasswordInput').value = ""; 
+            document.getElementById('passwordModal').classList.add('active'); 
+        } 
+
+        function closePasswordModal() { 
+            document.getElementById('passwordModal').classList.remove('active'); 
+        } 
+
+        function closePasswordOnBg(event) { 
+            if (event.target.id === 'passwordModal') closePasswordModal(); 
+        } 
+
+        function handlePasswordKey(event) { 
+            if (event.key === 'Enter') verifyAdminPassword(); 
+        } 
+
+        function verifyAdminPassword() { 
+            const enteredPwd = document.getElementById('adminPasswordInput').value; 
+            if (enteredPwd === ADMIN_SECRET_PASSWORD) { 
+                closePasswordModal(); 
+                logAuditTrail("Administrator successfully authenticated into Reschedule Panel.");
+                openAdminModal(); 
+            } else { 
+                logAuditTrail("Failed administrator authentication attempt.");
+                alert("Incorrect office password."); 
+            } 
+        } 
+
+        function openAdminModal() { 
+            selectedAdminDoctorIndex = null; 
+            document.getElementById('adminSearchInput').value = ""; 
+            document.getElementById('adminSelectedDoctorDisplay').value = ""; 
+            document.getElementById('adminSpecialDateFrom').value = ""; 
+            document.getElementById('adminSpecialDateTo').value = ""; 
+            document.getElementById('adminSpecialTimings').value = ""; 
+            document.getElementById('adminSpecialNote').value = ""; 
+            document.getElementById('adminChangeCallDayToggle').value = "No";
+            document.getElementById('adminNewCallDayDate').value = "";
+            toggleChangeCallDaySection();
+            updateQueueBadge(); 
+            document.getElementById('adminModal').classList.add('active'); 
+        } 
+
+        function closeAdminModal() { 
+            document.getElementById('adminModal').classList.remove('active'); 
+        } 
+
+        function closeAdminOnBg(event) { 
+            if (event.target.id === 'adminModal') closeAdminModal(); 
+        } 
+
+        function toggleChangeCallDaySection() {
+            const toggleVal = document.getElementById('adminChangeCallDayToggle').value;
+            const container = document.getElementById('newCallDayCalendarContainer');
+            if (toggleVal === "Yes") container.style.display = 'block';
+            else {
+                container.style.display = 'none';
+                document.getElementById('adminNewCallDayDate').value = "";
+            }
+        }
+
+        function handleAdminSearchInput() { 
+            const query = document.getElementById('adminSearchInput').value.toLowerCase().trim(); 
+            const suggestionsBox = document.getElementById('adminSuggestionsList'); 
+
+            if (query === "") { 
+                suggestionsBox.style.display = 'none'; 
+                return; 
+            } 
+
+            const matched = []; 
+            doctorData.forEach((doc, idx) => { 
+                const docName = doc["Doctor Name"] ? doc["Doctor Name"].toLowerCase() : "";
+                if (docName.includes(query)) matched.push({ doc, idx }); 
+            }); 
+
+            suggestionsBox.innerHTML = ''; 
+            if (matched.length === 0) { 
+                suggestionsBox.style.display = 'none'; 
+                return; 
+            } 
+
+            matched.slice(0, 5).forEach(item => { 
+                const div = document.createElement('div'); 
+                div.className = 'suggestion-item'; 
+                div.innerHTML = `<strong>${item.doc["Doctor Name"]}</strong> <span style="color:var(--text-secondary); font-size:13px;">(${item.doc["Department"]} - ${item.doc["Branch"]})</span>`; 
+                div.onclick = function() { 
+                    selectedAdminDoctorIndex = item.idx; 
+                    document.getElementById('adminSearchInput').value = item.doc["Doctor Name"]; 
+                    document.getElementById('adminSelectedDoctorDisplay').value = `${item.doc["Doctor Name"]} (${item.doc["Department"]} - ${item.doc["Branch"]})`; 
+
+                    const existingQueueItem = pendingQueueUpdates[item.idx]; 
+                    if (existingQueueItem) { 
+                        document.getElementById('adminSpecialDateFrom').value = existingQueueItem["Special Date From"] || existingQueueItem["Special Date"] || ""; 
+                        document.getElementById('adminSpecialDateTo').value = existingQueueItem["Special Date To"] || ""; 
+                        document.getElementById('adminSpecialTimings').value = existingQueueItem["Special Timings"] || ""; 
+                        document.getElementById('adminSpecialNote').value = existingQueueItem["Special Note"] || ""; 
+                        if (existingQueueItem["New Call Day"]) {
+                            document.getElementById('adminChangeCallDayToggle').value = "Yes";
+                            document.getElementById('adminNewCallDayDate').value = existingQueueItem["New Call Day"];
+                        } else {
+                            document.getElementById('adminChangeCallDayToggle').value = "No";
+                            document.getElementById('adminNewCallDayDate').value = "";
+                        }
+                    } else { 
+                        document.getElementById('adminSpecialDateFrom').value = item.doc["Special Date From"] || item.doc["Special Date"] || ""; 
+                        document.getElementById('adminSpecialDateTo').value = item.doc["Special Date To"] || ""; 
+                        document.getElementById('adminSpecialTimings').value = item.doc["Special Timings"] || ""; 
+                        document.getElementById('adminSpecialNote').value = item.doc["Special Note"] || ""; 
+                        document.getElementById('adminChangeCallDayToggle').value = "No";
+                        document.getElementById('adminNewCallDayDate').value = "";
+                    } 
+                    toggleChangeCallDaySection();
+                    suggestionsBox.style.display = 'none'; 
+                }; 
+                suggestionsBox.appendChild(div); 
+            }); 
+            suggestionsBox.style.display = 'block'; 
+        } 
+
+        function saveToQueueAction() { 
+            if (selectedAdminDoctorIndex === null || selectedAdminDoctorIndex === undefined) { 
+                alert("Please search and select a doctor first."); 
+                return; 
+            } 
+
+            const fromDate = document.getElementById('adminSpecialDateFrom').value.trim(); 
+            const toDate = document.getElementById('adminSpecialDateTo').value.trim(); 
+            const timings = document.getElementById('adminSpecialTimings').value.trim(); 
+            const note = document.getElementById('adminSpecialNote').value.trim(); 
+            const changeCallDayToggle = document.getElementById('adminChangeCallDayToggle').value;
+            const newCallDayDate = document.getElementById('adminNewCallDayDate').value.trim();
+
+            if (!fromDate || !toDate || !timings || !note) { 
+                alert("All fields (From Date, To Date, Special Timings, and Office Update Reason / Note) are mandatory to save the update."); 
+                return; 
+            } 
+
+            if (changeCallDayToggle === "Yes" && !newCallDayDate) {
+                alert("Please select the new call day from the calendar since 'Change Call Day' is set to Yes.");
                 return;
             }
 
-            let filtered = doctorData.filter(doc => {
-                const docName = (doc["Doctor Name"] || "").toLowerCase();
-                const matchesQuery = query === "" || docName.includes(query);
-                const matchesDept = !selDept || (doc["Department"] && doc["Department"].toLowerCase() === selDept);
-                const matchesBranch = !selBranch || (doc["Branch"] && doc["Branch"].toLowerCase() === selBranch);
-                return matchesQuery && matchesDept && matchesBranch;
-            });
+            pendingQueueUpdates[selectedAdminDoctorIndex] = { 
+                "Special Date From": fromDate, 
+                "Special Date To": toDate, 
+                "Special Timings": timings, 
+                "Special Note": note,
+                "Change Call Day": changeCallDayToggle,
+                "New Call Day": changeCallDayToggle === "Yes" ? newCallDayDate : ""
+            }; 
 
-            renderDoctors(filtered);
-        }
+            const docName = doctorData[selectedAdminDoctorIndex]["Doctor Name"] || "Doctor";
+            logAuditTrail(`Saved update to queue for ${docName} (${fromDate} to ${toDate})`);
 
-        function renderDoctors(doctors) {
-            const container = document.getElementById('resultsContainer');
-            container.innerHTML = '';
+            updateQueueBadge(); 
+            selectedAdminDoctorIndex = null; 
+            document.getElementById('adminSearchInput').value = ""; 
+            document.getElementById('adminSelectedDoctorDisplay').value = ""; 
+            document.getElementById('adminSpecialDateFrom').value = ""; 
+            document.getElementById('adminSpecialDateTo').value = ""; 
+            document.getElementById('adminSpecialTimings').value = ""; 
+            document.getElementById('adminSpecialNote').value = ""; 
+            document.getElementById('adminChangeCallDayToggle').value = "No";
+            document.getElementById('adminNewCallDayDate').value = "";
+            toggleChangeCallDaySection();
+            alert("Update with date range saved to queue automatically!"); 
+        } 
 
-            if (doctors.length === 0) {
-                container.innerHTML = `<div class="no-results">No doctors found matching criteria.</div>`;
-                return;
-            }
+        function updateQueueBadge() { 
+            const count = Object.keys(pendingQueueUpdates).length; 
+            const badge = document.getElementById('queueCounterBadge'); 
+            if (badge) badge.textContent = `Queue: ${count} update(s) saved`; 
+        } 
 
-            doctors.forEach(doc => {
-                const card = document.createElement('div');
-                card.className = 'doctor-card-minimal';
-                card.onclick = () => openModal(doc);
-                card.innerHTML = `
-                    <div class="card-top-row">
-                        <div>
-                            <h3 class="doctor-name-min">${doc["Doctor Name"]}</h3>
-                            <div class="doctor-spec-min">${doc["Department"]}</div>
-                        </div>
-                        <span class="branch-tag">${doc["Branch"]}</span>
-                    </div>
-                    <div class="card-details-footer">
-                        <span>Fee: <strong>${doc["OP Fee"] || 'N/A'}</strong></span>
-                        <span>Timing: ${doc["OP Timings"] || 'N/A'}</span>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
+        function openPreviewModal() { 
+            const queueKeys = Object.keys(pendingQueueUpdates); 
+            const container = document.getElementById('previewContainerList'); 
+            container.innerHTML = ''; 
 
-        function handleSearchInput() { applyFilters(); }
-        function handleKeyDown(e) { if (e.key === 'Enter') applyFilters(); }
+            if (queueKeys.length === 0) { 
+                container.innerHTML = `<div style="color: var(--text-secondary); font-size: 14px; text-align: center; padding: 20px;">No updates saved in queue yet.</div>`; 
+            } else { 
+                queueKeys.forEach(idx => { 
+                    const item = pendingQueueUpdates[idx]; 
+                    const doc = doctorData[idx] || {}; 
+                    const dateRangeDisplay = item["Special Date From"] === item["Special Date To"] || !item["Special Date To"] 
+                        ? (item["Special Date From"] || 'None') 
+                        : `${item["Special Date From"]} to ${item["Special Date To"]}`; 
 
-        function openModal(doc) {
-            document.getElementById('modalDoctorName').textContent = doc["Doctor Name"] || 'N/A';
-            document.getElementById('modalDept').textContent = doc["Department"] || 'N/A';
-            document.getElementById('modalBranch').textContent = doc["Branch"] || 'N/A';
-            document.getElementById('modalFee').textContent = doc["OP Fee"] || 'N/A';
-            document.getElementById('modalTimings').textContent = doc["OP Timings"] || 'N/A';
-            document.getElementById('modalCredits').textContent = doc["Credit Accepted"] || 'None';
-            document.getElementById('modalCallDay').textContent = doc["Call Day"] || 'N/A';
-            document.getElementById('modalAgeLimit').textContent = doc["Age Criteria"] || 'All Ages';
-            document.getElementById('doctorModal').classList.add('active');
-        }
+                    let callDayDisplayHtml = item["Change Call Day"] === "Yes" ? `<div><strong>New Call Day:</strong> <span style="color:#fbbf24;">${item["New Call Day"]}</span></div>` : '';
 
-        function closeModal() { document.getElementById('doctorModal').classList.remove('active'); }
-        function closeModalOnBg(e) { if (e.target.id === 'doctorModal') closeModal(); }
+                    const cardDiv = document.createElement('div'); 
+                    cardDiv.className = 'preview-item-card'; 
+                    cardDiv.innerHTML = ` 
+                        <div class="preview-item-header"> 
+                            <span class="preview-doctor-name">${doc["Doctor Name"] || 'Doctor'}</span> 
+                            <div class="preview-actions"> 
+                                <button class="preview-btn-sm btn-edit-sm" onclick="editQueueItem(${idx})">Edit</button> 
+                                <button class="preview-btn-sm btn-del-sm" onclick="removeQueueItem(${idx})">Remove</button> 
+                            </div> 
+                        </div> 
+                        <div style="font-size: 13.5px; color: var(--text-secondary);"> 
+                            <div><strong>Branch:</strong> ${doc["Branch"] || 'N/A'} | <strong>Dept:</strong> ${doc["Department"] || 'N/A'}</div> 
+                            <div><strong>Date Range:</strong> ${dateRangeDisplay}</div> 
+                            <div><strong>Timings:</strong> ${item["Special Timings"] || 'Regular'}</div> 
+                            <div><strong>Note:</strong> ${item["Special Note"] || 'None'}</div> 
+                            ${callDayDisplayHtml}
+                        </div> 
+                    `; 
+                    container.appendChild(cardDiv); 
+                }); 
+            } 
 
-        /* ADMIN RESCHEDULE MODAL CONTROLS */
-        function promptAdminPassword() { document.getElementById('passwordModal').classList.add('active'); }
-        function closePasswordModal() { document.getElementById('passwordModal').classList.remove('active'); }
-        function closePasswordOnBg(e) { if (e.target.id === 'passwordModal') closePasswordModal(); }
-        function handlePasswordKey(e) { if (e.key === 'Enter') verifyAdminPassword(); }
+            document.getElementById('rescheduledByInput').value = ""; 
+            document.getElementById('acknowledgeCheckbox').checked = false; 
+            validatePreviewDownloadForm(); 
+            document.getElementById('previewModal').classList.add('active'); 
+        } 
 
-        function verifyAdminPassword() {
-            if (document.getElementById('adminPasswordInput').value === "careoffice123") {
-                closePasswordModal();
-                document.getElementById('adminModal').classList.add('active');
+        function closePreviewModal() { 
+            document.getElementById('previewModal').classList.remove('active'); 
+        } 
+
+        function closePreviewOnBg(event) { 
+            if (event.target.id === 'previewModal') closePreviewModal(); 
+        } 
+
+        function removeQueueItem(idx) { 
+            delete pendingQueueUpdates[idx]; 
+            updateQueueBadge(); 
+            openPreviewModal(); 
+        } 
+
+        function editQueueItem(idx) { 
+            closePreviewModal(); 
+            closeAdminModal(); 
+
+            const doc = doctorData[idx]; 
+            selectedAdminDoctorIndex = idx; 
+            document.getElementById('adminSearchInput').value = doc["Doctor Name"]; 
+            document.getElementById('adminSelectedDoctorDisplay').value = `${doc["Doctor Name"]} (${doc["Department"]} - ${doc["Branch"]})`; 
+
+            const qItem = pendingQueueUpdates[idx]; 
+            document.getElementById('adminSpecialDateFrom').value = qItem["Special Date From"] || ""; 
+            document.getElementById('adminSpecialDateTo').value = qItem["Special Date To"] || ""; 
+            document.getElementById('adminSpecialTimings').value = qItem["Special Timings"] || ""; 
+            document.getElementById('adminSpecialNote').value = qItem["Special Note"] || ""; 
+            if (qItem["Change Call Day"] === "Yes") {
+                document.getElementById('adminChangeCallDayToggle').value = "Yes";
+                document.getElementById('adminNewCallDayDate').value = qItem["New Call Day"] || "";
             } else {
-                alert("Incorrect password.");
+                document.getElementById('adminChangeCallDayToggle').value = "No";
+                document.getElementById('adminNewCallDayDate').value = "";
             }
-        }
+            toggleChangeCallDaySection();
+            document.getElementById('adminModal').classList.add('active'); 
+        } 
 
-        function closeAdminModal() { document.getElementById('adminModal').classList.remove('active'); }
-        function closeAdminOnBg(e) { if (e.target.id === 'adminModal') closeAdminModal(); }
+        function downloadMasterQueueJSON() { 
+            const queueKeys = Object.keys(pendingQueueUpdates); 
+            if (queueKeys.length === 0) { 
+                alert("Your update queue is empty. Please save at least one doctor update before downloading."); 
+                return; 
+            } 
+            openPreviewModal(); 
+        } 
+
+        function validatePreviewDownloadForm() { 
+            const nameVal = document.getElementById('rescheduledByInput').value.trim(); 
+            const isChecked = document.getElementById('acknowledgeCheckbox').checked; 
+            const downloadBtn = document.getElementById('downloadVerifiedBtn'); 
+
+            if (nameVal.length > 0 && isChecked) downloadBtn.removeAttribute('disabled'); 
+            else downloadBtn.setAttribute('disabled', 'true'); 
+        } 
+
+        function confirmAndDownloadFromPreview() { 
+            const queueKeys = Object.keys(pendingQueueUpdates); 
+            if (queueKeys.length === 0) return; 
+
+            const rescheduledByName = document.getElementById('rescheduledByInput').value.trim(); 
+            const timestampNow = formatBackendDate(new Date()); 
+
+            queueKeys.forEach(idx => { 
+                const updates = pendingQueueUpdates[idx]; 
+                doctorData[idx]["Special Date From"] = updates["Special Date From"]; 
+                doctorData[idx]["Special Date To"] = updates["Special Date To"]; 
+                doctorData[idx]["Special Timings"] = updates["Special Timings"]; 
+                doctorData[idx]["Special Note"] = updates["Special Note"]; 
+                
+                if (updates["Change Call Day"] === "Yes" && updates["New Call Day"]) {
+                    let existingCallDays = doctorData[idx]["Call Day"] || doctorData[idx]["Call Days"] || "";
+                    doctorData[idx]["Call Day"] = existingCallDays ? `${existingCallDays}, ${updates["New Call Day"]}` : updates["New Call Day"];
+                }
+
+                doctorData[idx]["Rescheduled By"] = rescheduledByName; 
+                doctorData[idx]["Rescheduled At"] = timestampNow; 
+            }); 
+
+            logAuditTrail(`Master JSON downloaded and committed by ${rescheduledByName}`);
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doctorData, null, 4)); 
+            const downloadAnchor = document.createElement('a'); 
+            downloadAnchor.setAttribute("href", dataStr); 
+            downloadAnchor.setAttribute("download", "doctors.json"); 
+            document.body.appendChild(downloadAnchor); 
+            downloadAnchor.click(); 
+            downloadAnchor.remove(); 
+
+            alert(`Master 'doctors.json' file successfully downloaded! Recorded under Rescheduled By: ${rescheduledByName}.`); 
+            pendingQueueUpdates = {}; 
+            updateQueueBadge(); 
+            closePreviewModal(); 
+            closeAdminModal(); 
+            renderStarredAccordion(); 
+            applyFilters(); 
+        } 
     </script> 
 </body> 
 </html>
-
