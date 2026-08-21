@@ -1318,11 +1318,10 @@
             resultsContainer.style.display = 'flex';
             resultsContainer.innerHTML = '';
 
-            // Generate distances and travel times based on input character length and branch variations
             careBranchesData.forEach((branch, index) => {
                 const randomOffset = (inputVal.length + index) % 4;
                 const distance = (branch.baseKm + randomOffset * 0.7).toFixed(1);
-                const travelTime = Math.round(distance * 3.5); // Estimated minutes drive
+                const travelTime = Math.round(distance * 3.5);
 
                 const itemHTML = `
                     <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); padding: 14px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s ease;">
