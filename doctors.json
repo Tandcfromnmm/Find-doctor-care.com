@@ -230,7 +230,7 @@
   {
     "Starred": "Yes",
     "Doctor Name": "Dr. Ramchandar Rao",
-    "Department": "Pulmonary",
+    "Department": "Pulmonology",
     "Branch": "COPC",
     "Age Criteria": "15+",
     "Call Day": "Tuesday",
@@ -316,7 +316,7 @@
   {
     "Starred": "Yes",
     "Doctor Name": "Dr. Sandeep",
-    "Department": "Medical Oncology",
+    "Department": "Oncology",
     "Branch": "COPC",
     "Age Criteria": "15+",
     "Call Day": "Tuesday",
@@ -478,7 +478,7 @@
   {
     "Starred": "Yes",
     "Doctor Name": "Dr. Sandeep",
-    "Department": "Medical Oncology",
+    "Department": "Oncology",
     "Branch": "Banjara IP",
     "Age Criteria": "15+",
     "Call Day": "Tuesday",
