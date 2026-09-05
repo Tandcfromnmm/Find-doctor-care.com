@@ -3684,7 +3684,6 @@
      //Daily updates
 function toggleHubCard(cardId) {
     const card = document.getElementById(cardId);
-    // Optional: close other cards when opening a new one
     document.querySelectorAll('.hub-card').forEach(c => {
         if(c !== card) c.classList.remove('expanded');
     });
@@ -3701,12 +3700,9 @@ function ackSingleHub(btn, cardId) {
     
     btn.textContent = "Seen";
     btn.disabled = true;
-    btn.style.background = "#e1f5fe";
-    btn.style.color = "#0071e3";
     
     statusText.textContent = "Acknowledged";
     statusText.style.color = "#34c759";
-    statusText.style.background = "#e8f8ed";
     
     timestampSpan.textContent = `At ${timeStr}`;
 }
@@ -3722,17 +3718,13 @@ function acknowledgeAllRadar() {
         
         btn.textContent = "Seen";
         btn.disabled = true;
-        btn.style.background = "#e1f5fe";
-        btn.style.color = "#0071e3";
         
         statusText.textContent = "Acknowledged";
         statusText.style.color = "#34c759";
-        statusText.style.background = "#e8f8ed";
         
         timestampSpan.textContent = `At ${timeStr}`;
     });
 }
-
 
 
         
