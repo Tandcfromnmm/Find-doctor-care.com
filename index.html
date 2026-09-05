@@ -1376,44 +1376,87 @@
 
 
 <!--Daily updates-->
-<section class="apple-updates-section">
-    <div class="updates-container">
-        <div class="updates-header">
-            <h2>Hospital Status & Updates</h2>
-            <p>Real-time advisories across all care branches.</p>
+<section class="apple-pulse-section">
+    <div class="pulse-container">
+        
+        <!-- Header with Date & Global Status -->
+        <div class="pulse-header">
+            <div class="header-titles">
+                <h2>Daily Care Pulse</h2>
+                <p id="current-date-label">Today's Live Overview Across All Branches</p>
+            </div>
+            <div class="global-ack-wrapper">
+                <button class="global-ack-btn" onclick="acknowledgeAll(this)">Acknowledge All Updates</button>
+                <span id="global-timestamp" class="timestamp-text"></span>
+            </div>
         </div>
 
-        <div class="updates-grid">
-            <!-- Update Card 1 -->
-            <div class="update-card" data-id="1">
-                <div class="card-top">
-                    <span class="badge branch-jubilee">Jubilee Hills Branch</span>
-                    <span class="update-type">OP Timings</span>
+        <!-- Bento Grid Layout (Fits everything on one screen) -->
+        <div class="bento-grid">
+            
+            <!-- Branch Card: Jubilee Hills -->
+            <div class="bento-card" data-branch="jubilee">
+                <div class="card-top-row">
+                    <span class="branch-title">Jubilee Hills</span>
+                    <span class="status-dot active"></span>
                 </div>
-                <h3>Dr. Smith Rescheduled</h3>
-                <p>Cardiology OPD for today is shifted to 2:00 PM due to surgery hours.</p>
-                <div class="card-footer">
-                    <button class="ack-btn" onclick="acknowledgeUpdate(this)">Acknowledge</button>
-                    <span class="ack-status"></span>
+                <ul class="update-mini-list">
+                    <li><strong class="tag-op">OP:</strong> Dr. Smith shifted to 2:00 PM</li>
+                    <li><strong class="tag-diag">Diag:</strong> MRI Suite calibrated till 4 PM</li>
+                </ul>
+                <div class="card-bottom">
+                    <button class="mini-ack" onclick="ackSingle(this)">Check</button>
                 </div>
             </div>
 
-            <!-- Update Card 2 -->
-            <div class="update-card" data-id="2">
-                <div class="card-top">
-                    <span class="badge branch-hitec">HITEC City Branch</span>
-                    <span class="update-type">Diagnostics</span>
+            <!-- Branch Card: HITEC City -->
+            <div class="bento-card" data-branch="hitec">
+                <div class="card-top-row">
+                    <span class="branch-title">HITEC City</span>
+                    <span class="status-dot active"></span>
                 </div>
-                <h3>MRI Maintenance Notice</h3>
-                <p>Main MRI suite is undergoing scheduled calibration until 4:00 PM.</p>
-                <div class="card-footer">
-                    <button class="ack-btn" onclick="acknowledgeUpdate(this)">Acknowledge</button>
-                    <span class="ack-status"></span>
+                <ul class="update-mini-list">
+                    <li><strong class="tag-leave">Leave:</strong> Dr. Rao on emergency leave</li>
+                    <li><strong class="tag-op">OP:</strong> Pediatrics handled by Dr. Mehta</li>
+                </ul>
+                <div class="card-bottom">
+                    <button class="mini-ack" onclick="ackSingle(this)">Check</button>
                 </div>
             </div>
+
+            <!-- Branch Card: Gachibowli -->
+            <div class="bento-card" data-branch="gachibowli">
+                <div class="card-top-row">
+                    <span class="branch-title">Gachibowli</span>
+                    <span class="status-dot normal"></span>
+                </div>
+                <ul class="update-mini-list">
+                    <li><strong class="tag-op">OP:</strong> Normal operations reported</li>
+                    <li><strong class="tag-diag">Diag:</strong> CT Scan operational</li>
+                </ul>
+                <div class="card-bottom">
+                    <button class="mini-ack" onclick="ackSingle(this)">Check</button>
+                </div>
+            </div>
+
+            <!-- Branch Card: Banjara Hills -->
+            <div class="bento-card" data-branch="banjara">
+                <div class="card-top-row">
+                    <span class="branch-title">Banjara Hills</span>
+                    <span class="status-dot active"></span>
+                </div>
+                <ul class="update-mini-list">
+                    <li><strong class="tag-op">Timings:</strong> Evening OPD extended to 8 PM</li>
+                </ul>
+                <div class="card-bottom">
+                    <button class="mini-ack" onclick="ackSingle(this)">Check</button>
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
+
 
 
 
