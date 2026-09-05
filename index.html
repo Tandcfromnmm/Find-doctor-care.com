@@ -3685,39 +3685,57 @@
         } 
 
      //Daily updates
-     // Acknowledge a single branch card
-function ackSingle(btn) {
-    const card = btn.closest('.bento-card');
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    btn.textContent = `Seen (${timeStr})`;
-    btn.style.backgroundColor = "#e8f8ed";
-    btn.style.color = "#34c759";
-    btn.disabled = true;
+function toggleHubCard(cardId) {
+    const card = document.getElementById(cardId);
+    // Optional: close other cards when opening a new one
+    document.querySelectorAll('.hub-card').forEach(c => {
+        if(c !== card) c.classList.remove('expanded');
+    });
+    card.classList.toggle('expanded');
 }
 
-// Acknowledge all branches at once with one click
-function acknowledgeAll(mainBtn) {
+function ackSingleHub(btn, cardId) {
+    const card = document.getElementById(cardId);
+    const statusText = card.querySelector('.hub-status-text');
+    const timestampSpan = card.querySelector('.timestamp-stamp');
+    
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const dateStr = now.toLocaleDateString([], { month: 'short', day: 'numeric' });
     
-    mainBtn.textContent = "All Briefs Acknowledged";
-    mainBtn.disabled = true;
-    mainBtn.style.backgroundColor = "#e8e8ed";
-    mainBtn.style.color = "#86868b";
+    btn.textContent = "Seen";
+    btn.disabled = true;
+    btn.style.background = "#e1f5fe";
+    btn.style.color = "#0071e3";
     
-    document.getElementById('global-timestamp').textContent = `Acknowledged on ${dateStr} at ${timeStr}`;
+    statusText.textContent = "Acknowledged";
+    statusText.style.color = "#34c759";
+    statusText.style.background = "#e8f8ed";
     
-    // Auto-check all individual mini buttons
-    document.querySelectorAll('.mini-ack').forEach(btn => {
+    timestampSpan.textContent = `At ${timeStr}`;
+}
+
+function acknowledgeAllRadar() {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    document.querySelectorAll('.hub-card').forEach(card => {
+        const btn = card.querySelector('.branch-ack');
+        const statusText = card.querySelector('.hub-status-text');
+        const timestampSpan = card.querySelector('.timestamp-stamp');
+        
         btn.textContent = "Seen";
-        btn.style.backgroundColor = "#e8f8ed";
-        btn.style.color = "#34c759";
         btn.disabled = true;
+        btn.style.background = "#e1f5fe";
+        btn.style.color = "#0071e3";
+        
+        statusText.textContent = "Acknowledged";
+        statusText.style.color = "#34c759";
+        statusText.style.background = "#e8f8ed";
+        
+        timestampSpan.textContent = `At ${timeStr}`;
     });
 }
+
 
 
         
