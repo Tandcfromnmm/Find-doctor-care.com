@@ -1423,83 +1423,71 @@
         <div class="radar-header">
             <div>
                 <h2>Branch Hub</h2>
-                <p>Tap a branch to view updates</p>
+                <p>Tap a branch for live updates or pin them</p>
             </div>
             <button class="master-ack-btn" onclick="acknowledgeAllRadar()">Acknowledge All</button>
         </div>
 
-        <!-- Visual Branch Hub Grid -->
-        <div class="hub-grid">
-            
-            <!-- Jubilee Hills -->
-            <div class="hub-card" id="hub-jubilee">
-                <div class="hub-trigger" onclick="toggleHubCard('hub-jubilee')">
-                    <div class="hub-info">
-                        <span class="pulsing-dot active"></span>
-                        <span class="hub-name">Jubilee Hills</span>
-                    </div>
-                    <span class="hub-status-text">1 Alert</span>
-                </div>
-                <div class="hub-drawer">
-                    <div class="drawer-content">
-                        <ul class="update-bullets">
-                            <li>Dr. Smith's OPD shifted to 2:00 PM.</li>
-                        </ul>
-                        <div class="drawer-footer">
-                            <span class="timestamp-stamp"></span>
-                            <button class="branch-ack" onclick="ackSingleHub(this, 'hub-jubilee')">Acknowledge</button>
-                        </div>
-                    </div>
-                </div>
+        <!-- Horizontal Scrollable Branch Pills -->
+        <div class="branches-scroll-row">
+            <div class="branch-pill active-alert" onclick="openPopup('Jubilee Hills', 'Dr. Smith\'s OPD shifted to 2:00 PM. MRI suite calibration until 4:00 PM.')">
+                <span class="pulsing-dot active"></span>
+                <span class="branch-name">Jubilee Hills</span>
+                <span class="alert-count">2</span>
             </div>
-
-            <!-- HITEC City -->
-            <div class="hub-card" id="hub-hitec">
-                <div class="hub-trigger" onclick="toggleHubCard('hub-hitec')">
-                    <div class="hub-info">
-                        <span class="pulsing-dot active"></span>
-                        <span class="hub-name">HITEC City</span>
-                    </div>
-                    <span class="hub-status-text">1 Alert</span>
-                </div>
-                <div class="hub-drawer">
-                    <div class="drawer-content">
-                        <ul class="update-bullets">
-                            <li>Dr. Rao on leave; Pediatrics handled by Dr. Mehta.</li>
-                        </ul>
-                        <div class="drawer-footer">
-                            <span class="timestamp-stamp"></span>
-                            <button class="branch-ack" onclick="ackSingleHub(this, 'hub-hitec')">Acknowledge</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="branch-pill active-alert" onclick="openPopup('HITEC City', 'Dr. Rao on leave; Pediatrics handled by Dr. Mehta.')">
+                <span class="pulsing-dot active"></span>
+                <span class="branch-name">HITEC City</span>
+                <span class="alert-count">1</span>
             </div>
-
-            <!-- Gachibowli -->
-            <div class="hub-card" id="hub-gachibowli">
-                <div class="hub-trigger" onclick="toggleHubCard('hub-gachibowli')">
-                    <div class="hub-info">
-                        <span class="pulsing-dot normal"></span>
-                        <span class="hub-name">Gachibowli</span>
-                    </div>
-                    <span class="hub-status-text">Normal</span>
-                </div>
-                <div class="hub-drawer">
-                    <div class="drawer-content">
-                        <ul class="update-bullets">
-                            <li>All departments operating normally.</li>
-                        </ul>
-                        <div class="drawer-footer">
-                            <span class="timestamp-stamp"></span>
-                            <button class="branch-ack" onclick="ackSingleHub(this, 'hub-gachibowli')">Acknowledge</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="branch-pill" onclick="openPopup('Gachibowli', 'All departments operating normally.')">
+                <span class="pulsing-dot normal"></span>
+                <span class="branch-name">Gachibowli</span>
+                <span class="alert-count">0</span>
             </div>
-
+            <div class="branch-pill active-alert" onclick="openPopup('Banjara Hills', 'Evening OPD extended up to 8:00 PM.')">
+                <span class="pulsing-dot active"></span>
+                <span class="branch-name">Banjara Hills</span>
+                <span class="alert-count">1</span>
+            </div>
         </div>
+
+        <!-- Pinned Alerts Strip (Appears when items are pinned) -->
+        <div id="pinnedContainer" class="pinned-strip-container" style="display: none;">
+            <div class="pinned-strip-header">
+                <span>📌 Pinned Updates</span>
+            </div>
+            <div id="pinnedList" class="pinned-list"></div>
+        </div>
+
     </div>
 </section>
+
+<!-- Apple-Style Popup Modal with Pin Option -->
+<div id="branchPopup" class="popup-overlay" onclick="closePopupOutside(event)">
+    <div class="popup-card">
+        <div class="popup-header">
+            <h3 id="popupTitle">Branch Name</h3>
+            <div class="popup-header-actions">
+                <button id="popupPinBtn" class="icon-action-btn" onclick="togglePinCurrent()" title="Pin this update">📌</button>
+                <button class="popup-close" onclick="closePopup()">&times;</button>
+            </div>
+        </div>
+        <div class="popup-body">
+            <p id="popupContent">Update details go here...</p>
+        </div>
+        <div class="popup-footer">
+            <span id="popupTimestamp" class="timestamp-stamp">Unacknowledged</span>
+            <button id="popupAckBtn" class="branch-ack" onclick="ackCurrentPopup()">Acknowledge</button>
+        </div>
+    </div>
+</div>
+
+            
+            
+
+
+
 
                     
 
