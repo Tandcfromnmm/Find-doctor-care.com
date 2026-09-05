@@ -3783,48 +3783,148 @@
         } 
 
      //Daily updates
-function toggleHubCard(cardId) {
-    const card = document.getElementById(cardId);
-    document.querySelectorAll('.hub-card').forEach(c => {
-        if(c !== card) c.classList.remove('expanded');
+let currentBranchName = "";
+let currentContentText = "";
+let activeBranchElement = null;
+let pinnedBranches = {}; // Tracks pinned states
+
+function openPopup(branchName, contentText) {
+    currentBranchName = branchName;
+    currentContentText = contentText;
+    
+    document.getElementById('popupTitle').textContent = branchName;
+    document.getElementById('popupContent').textContent = contentText;
+    
+    // Find matching pill element
+    const pills = document.querySelectorAll('.branch-pill');
+    pills.forEach(pill => {
+        if(pill.querySelector('.branch-name').textContent === branchName) {
+            activeBranchElement = pill;
+        }
     });
-    card.classList.toggle('expanded');
+
+    // Check pin status
+    const pinBtn = document.getElementById('popupPinBtn');
+    if (pinnedBranches[branchName]) {
+        pinBtn.classList.add('pinned');
+        pinBtn.title = "Unpin this update";
+    } else {
+        pinBtn.classList.remove('pinned');
+        pinBtn.title = "Pin this update";
+    }
+
+    // Check acknowledgment status
+    const ackBtn = document.getElementById('popupAckBtn');
+    const timestampSpan = document.getElementById('popupTimestamp');
+    
+    if (activeBranchElement && activeBranchElement.classList.contains('acknowledged')) {
+        ackBtn.textContent = "Seen";
+        ackBtn.disabled = true;
+        ackBtn.style.background = "rgba(255,255,255,0.1)";
+        timestampSpan.textContent = activeBranchElement.dataset.ackTime || "Acknowledged";
+    } else {
+        ackBtn.textContent = "Acknowledge";
+        ackBtn.disabled = false;
+        ackBtn.style.background = "#0071e3";
+        timestampSpan.textContent = "Unacknowledged";
+    }
+
+    document.getElementById('branchPopup').classList.add('active');
 }
 
-function ackSingleHub(btn, cardId) {
-    const card = document.getElementById(cardId);
-    const statusText = card.querySelector('.hub-status-text');
-    const timestampSpan = card.querySelector('.timestamp-stamp');
+function closePopup() {
+    document.getElementById('branchPopup').classList.remove('active');
+}
+
+function closePopupOutside(event) {
+    if (event.target.id === 'branchPopup') {
+        closePopup();
+    }
+}
+
+function togglePinCurrent() {
+    const pinBtn = document.getElementById('popupPinBtn');
     
+    if (pinnedBranches[currentBranchName]) {
+        delete pinnedBranches[currentBranchName];
+        pinBtn.classList.remove('pinned');
+    } else {
+        pinnedBranches[currentBranchName] = currentContentText;
+        pinBtn.classList.add('pinned');
+    }
+    renderPinnedStrip();
+}
+
+function removePin(branchName) {
+    delete pinnedBranches[branchName];
+    if (currentBranchName === branchName) {
+        document.getElementById('popupPinBtn').classList.remove('pinned');
+    }
+    renderPinnedStrip();
+}
+
+function renderPinnedStrip() {
+    const container = document.getElementById('pinnedContainer');
+    const list = document.getElementById('pinnedList');
+    list.innerHTML = "";
+    
+    const keys = Object.keys(pinnedBranches);
+    if (keys.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    keys.forEach(branch => {
+        const item = document.createElement('div');
+        item.className = 'pinned-item';
+        item.innerHTML = `
+            <span class="pinned-item-content"><strong>${branch}:</strong> ${pinnedBranches[branch]}</span>
+            <button class="unpin-btn" onclick="removePin('${branch}')" title="Unpin">&times;</button>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function ackCurrentPopup() {
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const timeLabel = `Seen at ${timeStr}`;
     
-    btn.textContent = "Seen";
-    btn.disabled = true;
+    const ackBtn = document.getElementById('popupAckBtn');
+    const timestampSpan = document.getElementById('popupTimestamp');
     
-    statusText.textContent = "Acknowledged";
-    statusText.style.color = "#34c759";
+    ackBtn.textContent = "Seen";
+    ackBtn.disabled = true;
+    ackBtn.style.background = "rgba(255,255,255,0.1)";
+    timestampSpan.textContent = timeLabel;
     
-    timestampSpan.textContent = `At ${timeStr}`;
+    if (activeBranchElement) {
+        activeBranchElement.classList.add('acknowledged');
+        activeBranchElement.dataset.ackTime = timeLabel;
+        const countBadge = activeBranchElement.querySelector('.alert-count');
+        if(countBadge) countBadge.style.color = "#34c759";
+    }
 }
 
 function acknowledgeAllRadar() {
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const timeLabel = `Seen at ${timeStr}`;
     
-    document.querySelectorAll('.hub-card').forEach(card => {
-        const btn = card.querySelector('.branch-ack');
-        const statusText = card.querySelector('.hub-status-text');
-        const timestampSpan = card.querySelector('.timestamp-stamp');
-        
-        btn.textContent = "Seen";
-        btn.disabled = true;
-        
-        statusText.textContent = "Acknowledged";
-        statusText.style.color = "#34c759";
-        
-        timestampSpan.textContent = `At ${timeStr}`;
+    document.querySelectorAll('.branch-pill').forEach(pill => {
+        pill.classList.add('acknowledged');
+        pill.dataset.ackTime = timeLabel;
+        const countBadge = pill.querySelector('.alert-count');
+        if(countBadge) countBadge.style.color = "#34c759";
     });
+
+    const ackBtn = document.getElementById('popupAckBtn');
+    const timestampSpan = document.getElementById('popupTimestamp');
+    ackBtn.textContent = "Seen";
+    ackBtn.disabled = true;
+    ackBtn.style.background = "rgba(255,255,255,0.1)";
+    timestampSpan.textContent = timeLabel;
 }
 
 
