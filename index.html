@@ -1177,44 +1177,144 @@
 
 
         /*Daily updates*/
-.apple-radar-section {
-    background-color: transparent;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-    padding: 12px 10px;
-    color: #ffffff;
-}
 
-.radar-container {
-    max-width: 100%;
-    margin: 0 auto;
-    background: rgba(26, 31, 56, 0.6);
+<style>
+/* Trigger Bar */
+.matrix-trigger-bar {
+    background: rgba(15, 23, 42, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    padding: 12px;
-    backdrop-filter: blur(10px);
-}
-
-.radar-header {
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 10px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    color: #ffffff;
+    margin: 10px 0;
+    transition: all 0.25s ease;
 }
 
-.radar-header h2 {
-    font-size: 15px;
+.matrix-trigger-bar:hover {
+    border-color: rgba(0, 113, 227, 0.5);
+    background: rgba(30, 41, 59, 0.85);
+}
+
+.trigger-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.matrix-pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+.matrix-pulse-dot.active { background-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
+.matrix-pulse-dot.normal { background-color: #10b981; }
+
+.trigger-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #f8fafc;
+}
+
+.trigger-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.matrix-badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.trigger-arrow {
+    font-size: 12px;
+    color: #94a3b8;
+    transition: transform 0.25s ease;
+}
+
+/* Holographic Flyout Overlay with 3D perspective tilt */
+.matrix-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(2, 6, 23, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    perspective: 1000px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.matrix-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.matrix-flyout-container {
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 650px;
+    padding: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    transform: translateY(20px) rotateX(8deg) scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.matrix-overlay.active .matrix-flyout-container {
+    transform: translateY(0) rotateX(0deg) scale(1);
+}
+
+/* Flyout Header */
+.matrix-flyout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 10px;
+}
+
+.matrix-header-info h3 {
+    font-size: 16px;
     font-weight: 600;
     margin: 0 0 2px 0;
     color: #ffffff;
 }
 
-.radar-header p {
+.matrix-header-info p {
     font-size: 11px;
     color: #94a3b8;
     margin: 0;
 }
 
-.master-ack-btn {
+.matrix-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.matrix-ack-all-btn {
     background: #0071e3;
     color: white;
     border: none;
@@ -1225,224 +1325,101 @@
     cursor: pointer;
 }
 
-/* Horizontal Scrollable Row */
-.branches-scroll-row {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-}
-
-.branches-scroll-row::-webkit-scrollbar {
-    height: 4px;
-}
-.branches-scroll-row::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-}
-
-.branch-pill {
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    padding: 6px 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.branch-pill:hover {
-    border-color: #0071e3;
-    background: rgba(30, 41, 59, 0.9);
-}
-
-.pulsing-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-}
-.pulsing-dot.active { background-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
-.pulsing-dot.normal { background-color: #10b981; }
-
-.branch-name {
-    font-size: 12px;
-    font-weight: 500;
-    color: #f8fafc;
-}
-
-.alert-count {
-    font-size: 10px;
-    background: rgba(255, 255, 255, 0.1);
+.matrix-close-btn {
+    background: none;
+    border: none;
     color: #94a3b8;
-    padding: 1px 5px;
-    border-radius: 10px;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
 }
 
-/* Pinned Strip Styles */
-.pinned-strip-container {
-    margin-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 8px;
+/* Matrix Card Grid (Auto-wrapping side-by-side cards) */
+.matrix-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 4px;
 }
 
-.pinned-strip-header {
-    font-size: 11px;
-    color: #f59e0b;
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-
-.pinned-list {
+/* Individual Matrix Card */
+.matrix-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.2s ease;
+}
+
+.matrix-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.matrix-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.matrix-branch-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
     gap: 6px;
 }
 
-.pinned-item {
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.2);
-    border-radius: 8px;
-    padding: 6px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-}
-
-.pinned-item-content {
-    color: #fef3c7;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 75%;
-}
-
-.unpin-btn {
-    background: none;
-    border: none;
-    color: #94a3b8;
-    cursor: pointer;
+.matrix-card-body {
     font-size: 12px;
-}
-
-/* Modal Popup Styles */
-.popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.25s ease;
-}
-
-.popup-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.popup-card {
-    background: #1e293b;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    width: 90%;
-    max-width: 340px;
-    padding: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    color: #ffffff;
-    transform: scale(0.95);
-    transition: transform 0.25s ease;
-}
-
-.popup-overlay.active .popup-card {
-    transform: scale(1);
-}
-
-.popup-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.popup-header h3 {
-    font-size: 15px;
-    font-weight: 600;
-    margin: 0;
-}
-
-.popup-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.icon-action-btn {
-    background: none;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-}
-
-.icon-action-btn.pinned {
-    opacity: 1;
-}
-
-.popup-close {
-    background: none;
-    border: none;
-    color: #94a3b8;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.popup-body {
-    font-size: 13px;
     color: #cbd5e1;
     line-height: 1.4;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
-.popup-footer {
+.matrix-card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 8px;
 }
 
-.timestamp-stamp {
-    font-size: 11px;
+.matrix-timestamp {
+    font-size: 10px;
     color: #34c759;
     font-weight: 500;
 }
 
-.branch-ack {
-    background: #0071e3;
+.matrix-card-ack {
+    background: rgba(255, 255, 255, 0.1);
     border: none;
-    padding: 5px 12px;
-    border-radius: 8px;
-    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
     font-weight: 500;
     color: #ffffff;
     cursor: pointer;
 }
 
-  
+
+
+
+    
+
+
+
+
+
+    
+
+
     
 
   
