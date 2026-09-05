@@ -3587,6 +3587,34 @@
             renderStarredAccordion(); 
             applyFilters(); 
         } 
+
+     //Daily updates
+     function acknowledgeUpdate(button) {
+    const card = button.closest('.update-card');
+    const statusSpan = card.querySelector('.ack-status');
+    
+    // Get current local timestamp
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const dateString = now.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    
+    // Update UI elements
+    button.textContent = "Acknowledged";
+    button.disabled = true;
+    button.style.backgroundColor = "#e8e8ed";
+    button.style.color = "#86868b";
+    button.style.cursor = "default";
+    
+    statusSpan.textContent = `Seen on ${dateString} at ${timeString}`;
+    
+    // Optional: Save acknowledgment state to localStorage so it persists on reload
+    const updateId = card.getAttribute('data-id');
+    localStorage.setItem(`acknowledged_${updateId}`, true);
+}
+
+        
+
+        
     </script> 
 </body> 
 </html>
