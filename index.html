@@ -3765,10 +3765,50 @@
         } 
 
      //Daily updates
+
 let currentBranchName = "";
 let currentContentText = "";
 let activeBranchElement = null;
-let pinnedBranches = {}; // Tracks pinned states
+let pinnedBranches = {};
+
+// Fetch JSON data when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+    loadBranchData();
+});
+
+async function loadBranchData() {
+    try {
+        const response = await fetch('briefingsheet.json'); // Path to your json file
+        const data = await response.json();
+        renderBranchPills(data.branches);
+    } catch (error) {
+        console.error("Error loading briefingsheet.json:", error);
+        document.getElementById('branchesScrollRow').innerHTML = '<span style="font-size:11px; color:#ef4444;">Failed to load branch data.</span>';
+    }
+}
+
+function renderBranchPills(branches) {
+    const scrollRow = document.getElementById('branchesScrollRow');
+    scrollRow.innerHTML = "";
+
+    branches.forEach(branch => {
+        const pill = document.createElement('div');
+        const isActive = branch.alertCount > 0;
+        
+        pill.className = `branch-pill ${isActive ? 'active-alert' : ''}`;
+        // Escape quotes safely for onclick handler
+        const safeContent = branch.content.replace(/'/g, "\\'");
+        
+        pill.setAttribute('onclick', `openPopup('${branch.name}', '${safeContent}')`);
+        
+        pill.innerHTML = `
+            <span class="pulsing-dot ${isActive ? 'active' : 'normal'}"></span>
+            <span class="branch-name">${branch.name}</span>
+            <span class="alert-count">${branch.alertCount}</span>
+        `;
+        scrollRow.appendChild(pill);
+    });
+}
 
 function openPopup(branchName, contentText) {
     currentBranchName = branchName;
@@ -3777,7 +3817,6 @@ function openPopup(branchName, contentText) {
     document.getElementById('popupTitle').textContent = branchName;
     document.getElementById('popupContent').textContent = contentText;
     
-    // Find matching pill element
     const pills = document.querySelectorAll('.branch-pill');
     pills.forEach(pill => {
         if(pill.querySelector('.branch-name').textContent === branchName) {
@@ -3785,7 +3824,6 @@ function openPopup(branchName, contentText) {
         }
     });
 
-    // Check pin status
     const pinBtn = document.getElementById('popupPinBtn');
     if (pinnedBranches[branchName]) {
         pinBtn.classList.add('pinned');
@@ -3795,7 +3833,6 @@ function openPopup(branchName, contentText) {
         pinBtn.title = "Pin this update";
     }
 
-    // Check acknowledgment status
     const ackBtn = document.getElementById('popupAckBtn');
     const timestampSpan = document.getElementById('popupTimestamp');
     
@@ -3908,6 +3945,7 @@ function acknowledgeAllRadar() {
     ackBtn.style.background = "rgba(255,255,255,0.1)";
     timestampSpan.textContent = timeLabel;
 }
+
 
 
         
