@@ -3664,28 +3664,40 @@
         } 
 
      //Daily updates
-     function acknowledgeUpdate(button) {
-    const card = button.closest('.update-card');
-    const statusSpan = card.querySelector('.ack-status');
-    
-    // Get current local timestamp
+     // Acknowledge a single branch card
+function ackSingle(btn) {
+    const card = btn.closest('.bento-card');
     const now = new Date();
-    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const dateString = now.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
-    // Update UI elements
-    button.textContent = "Acknowledged";
-    button.disabled = true;
-    button.style.backgroundColor = "#e8e8ed";
-    button.style.color = "#86868b";
-    button.style.cursor = "default";
-    
-    statusSpan.textContent = `Seen on ${dateString} at ${timeString}`;
-    
-    // Optional: Save acknowledgment state to localStorage so it persists on reload
-    const updateId = card.getAttribute('data-id');
-    localStorage.setItem(`acknowledged_${updateId}`, true);
+    btn.textContent = `Seen (${timeStr})`;
+    btn.style.backgroundColor = "#e8f8ed";
+    btn.style.color = "#34c759";
+    btn.disabled = true;
 }
+
+// Acknowledge all branches at once with one click
+function acknowledgeAll(mainBtn) {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateStr = now.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    
+    mainBtn.textContent = "All Briefs Acknowledged";
+    mainBtn.disabled = true;
+    mainBtn.style.backgroundColor = "#e8e8ed";
+    mainBtn.style.color = "#86868b";
+    
+    document.getElementById('global-timestamp').textContent = `Acknowledged on ${dateStr} at ${timeStr}`;
+    
+    // Auto-check all individual mini buttons
+    document.querySelectorAll('.mini-ack').forEach(btn => {
+        btn.textContent = "Seen";
+        btn.style.backgroundColor = "#e8f8ed";
+        btn.style.color = "#34c759";
+        btn.disabled = true;
+    });
+}
+
 
         
 
