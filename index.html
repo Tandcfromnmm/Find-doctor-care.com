@@ -1535,37 +1535,18 @@
         <!-- Compact Section Header -->
         <div class="radar-header">
             <div>
-                <h2>Briefing</h2>
+                <h2>Briefing Hub</h2>
                 <p>Tap a branch for live updates or pin them</p>
             </div>
             <button class="master-ack-btn" onclick="acknowledgeAllRadar()">Acknowledge All</button>
         </div>
 
-        <!-- Horizontal Scrollable Branch Pills -->
-        <div class="branches-scroll-row">
-            <div class="branch-pill active-alert" onclick="openPopup('Jubilee Hills', 'Dr. Smith\'s OPD shifted to 2:00 PM. MRI suite calibration until 4:00 PM.')">
-                <span class="pulsing-dot active"></span>
-                <span class="branch-name">Banjara IP</span>
-                <span class="alert-count">2</span>
-            </div>
-            <div class="branch-pill active-alert" onclick="openPopup('HITEC City', 'Dr. Rao on leave; Pediatrics handled by Dr. Mehta.')">
-                <span class="pulsing-dot active"></span>
-                <span class="branch-name">HITEC City</span>
-                <span class="alert-count">1</span>
-            </div>
-            <div class="branch-pill" onclick="openPopup('Gachibowli', 'All departments operating normally.')">
-                <span class="pulsing-dot normal"></span>
-                <span class="branch-name">Nampally</span>
-                <span class="alert-count">0</span>
-            </div>
-            <div class="branch-pill active-alert" onclick="openPopup('Banjara Hills', 'Evening OPD extended up to 8:00 PM.')">
-                <span class="pulsing-dot active"></span>
-                <span class="branch-name">COPC</span>
-                <span class="alert-count">1</span>
-            </div>
+        <!-- Horizontal Scrollable Branch Pills (Loaded dynamically from JSON) -->
+        <div id="branchesScrollRow" class="branches-scroll-row">
+            <!-- Dynamic pills load here -->
         </div>
 
-        <!-- Pinned Alerts Strip (Appears when items are pinned) -->
+        <!-- Pinned Alerts Strip -->
         <div id="pinnedContainer" class="pinned-strip-container" style="display: none;">
             <div class="pinned-strip-header">
                 <span>📌 Pinned</span>
@@ -1576,7 +1557,7 @@
     </div>
 </section>
 
-<!-- Apple-Style Popup Modal with Pin Option -->
+<!-- Apple-Style Popup Modal -->
 <div id="branchPopup" class="popup-overlay" onclick="closePopupOutside(event)">
     <div class="popup-card">
         <div class="popup-header">
@@ -1596,7 +1577,8 @@
     </div>
 </div>
 
-            
+
+        
             
 
 
