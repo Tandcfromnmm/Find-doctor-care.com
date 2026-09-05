@@ -1253,6 +1253,51 @@
         </div> 
     </div> 
 
+
+<!--Daily updates-->
+<section class="apple-updates-section">
+    <div class="updates-container">
+        <div class="updates-header">
+            <h2>Hospital Status & Updates</h2>
+            <p>Real-time advisories across all care branches.</p>
+        </div>
+
+        <div class="updates-grid">
+            <!-- Update Card 1 -->
+            <div class="update-card" data-id="1">
+                <div class="card-top">
+                    <span class="badge branch-jubilee">Jubilee Hills Branch</span>
+                    <span class="update-type">OP Timings</span>
+                </div>
+                <h3>Dr. Smith Rescheduled</h3>
+                <p>Cardiology OPD for today is shifted to 2:00 PM due to surgery hours.</p>
+                <div class="card-footer">
+                    <button class="ack-btn" onclick="acknowledgeUpdate(this)">Acknowledge</button>
+                    <span class="ack-status"></span>
+                </div>
+            </div>
+
+            <!-- Update Card 2 -->
+            <div class="update-card" data-id="2">
+                <div class="card-top">
+                    <span class="badge branch-hitec">HITEC City Branch</span>
+                    <span class="update-type">Diagnostics</span>
+                </div>
+                <h3>MRI Maintenance Notice</h3>
+                <p>Main MRI suite is undergoing scheduled calibration until 4:00 PM.</p>
+                <div class="card-footer">
+                    <button class="ack-btn" onclick="acknowledgeUpdate(this)">Acknowledge</button>
+                    <span class="ack-status"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+    
     <!-- FOOTER --> 
     <footer class="site-footer"> 
         <div class="footer-top-row">
