@@ -1,1 +1,41 @@
+{
+  "branches": [
+    {
+      "name": "Banana IP",
+      "status": "active",
+      "alertCount": 2,
+      "content": "Dr. Murali Manohar OP for 5th Sep & 6thSep 1PM to 2PM only. MRI Offer: 50% discount on all MRI's until 4:00 PM on 6th Sep."
+    },
+    {
+      "name": "HITEC City",
+      "status": "active",
+      "alertCount": 1,
+      "content": "Dr. Rao on leave; Pediatrics handled by Dr. Mehta."
+    },
+    {
+      "name": "Nampally",
+      "status": "inactive",
+      "alertCount": 0,
+      "content": "All departments operating normally."
+    },
+    {
+      "name": "COPC",
+      "status": "active",
+      "alertCount": 1,
+      "content": "Dr. Chandravati Evening OPD extended up to 8:00 PM."
+    },
+    {
+      "name": "Raipur",
+      "status": "active",
+      "alertCount": 1,
+      "content": "Dr. Manohar left Care, pitch for alternative doctor."
+    },
+    {
+      "name": "Bhubaneswar",
+      "status": "active",
+      "alertCount": 1,
+      "content": "Dr. Sandeep singh on leave 10th Sep to 15th Sep. No-OP."
+    }
+  ]
+}
 
