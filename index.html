@@ -1528,11 +1528,11 @@
     </div> 
 
 
-<!--Daily updates-->
-<section class="apple-radar-section">
+<!--Daily updates
+    <section class="apple-radar-section">
     <div class="radar-container">
         
-        <!-- Compact Section Header -->
+        <!-- Compact Section Header 
         <div class="radar-header">
             <div>
                 <h2>Briefing Hub</h2>
@@ -1541,12 +1541,12 @@
             <button class="master-ack-btn" onclick="acknowledgeAllRadar()">Acknowledge All</button>
         </div>
 
-        <!-- Horizontal Scrollable Branch Pills (Loaded dynamically from JSON) -->
+        <!-- Horizontal Scrollable Branch Pills (Loaded dynamically from JSHead
         <div id="branchesScrollRow" class="branches-scroll-row">
-            <!-- Dynamic pills load here -->
+            <!-- Dynamic pills load here 
         </div>
 
-        <!-- Pinned Alerts Strip -->
+        <!-- Pinned Alerts Strip -
         <div id="pinnedContainer" class="pinned-strip-container" style="display: none;">
             <div class="pinned-strip-header">
                 <span>📌 Pinned</span>
@@ -1557,6 +1557,46 @@
     </div>
 </section>
 
+<!-- Holographic Trigger Bar (Zero permanent vertical footprint) -->
+<div class="matrix-trigger-bar" onclick="toggleMatrixFlyout()">
+    <div class="trigger-left">
+        <span class="matrix-pulse-dot active"></span>
+        <span class="trigger-title">Hospital Branch Status Matrix</span>
+    </div>
+    <div class="trigger-right">
+        <span id="matrixAlertBadge" class="matrix-badge">3 Alerts</span>
+        <span class="trigger-arrow">▾</span>
+    </div>
+</div>
+
+<!-- Holographic Matrix Flyout Overlay -->
+<div id="matrixFlyoutOverlay" class="matrix-overlay" onclick="closeMatrixOutside(event)">
+    <div class="matrix-flyout-container">
+        
+        <!-- Flyout Header -->
+        <div class="matrix-flyout-header">
+            <div class="matrix-header-info">
+                <h3>Branch Matrix Hub</h3>
+                <p>Live data feed from briefingsheet.json</p>
+            </div>
+            <div class="matrix-header-actions">
+                <button class="matrix-ack-all-btn" onclick="matrixAckAll()">Acknowledge All</button>
+                <button class="matrix-close-btn" onclick="toggleMatrixFlyout()">&times;</button>
+            </div>
+        </div>
+
+        <!-- Holographic Card Grid (Automatically wraps cards side-by-side) -->
+        <div id="matrixCardGrid" class="matrix-card-grid">
+            <!-- Dynamic branch cards load here from JSON -->
+        </div>
+
+    </div>
+</div>
+
+
+
+
+    
 <!-- Apple-Style Popup Modal -->
 <div id="branchPopup" class="popup-overlay" onclick="closePopupOutside(event)">
     <div class="popup-card">
