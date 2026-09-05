@@ -1408,80 +1408,88 @@
 
 
 <!--Daily updates-->
-<section class="apple-pulse-section">
-    <div class="pulse-container">
+<section class="apple-radar-section">
+    <div class="radar-container">
         
-        <!-- Header with Date & Global Status -->
-        <div class="pulse-header">
-            <div class="header-titles">
-                <h2>Daily Care Pulse</h2>
-                <p id="current-date-label">Today's Live Overview Across All Branches</p>
+        <!-- Section Header -->
+        <div class="radar-header">
+            <div>
+                <h2>Hospital Branch Hub</h2>
+                <p>Click a branch node to inspect live daily updates.</p>
             </div>
-            <div class="global-ack-wrapper">
-                <button class="global-ack-btn" onclick="acknowledgeAll(this)">Acknowledge All Updates</button>
-                <span id="global-timestamp" class="timestamp-text"></span>
-            </div>
+            <button class="master-ack-btn" onclick="acknowledgeAllRadar()">Acknowledge All Branches</button>
         </div>
 
-        <!-- Bento Grid Layout (Fits everything on one screen) -->
-        <div class="bento-grid">
+        <!-- Visual Branch Hub Grid -->
+        <div class="hub-grid">
             
-            <!-- Branch Card: Jubilee Hills -->
-            <div class="bento-card" data-branch="jubilee">
-                <div class="card-top-row">
-                    <span class="branch-title">Jubilee Hills</span>
-                    <span class="status-dot active"></span>
+            <!-- Branch Card 1: Jubilee Hills -->
+            <div class="hub-card" id="hub-jubilee">
+                <div class="hub-trigger" onclick="toggleHubCard('hub-jubilee')">
+                    <div class="hub-info">
+                        <span class="pulsing-dot active"></span>
+                        <span class="hub-name">Jubilee Hills</span>
+                    </div>
+                    <span class="hub-status-text">1 Alert</span>
                 </div>
-                <ul class="update-mini-list">
-                    <li><strong class="tag-op">OP:</strong> Dr. Smith shifted to 2:00 PM</li>
-                    <li><strong class="tag-diag">Diag:</strong> MRI Suite calibrated till 4 PM</li>
-                </ul>
-                <div class="card-bottom">
-                    <button class="mini-ack" onclick="ackSingle(this)">Check</button>
-                </div>
-            </div>
-
-            <!-- Branch Card: HITEC City -->
-            <div class="bento-card" data-branch="hitec">
-                <div class="card-top-row">
-                    <span class="branch-title">HITEC City</span>
-                    <span class="status-dot active"></span>
-                </div>
-                <ul class="update-mini-list">
-                    <li><strong class="tag-leave">Leave:</strong> Dr. Rao on emergency leave</li>
-                    <li><strong class="tag-op">OP:</strong> Pediatrics handled by Dr. Mehta</li>
-                </ul>
-                <div class="card-bottom">
-                    <button class="mini-ack" onclick="ackSingle(this)">Check</button>
+                <!-- Dropdown Drawer Content -->
+                <div class="hub-drawer">
+                    <div class="drawer-content">
+                        <ul class="update-bullets">
+                            <li><strong>OP Timing:</strong> Dr. Smith's shift moved to 2:00 PM.</li>
+                            <li><strong>Diagnostics:</strong> MRI suite calibration until 4:00 PM.</li>
+                        </ul>
+                        <div class="drawer-footer">
+                            <span class="timestamp-stamp"></span>
+                            <button class="branch-ack" onclick="ackSingleHub(this, 'hub-jubilee')">Acknowledge</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Branch Card: Gachibowli -->
-            <div class="bento-card" data-branch="gachibowli">
-                <div class="card-top-row">
-                    <span class="branch-title">Gachibowli</span>
-                    <span class="status-dot normal"></span>
+            <!-- Branch Card 2: HITEC City -->
+            <div class="hub-card" id="hub-hitec">
+                <div class="hub-trigger" onclick="toggleHubCard('hub-hitec')">
+                    <div class="hub-info">
+                        <span class="pulsing-dot active"></span>
+                        <span class="hub-name">HITEC City</span>
+                    </div>
+                    <span class="hub-status-text">1 Alert</span>
                 </div>
-                <ul class="update-mini-list">
-                    <li><strong class="tag-op">OP:</strong> Normal operations reported</li>
-                    <li><strong class="tag-diag">Diag:</strong> CT Scan operational</li>
-                </ul>
-                <div class="card-bottom">
-                    <button class="mini-ack" onclick="ackSingle(this)">Check</button>
+                <!-- Dropdown Drawer Content -->
+                <div class="hub-drawer">
+                    <div class="drawer-content">
+                        <ul class="update-bullets">
+                            <li><strong>Leave Notice:</strong> Dr. Rao on leave; Pediatrics handled by Dr. Mehta.</li>
+                        </ul>
+                        <div class="drawer-footer">
+                            <span class="timestamp-stamp"></span>
+                            <button class="branch-ack" onclick="ackSingleHub(this, 'hub-hitec')">Acknowledge</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Branch Card: Banjara Hills -->
-            <div class="bento-card" data-branch="banjara">
-                <div class="card-top-row">
-                    <span class="branch-title">Banjara Hills</span>
-                    <span class="status-dot active"></span>
+            <!-- Branch Card 3: Gachibowli -->
+            <div class="hub-card" id="hub-gachibowli">
+                <div class="hub-trigger" onclick="toggleHubCard('hub-gachibowli')">
+                    <div class="hub-info">
+                        <span class="pulsing-dot normal"></span>
+                        <span class="hub-name">Gachibowli</span>
+                    </div>
+                    <span class="hub-status-text">Normal</span>
                 </div>
-                <ul class="update-mini-list">
-                    <li><strong class="tag-op">Timings:</strong> Evening OPD extended to 8 PM</li>
-                </ul>
-                <div class="card-bottom">
-                    <button class="mini-ack" onclick="ackSingle(this)">Check</button>
+                <!-- Dropdown Drawer Content -->
+                <div class="hub-drawer">
+                    <div class="drawer-content">
+                        <ul class="update-bullets">
+                            <li>All departments operating under regular schedules today.</li>
+                        </ul>
+                        <div class="drawer-footer">
+                            <span class="timestamp-stamp"></span>
+                            <button class="branch-ack" onclick="ackSingleHub(this, 'hub-gachibowli')">Acknowledge</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1489,6 +1497,9 @@
     </div>
 </section>
 
+        
+            
+                
 
 
 
