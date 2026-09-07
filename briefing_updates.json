@@ -2,11 +2,27 @@
   {
     "id": "upd1",
     "date": "2026-09-10",
+    "branch": "COPC",
+    "title": "Dr Murali-Cardiology No Op today",
+    "body": "Dr is on leave."
+  },
+  {
+    "id": "upd1",
+    "date": "2026-09-10",
+    "branch": "All Branches",
+    "title": "Free Camp",
+    "body": "Cardio Op free for new patients until 25th Sep."
+  },
+  {
+    "id": "upd1",
+    "date": "2026-09-10",
     "branch": "All Branches",
     "title": "Your update title",
     "body": "Your update text."
   }
 ]
+
+
 
 
 
