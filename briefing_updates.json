@@ -9,16 +9,37 @@
   {
     "id": "upd1",
     "date": "2026-09-10",
-    "branch": "All Branches",
+    "branch": "Banjara IP",
     "title": "Free Camp",
     "body": "Cardio Op free for new patients until 25th Sep."
   },
   {
     "id": "upd1",
     "date": "2026-09-10",
-    "branch": "All Branches",
-    "title": "Your update title",
-    "body": "Your update text."
+    "branch": "Indore",
+    "title": "Check 06",
+    "body": "Check 06 viewing z text."
+  },
+  {
+    "id": "upd1",
+    "date": "2026-09-10",
+    "branch": "Musheerabad",
+    "title": "Dr Murali-Cardiology No Op today",
+    "body": "Dr is on leave."
+  },
+  {
+    "id": "upd1",
+    "date": "2026-09-10",
+    "branch": "Nampally",
+    "title": "Op Time Change",
+    "body": "Dr Murali-Cardio OP from 1pm to 5pm on 8th to 14th Sep."
+  },
+  {
+    "id": "upd1",
+    "date": "2026-09-10",
+    "branch": "Hitech Care",
+    "title": "Check 12",
+    "body": "Visual test check 12 text executed."
   }
 ]
 
