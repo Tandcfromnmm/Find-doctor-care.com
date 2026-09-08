@@ -1,42 +1,57 @@
 [
   {
+  "id": "leave1",
+  "dateFrom": "2026-09-08",
+  "dateTo": "2026-09-15",
+  "branch": "HITEC City",
+  "title": "Dr. A on leave",
+  "body": "Dr. A is on leave from 8 Sep to 15 Sep. Please choose an alternate doctor or reschedule for this period."
+},
+  
+  {
     "id": "upd1",
-    "date": "2026-09-10 to 2026-09-15",
+    "dateFrom": "2026-09-08",
+    "dateTo": "2026-09-15",
     "branch": "COPC",
     "title": "Dr Murali-Cardiology No Op today",
     "body": "Dr is on leave."
   },
   {
     "id": "upd1",
-    "date": "2026-09-10",
+    "dateFrom": "2026-09-10",
+    "dateTo": "2026-09-10",
     "branch": "Banjara IP",
     "title": "Free Camp",
     "body": "Cardio Op free for new patients until 25th Sep."
   },
   {
     "id": "upd1",
-    "date": "2026-09-10",
+    "dateFrom": "2026-09-10",
+    "dateTo": "2026-09-10",
     "branch": "Indore",
     "title": "Check 06",
     "body": "Check 06 viewing z text."
   },
   {
     "id": "upd1",
-    "date": "2026-09-10",
+    "dateFrom": "2026-09-10",
+    "dateTo": "2026-09-10",
     "branch": "Musheerabad",
     "title": "Dr Murali-Cardiology No Op today",
     "body": "Dr is on leave."
   },
   {
     "id": "upd1",
-    "date": "2026-09-10",
+    "dateFrom": "2026-09-10",
+    "dateTo": "2026-09-10",
     "branch": "Nampally",
     "title": "Op Time Change",
     "body": "Dr Murali-Cardio OP from 1pm to 5pm on 8th to 14th Sep."
   },
   {
     "id": "upd1",
-    "date": "2026-09-10",
+    "dateFrom": "2026-09-10",
+    "dateTo": "2026-09-11",
     "branch": "Hitech Care",
     "title": "Check 12",
     "body": "Visual test check 12 text executed."
