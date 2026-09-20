@@ -30,7 +30,7 @@
     "dateTo": "2026-09-10",
     "branch": "Indore",
     "title": "Check 06",
-    "body": "Check 06 viewing z text."
+    "body": "Viewing example 'z' text. Check 12 text executed."
   },
   {
     "id": "upd1",
@@ -54,7 +54,7 @@
     "dateTo": "2026-09-11",
     "branch": "Hitech Care",
     "title": "Check 12",
-    "body": "Visual test check 12 text executed."
+    "body": "Viewing example 'z' text. Check 12 text executed."
   }
 ]
 
