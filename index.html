@@ -1965,7 +1965,7 @@
             <!-- Room -->
             <div id="lcRoom" class="lc-room" style="display:none;">
                 <div class="lc-topbar">
-                    <div id="lcOnline" class="lc-online"><span class="lc-dot"></span><span id="lcOnlineCount">1 online</span><span id="lcDemoTag" class="lc-demo-tag" style="display:none;">DEMO</span></div>
+                    <div id="lcOnline" class="lc-online"><span class="lc-dot"></span><span id="lcOnlineCount">1 online</span><span id="lcDemoTag" class="lc-demo-tag" style="display:none;">Test mod</span></div>
                     <button type="button" id="lcMeChip" class="lc-me-chip" onclick="lcLeave()" title="Leave the chat"></button>
                 </div>
                 <div id="lcPresence" class="lc-presence"></div>
@@ -1974,7 +1974,7 @@
                 <div id="lcTyping" class="lc-typing"></div>
                 <div id="lcQuick" class="lc-quick"></div>
                 <div class="lc-composer">
-                    <input type="text" id="lcInput" maxlength="300" placeholder="Message everyone..." autocomplete="off" onkeydown="lcKey(event)" oninput="lcTypingPing()">
+                    <input type="text" id="lcInput" maxlength="300" placeholder="Type here to message everyone..." autocomplete="off" onkeydown="lcKey(event)" oninput="lcTypingPing()">
                     <button type="button" id="lcSend" class="lc-send" onclick="lcSend()" aria-label="Send">➤</button>
                 </div>
                 <div id="lcToast" class="lc-toast"></div>
@@ -4837,7 +4837,7 @@
             if (firebaseConfigured()) { banner.style.display = 'none'; }
             else {
                 banner.style.display = 'block';
-                banner.textContent = 'Demo mode: only tabs open in this browser can see each other. The site owner can switch on live mode so everyone on the site can chat.';
+                banner.textContent = 'Text: Only if this tab is opened in this browser can text each other. 💠Credit: Murali Manohar';
             }
             const err = lc('lcJoinError');
             err.style.display = message ? 'block' : 'none';
