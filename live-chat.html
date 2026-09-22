@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat - Care Portal</title>
+    <style>
+        :root {
+            --bg-color: #0b132b;
+            --card-bg: #16223f;
+            --text-main: #ffffff;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.2);
+            --border-color: #1e293b;
+            --radius: 16px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 16px 0 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            flex: 1;
+        }
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .brand-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-image {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .brand-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+        .finder-back-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 14px;
+            cursor: pointer;
+            color: #60a5fa;
+            font-size: 14px;
+            font-weight: 600;
+            width: fit-content;
+        }
+        .finder-back-row:hover {
+            color: #93c5fd;
+        }
+        input[type="text"], input[type="date"], select, input[type="password"] {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 15px;
+            background: #0b132b;
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            color: var(--text-main);
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+        input[type="text"]:focus, input[type="date"]:focus, select:focus, input[type="password"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .site-footer {
+            width: 100%;
+            max-width: 600px;
+            margin: 40px auto 24px auto;
+            background: rgba(22, 34, 63, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .footer-divider-horizontal {
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+            margin: 2px 0;
+        }
+        .footer-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .footer-divider {
+            color: #334155;
+            font-weight: 300;
+        }
+        .content-managed-text {
+            color: var(--text-secondary);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        .developer-credit {
+            display: inline-block;
+            font-weight: 600;
+            background: linear-gradient(90deg, #38bdf8 0%, #818cf8 35%, #c084fc 70%, #38bdf8 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: colorShine 4s linear infinite;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border: 1px solid #2d3748;
+            transform: translateY(20px);
+            transition: transform 0.25s ease;
+            position: relative;
+            box-sizing: border-box;
+            color: var(--text-main);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+        #map {
+            width: 100%;
+            height: 220px;
+            border-radius: 12px;
+            border: 1px solid #2d3748;
+            margin-bottom: 16px;
+            z-index: 1;
+        }
+        @keyframes colorShine {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+
+        /* Portal navigation links */
+        a.home-app-tile, a.finder-back-row { text-decoration: none; }
+
+        /* Standalone page mode: the card is the page itself, not a popup */
+        .modal-overlay.page-mode {
+            position: static;
+            background: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            padding: 0;
+            z-index: auto;
+            opacity: 1;
+            pointer-events: auto;
+            align-items: flex-start;
+        }
+        .modal-overlay.page-mode:not(.active) { display: none; }
+        .modal-overlay.page-mode .modal-card {
+            transform: none;
+            max-height: none;
+            overflow: visible;
+        }
+        .modal-overlay.page-mode .chat-modal-card {
+            transform: none;
+            max-width: 100%;
+            max-height: none;
+            height: calc(100vh - 190px);
+            height: calc(100dvh - 190px);
+            min-height: 460px;
+        }
+        /* ================= LIVE CHAT ================= */
+        #liveChatModal .lc-card {
+            padding: 0;
+            max-width: 460px;
+            overflow: hidden;
+            background: linear-gradient(165deg, #182649 0%, #101a33 55%, #0d1630 100%);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+        }
+        #liveChatModal .lc-card button { font-family: inherit; }
+        #liveChatModal .modal-close { z-index: 6; top: 12px; right: 12px; }   /* stays above the chat header */
+
+        /* ---- join screen ---- */
+        .lc-join { padding: 30px 24px 24px; text-align: center; }
+        .lc-hero { position: relative; width: 74px; height: 74px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; }
+        .lc-hero::before, .lc-hero::after {
+            content: ''; position: absolute; inset: 0; border-radius: 50%;
+            border: 2px solid rgba(96, 165, 250, 0.55);
+            animation: lcRipple 2.6s ease-out infinite;
+        }
+        .lc-hero::after { animation-delay: 1.3s; }
+        .lc-hero-orb {
+            position: relative; width: 58px; height: 58px; border-radius: 50%; font-size: 28px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            box-shadow: 0 8px 26px rgba(99, 102, 241, 0.55);
+        }
+        .lc-title { margin: 6px 0 4px; font-size: 23px; font-weight: 800; color: #fff; }
+        .lc-sub { margin: 0 auto 14px; font-size: 13.5px; line-height: 1.5; color: var(--text-secondary, #94a3b8); max-width: 340px; }
+        .lc-banner {
+            margin: 0 0 14px; padding: 9px 12px; border-radius: 10px; font-size: 12.5px; line-height: 1.45; text-align: left;
+            background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24;
+        }
+        .lc-label { display: block; text-align: left; margin: 12px 0 7px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary, #94a3b8); }
+        .lc-emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+        .lc-emoji-btn {
+            aspect-ratio: 1; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.2); background: rgba(255, 255, 255, 0.04);
+            font-size: 24px; cursor: pointer; transition: transform .15s ease, background .15s ease;
+        }
+        .lc-emoji-btn:hover { transform: translateY(-2px); }
+        .lc-emoji-btn.selected { background: rgba(96, 165, 250, 0.22); border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25); }
+        .lc-color-row { display: flex; gap: 12px; justify-content: center; margin-top: 12px; }
+        .lc-color-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25) inset; transition: transform .15s ease; }
+        .lc-color-btn.selected { border-color: #fff; transform: scale(1.18); }
+        .lc-name-row { display: flex; gap: 8px; }
+        .lc-name-row input { flex: 1; min-width: 0; }
+        .lc-dice { width: 46px; border-radius: 12px; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(255, 255, 255, 0.05); font-size: 20px; cursor: pointer; }
+        .lc-error { margin-top: 10px; font-size: 13px; color: #f87171; text-align: left; }
+        .lc-join-btn {
+            width: 100%; margin-top: 16px; padding: 14px; border: none; border-radius: 14px; cursor: pointer;
+            font-size: 15.5px; font-weight: 800; color: #fff;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            box-shadow: 0 10px 24px rgba(99, 102, 241, 0.4); transition: transform .15s ease, opacity .15s ease;
+        }
+        .lc-join-btn:hover:not(:disabled) { transform: translateY(-1px); }
+        .lc-join-btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+        .lc-note { margin: 14px 4px 0; font-size: 11.5px; line-height: 1.5; color: var(--text-secondary, #94a3b8); opacity: .85; }
+
+        /* ---- room ---- */
+        .lc-room { display: flex; flex-direction: column; height: min(84vh, 680px); position: relative; }
+        #liveChatModal.page-mode .lc-room { height: calc(100vh - 190px); height: calc(100dvh - 190px); min-height: 480px; }
+        .lc-topbar-right { display: flex; align-items: center; gap: 8px; }
+        .lc-bell { padding: 5px 9px; font-size: 15px; }
+        .lc-bell.on { background: rgba(167, 139, 250, 0.25); border-color: #a78bfa; }
+        .lc-topbar {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px;
+            background: linear-gradient(120deg, rgba(59, 130, 246, 0.24), rgba(139, 92, 246, 0.24), rgba(52, 211, 153, 0.16));
+            background-size: 220% 220%; animation: lcAurora 12s ease infinite;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+        }
+        #liveChatModal:not(.page-mode) .lc-topbar { padding-right: 56px; }
+        .lc-online { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 800; color: #fff; }
+        .lc-dot { width: 9px; height: 9px; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); animation: lcPulse 1.8s infinite; }
+        .lc-reconnecting .lc-dot { background: #fbbf24; }
+        .lc-demo-tag { font-size: 10px; letter-spacing: .08em; padding: 2px 7px; border-radius: 999px; background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.5); color: #fbbf24; }
+        .lc-me-chip {
+            --lc-c: #60a5fa; display: flex; align-items: center; gap: 6px; max-width: 170px; padding: 5px 10px 5px 6px; cursor: pointer;
+            border-radius: 999px; border: 1px solid var(--lc-c); background: rgba(0, 0, 0, 0.2); color: #fff; font-size: 12.5px; font-weight: 700;
+        }
+        .lc-me-chip::after { content: 'Leave'; margin-left: 4px; padding-left: 8px; border-left: 1px solid rgba(255, 255, 255, 0.25); font-size: 11px; font-weight: 600; opacity: .75; }
+        .lc-me-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .lc-presence { display: flex; gap: 6px; overflow-x: auto; padding: 10px 12px 6px; scrollbar-width: none; border-bottom: 1px solid rgba(148, 163, 184, 0.1); }
+        .lc-presence::-webkit-scrollbar { display: none; }
+        .lc-orb {
+            --lc-c: #60a5fa; position: relative; flex: 0 0 auto; width: 64px; padding: 2px 0 4px; border: none; background: none; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-secondary, #94a3b8);
+            transition: transform .15s ease;
+        }
+        .lc-orb:hover { transform: translateY(-2px); }
+        .lc-orb-face {
+            position: relative; width: 46px; height: 46px; border-radius: 50%; font-size: 23px;
+            display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 55%), var(--lc-c);
+            box-shadow: 0 0 0 2px var(--lc-c);
+            animation: lcBreathe 3.4s ease-in-out infinite;
+        }
+        .lc-orb-face::after {
+            content: ''; position: absolute; inset: -4px; border-radius: 50%; z-index: -1;
+            background: var(--lc-c); filter: blur(11px); opacity: .5;
+        }
+        .lc-orb.current .lc-orb-face { outline: 2px solid #fff; outline-offset: 3px; }
+        .lc-orb.current { color: #fff; }
+        .lc-orb.away .lc-orb-face { filter: grayscale(.85); opacity: .5; animation: none; }
+        .lc-orb-label { max-width: 62px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 600; }
+        .lc-orb-badge {
+            position: absolute; top: -2px; right: 6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; display: none;
+            align-items: center; justify-content: center; font-size: 10.5px; font-weight: 800; color: #fff; background: #ef4444; border: 2px solid #101a33; box-sizing: border-box;
+        }
+        .lc-orb-typing { position: absolute; top: 30px; right: 4px; display: none; gap: 2px; padding: 4px 6px; border-radius: 10px; background: #0b132b; border: 1px solid rgba(255, 255, 255, 0.18); }
+        .lc-orb.typing .lc-orb-typing { display: flex; }
+        .lc-orb-typing i, .lc-dots i { width: 4px; height: 4px; border-radius: 50%; background: #cbd5e1; animation: lcDot 1.1s infinite ease-in-out; }
+        .lc-orb-typing i:nth-child(2), .lc-dots i:nth-child(2) { animation-delay: .15s; }
+        .lc-orb-typing i:nth-child(3), .lc-dots i:nth-child(3) { animation-delay: .3s; }
+        .lc-pop { animation: lcPop .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+        .lc-orb-leaving { opacity: 0; transform: scale(.6); transition: opacity .3s ease, transform .3s ease; }
+
+        .lc-thread-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 14px; font-size: 13px; font-weight: 700; color: #e2e8f0; }
+        .lc-thread-actions { display: flex; gap: 6px; }
+        .lc-mini-btn { padding: 5px 10px; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(255, 255, 255, 0.05); color: #cbd5e1; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .lc-mini-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .lc-messages { flex: 1; overflow-y: auto; padding: 4px 14px 10px; display: flex; flex-direction: column; gap: 8px; overscroll-behavior: contain; }
+        .lc-empty { margin: auto; padding: 0 22px; text-align: center; font-size: 13px; line-height: 1.55; color: var(--text-secondary, #94a3b8); }
+        .lc-msg {
+            --lc-c: #94a3b8; position: relative; overflow: hidden; align-self: flex-start; max-width: 84%; box-sizing: border-box;
+            padding: 8px 12px 11px; border-radius: 4px 16px 16px 16px; color: #f1f5f9;
+            background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid var(--lc-c);
+            transition: opacity .35s ease, transform .35s ease;
+        }
+        .lc-msg.mine { align-self: flex-end; border: none; border-radius: 16px 4px 16px 16px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .lc-who { margin-bottom: 2px; font-size: 11.5px; font-weight: 800; color: var(--lc-c); }
+        .lc-text { font-size: 14.5px; line-height: 1.42; overflow-wrap: anywhere; }
+        .lc-time { margin-top: 3px; font-size: 10px; text-align: right; opacity: .55; }
+        .lc-life { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, 0.07); }
+        .lc-life i { display: block; height: 100%; transform-origin: left; background: #34d399; animation: lcDrain linear forwards; }
+        .lc-in { animation: lcMsgIn .28s ease-out both; }
+        .lc-fade-out { opacity: 0; transform: scale(.94); }
+        .lc-sys { align-self: center; padding: 3px 11px; border-radius: 999px; font-size: 11.5px; color: var(--text-secondary, #94a3b8); background: rgba(255, 255, 255, 0.05); transition: opacity .35s ease; }
+        .lc-wave-line { color: #fde68a; background: rgba(251, 191, 36, 0.12); }
+
+        .lc-typing { min-height: 20px; padding: 0 16px 2px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary, #94a3b8); opacity: 0; transition: opacity .2s ease; }
+        .lc-typing.on { opacity: 1; }
+        .lc-dots { display: inline-flex; gap: 3px; }
+        .lc-quick { display: flex; gap: 7px; overflow-x: auto; padding: 4px 12px 8px; scrollbar-width: none; }
+        .lc-quick::-webkit-scrollbar { display: none; }
+        .lc-chip { flex: 0 0 auto; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(255, 255, 255, 0.05); color: #e2e8f0; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .lc-chip:hover { background: rgba(96, 165, 250, 0.18); border-color: #60a5fa; }
+        .lc-composer { display: flex; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid rgba(148, 163, 184, 0.14); background: rgba(8, 14, 30, 0.45); }
+        .lc-composer input { flex: 1; min-width: 0; }
+        .lc-send { width: 48px; border: none; border-radius: 12px; cursor: pointer; font-size: 18px; color: #fff; background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .lc-send:disabled { opacity: .4; cursor: not-allowed; }
+
+        .lc-toast {
+            position: absolute; left: 50%; bottom: 84px; transform: translate(-50%, 10px); padding: 7px 14px; border-radius: 999px; z-index: 5;
+            font-size: 12.5px; font-weight: 600; color: #fff; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.15);
+            opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; white-space: nowrap;
+        }
+        .lc-toast.on { opacity: 1; transform: translate(-50%, 0); }
+        .lc-wave-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 4; }
+        .lc-wave-float { position: absolute; bottom: 90px; display: flex; flex-direction: column; align-items: center; gap: 2px; animation: lcWaveUp 2.4s ease-out forwards; }
+        .lc-wave-float span { font-size: 42px; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.4)); }
+        .lc-wave-float small { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; color: #fff; background: rgba(15, 23, 42, 0.85); }
+
+        @keyframes lcBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+        @keyframes lcPulse { 0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); } 70% { box-shadow: 0 0 0 9px rgba(52, 211, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); } }
+        @keyframes lcRipple { 0% { transform: scale(.8); opacity: .9; } 100% { transform: scale(1.7); opacity: 0; } }
+        @keyframes lcAurora { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes lcPop { 0% { transform: scale(.2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes lcMsgIn { 0% { transform: translateY(10px) scale(.97); opacity: 0; } 100% { transform: none; opacity: 1; } }
+        @keyframes lcDrain { 0% { transform: scaleX(1); background: #34d399; } 65% { background: #fbbf24; } 100% { transform: scaleX(0); background: #fb7185; } }
+        @keyframes lcDot { 0%, 80%, 100% { transform: translateY(0); opacity: .5; } 40% { transform: translateY(-4px); opacity: 1; } }
+        @keyframes lcWaveUp { 0% { transform: translateY(0) scale(.5) rotate(-12deg); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-280px) scale(1.25) rotate(18deg); opacity: 0; } }
+        @media (prefers-reduced-motion: reduce) {
+            .lc-orb-face, .lc-topbar, .lc-dot, .lc-hero::before, .lc-hero::after, .lc-pop, .lc-in, .lc-wave-float { animation: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="brand-header">
+            <div class="brand-left">
+                <img src="" alt="Logo" class="logo-image" id="brandLogo" onerror="this.style.display='none'">
+                <div class="brand-title"></div>
+            </div>
+        </div>
+
+        <a class="finder-back-row" href="index.html">
+            <span>←</span><span>Home</span>
+        </a>
+
+    <!-- Live Chat: people on the site right now talk in real time -->
+    <div id="liveChatModal" class="modal-overlay page-mode active">
+        <div class="modal-card lc-card">
+            <!-- Join screen -->
+            <div id="lcJoin" class="lc-join">
+                <div class="lc-hero"><div class="lc-hero-orb">💬</div></div>
+                <h2 class="lc-title">Live Chat</h2>
+                <p class="lc-sub">Talk in real time with people who are on this site right now. Messages vanish after 10 minutes, or when someone leaves.</p>
+                <div id="lcModeBanner" class="lc-banner" style="display:none;"></div>
+                <label class="lc-label">Pick your look</label>
+                <div id="lcEmojiGrid" class="lc-emoji-grid"></div>
+                <div id="lcColorRow" class="lc-color-row"></div>
+                <label class="lc-label" for="lcNameInput">Nickname</label>
+                <div class="lc-name-row">
+                    <input type="text" id="lcNameInput" maxlength="20" placeholder="e.g. Calm Falcon" autocomplete="off" oninput="lcValidateJoin()" onkeydown="if(event.key==='Enter')lcJoin()">
+                    <button type="button" class="lc-dice" onclick="lcRandomName()" title="Random name" aria-label="Random name">🎲</button>
+                </div>
+                <div id="lcJoinError" class="lc-error" style="display:none;"></div>
+                <button type="button" id="lcJoinBtn" class="lc-join-btn" onclick="lcJoin()" disabled>Join the room</button>
+                <p class="lc-note">Not for emergencies or medical advice. Please do not share personal or medical details here.</p>
+            </div>
+
+            <!-- Room -->
+            <div id="lcRoom" class="lc-room" style="display:none;">
+                <div class="lc-topbar">
+                    <div id="lcOnline" class="lc-online"><span class="lc-dot"></span><span id="lcOnlineCount">1 online</span><span id="lcDemoTag" class="lc-demo-tag" style="display:none;">DEMO</span></div>
+                    <div class="lc-topbar-right">
+                        <button type="button" id="lcNotifyBtn" class="lc-mini-btn lc-bell" onclick="lcToggleNotify()" title="Get notified of new messages">🔕</button>
+                        <button type="button" id="lcMeChip" class="lc-me-chip" onclick="lcLeave()" title="Leave the chat"></button>
+                    </div>
+                </div>
+                <div id="lcPresence" class="lc-presence"></div>
+                <div id="lcThreadHead" class="lc-thread-head"></div>
+                <div id="lcMessages" class="lc-messages"></div>
+                <div id="lcTyping" class="lc-typing"></div>
+                <div id="lcQuick" class="lc-quick"></div>
+                <div class="lc-composer">
+                    <input type="text" id="lcInput" maxlength="300" placeholder="Message everyone..." autocomplete="off" onkeydown="lcKey(event)" oninput="lcTypingPing()">
+                    <button type="button" id="lcSend" class="lc-send" onclick="lcSend()" aria-label="Send">➤</button>
+                </div>
+                <div id="lcToast" class="lc-toast"></div>
+            </div>
+            <div id="lcWaveLayer" class="lc-wave-layer"></div>
+        </div>
+    </div>
+
+    </div>
+
+    <footer class="site-footer">
+        <div class="content-managed-text">Content Managed by your office</div>
+        <div class="footer-divider-horizontal"></div>
+        <div class="footer-item">
+            <span class="developer-credit">Website Build & Developed by Murali Manohar</span>
+        </div>
+    </footer>
+
+    <script type="module">
+        // =====================================================================
+        //  LIVE CHAT  -  people who are on the site right now can talk in real time
+        //
+        //  Two ways to run:
+        //    DEMO MODE  (default, nothing to set up): tabs open in the SAME browser can see
+        //               each other. Good for trying it out.
+        //    LIVE MODE  (Firebase Realtime Database): everyone on the site, on any device.
+        //               Paste your Firebase settings below to switch it on.
+        // =====================================================================
+        const LIVE_CHAT_FIREBASE = {
+            apiKey: "AIzaSyBaB9xdf2E1JFaYZXr5Omu170NYSYX-7tU",
+            authDomain: "care-portal-83615.firebaseapp.com",
+            databaseURL: "https://care-portal-83615-default-rtdb.firebaseio.com",
+            projectId: "care-portal-83615",
+            appId: "1:554118797078:web:5a9bd0bb230080d8506237"
+        };
+        const FIREBASE_VERSION = '12.19.0';
+        const MESSAGE_LIFETIME_MS = 10 * 60 * 1000;   // messages vanish after 10 minutes (or when the sender leaves)
+        const MAX_TEXT = 300;
+        const MIN_SEND_GAP_MS = 700;
+        const DB_ROOT = 'care_live';
+
+        const EMOJIS = ['🦊', '🐼', '🦉', '🐬', '🦋', '🐢', '🐧', '🦁', '🐙', '🦄', '🐝', '🦜'];
+        const COLORS = ['#38bdf8', '#a78bfa', '#34d399', '#f472b6', '#fbbf24', '#fb7185'];
+        const ADJECTIVES = ['Calm', 'Bright', 'Kind', 'Swift', 'Brave', 'Gentle', 'Sunny', 'Cosy', 'Lucky', 'Merry'];
+        const ANIMAL_FOR = { '🦊': 'Fox', '🐼': 'Panda', '🦉': 'Owl', '🐬': 'Dolphin', '🦋': 'Butterfly', '🐢': 'Turtle',
+                             '🐧': 'Penguin', '🦁': 'Lion', '🐙': 'Octopus', '🦄': 'Unicorn', '🐝': 'Bee', '🦜': 'Parrot' };
+        const QUICK_REPLIES = [['👋 Hi', 'Hi 👋'], ['👍', '👍'], ['🙏 Thanks', 'Thank you 🙏'], ['😊', '😊']];
+
+        const lc = (id) => document.getElementById(id);
+        const firebaseConfigured = () => !String(LIVE_CHAT_FIREBASE.apiKey).startsWith('PASTE_');
+
+        function cleanText(s) {
+            return String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+        function pickOne(list) { return list[Math.floor(Math.random() * list.length)]; }
+        function randomName(emoji) { return pickOne(ADJECTIVES) + ' ' + (ANIMAL_FOR[emoji] || 'Guest'); }   // the name matches the avatar
+        function fmtTime(t) {
+            try { return new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; }
+        }
+        function loadProfile() {
+            try { return JSON.parse(localStorage.getItem('careLiveChatProfile') || 'null'); } catch (e) { return null; }
+        }
+        function saveProfile(p) {
+            try { localStorage.setItem('careLiveChatProfile', JSON.stringify(p)); } catch (e) { /* storage may be blocked */ }
+        }
+        function validProfile(p) {
+            return p && typeof p.name === 'string' && EMOJIS.includes(p.emoji) && COLORS.includes(p.color);
+        }
+
+        // =====================================================================
+        //  TRANSPORT 1: DEMO (BroadcastChannel - same browser only)
+        // =====================================================================
+        function createDemoTransport() {
+            const uid = 'd' + Math.random().toString(36).slice(2, 10);
+            const chan = new BroadcastChannel('care-live-chat-demo');
+            const peers = new Map();       // uid -> { profile, seen }
+            const typing = new Map();      // uid -> { scope, seen }
+            let cb = null, profile = null, away = false, hb = null, sweep = null, lastPresence = '';
+
+            const post = (o) => { try { chan.postMessage({ ...o, from: uid }); } catch (e) { /* channel closed */ } };
+            const me = () => ({ ...profile, away });
+
+            function emitPresence(force) {
+                const list = [{ uid, ...me() }].concat([...peers.entries()].map(([id, p]) => ({ uid: id, ...p.profile })));
+                const key = JSON.stringify(list);
+                if (force || key !== lastPresence) { lastPresence = key; cb.onPresence(list); }
+            }
+            function emitTyping() {
+                const map = {};
+                typing.forEach((v, id) => { map[id] = v.scope; });
+                cb.onTyping(map);
+            }
+
+            chan.onmessage = (e) => {
+                const d = e.data;
+                if (!d || d.from === uid || !cb) return;
+                switch (d.type) {
+                    case 'hello':
+                        peers.set(d.from, { profile: d.profile, seen: Date.now() });
+                        if (d.ask) post({ type: 'hello', profile: me() });
+                        emitPresence();
+                        break;
+                    case 'ping':
+                        peers.set(d.from, { profile: d.profile, seen: Date.now() });
+                        emitPresence();
+                        break;
+                    case 'bye':
+                        peers.delete(d.from); typing.delete(d.from);
+                        emitPresence(); emitTyping();
+                        break;
+                    case 'typing':
+                        if (d.scope) typing.set(d.from, { scope: d.scope, seen: Date.now() }); else typing.delete(d.from);
+                        emitTyping();
+                        break;
+                    case 'msg':
+                        if (d.msg.to === 'lobby') cb.onLobby(d.msg);
+                        else if (d.msg.to === uid) cb.onDm(d.msg);
+                        break;
+                }
+            };
+
+            function makeMsg(to, text, kind) {
+                return { id: uid + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                         from: uid, name: profile.name, emoji: profile.emoji, color: profile.color,
+                         to, text, kind: kind || 'text', t: Date.now() };
+            }
+
+            return {
+                mode: 'demo', uid,
+                now: () => Date.now(),
+                async connect(p, callbacks) {
+                    profile = p; cb = callbacks;
+                    post({ type: 'hello', ask: true, profile: me() });
+                    hb = setInterval(() => post({ type: 'ping', profile: me() }), 2000);
+                    sweep = setInterval(() => {
+                        const now = Date.now();
+                        let changed = false, typingChanged = false;
+                        peers.forEach((v, id) => { if (now - v.seen > 6500) { peers.delete(id); typing.delete(id); changed = true; typingChanged = true; } });
+                        typing.forEach((v, id) => { if (now - v.seen > 3500) { typing.delete(id); typingChanged = true; } });
+                        if (changed) emitPresence();
+                        if (typingChanged) emitTyping();
+                    }, 1500);
+                    emitPresence(true);
+                    cb.onStatus('online');
+                },
+                disconnect() {
+                    clearInterval(hb); clearInterval(sweep);
+                    post({ type: 'bye' });
+                    try { chan.close(); } catch (e) { /* already closed */ }
+                    cb = null;
+                },
+                updateProfile(p) { profile = p; post({ type: 'hello', profile: me() }); emitPresence(true); },
+                setAway(v) { away = v; post({ type: 'ping', profile: me() }); emitPresence(true); },
+                setTyping(scope) { post({ type: 'typing', scope: scope || null }); },
+                sendLobby(text, kind) {
+                    const m = makeMsg('lobby', text, kind);
+                    post({ type: 'msg', msg: m });
+                    cb.onLobby(m);                 // show my own message right away
+                    return { ...m, ack: Promise.resolve() };
+                },
+                sendDm(to, text, kind) {
+                    const m = makeMsg(to, text, kind);
+                    post({ type: 'msg', msg: m });
+                    return { ...m, ack: Promise.resolve() };   // the screen adds it locally
+                }
+            };
+        }
+
+        // =====================================================================
+        //  TRANSPORT 2: LIVE (Firebase Realtime Database + anonymous sign-in)
+        // =====================================================================
+        async function createFirebaseTransport() {
+            const base = 'https://www.gstatic.com/firebasejs/' + FIREBASE_VERSION + '/';
+            const [appMod, authMod, dbMod] = await Promise.all([
+                import(base + 'firebase-app.js'),
+                import(base + 'firebase-auth.js'),
+                import(base + 'firebase-database.js')
+            ]);
+            const { initializeApp } = appMod;
+            const { getAuth, signInAnonymously } = authMod;
+            const { getDatabase, ref, set, push, update, remove, onValue, onChildAdded, onDisconnect, serverTimestamp } = dbMod;
+
+            const app = initializeApp(LIVE_CHAT_FIREBASE, 'care-live-chat');
+            const auth = getAuth(app);
+            const cred = await signInAnonymously(auth);
+            const uid = cred.user.uid;
+            const db = getDatabase(app);
+
+            const presenceRef = ref(db, DB_ROOT + '/presence/' + uid);
+            const typingRef = ref(db, DB_ROOT + '/typing/' + uid);
+            const inboxRef = ref(db, DB_ROOT + '/dm/' + uid);
+            const lobbyRef = ref(db, DB_ROOT + '/lobby');
+
+            let cb = null, profile = null, away = false, offset = 0, joinedAt = 0;
+            let typingRaw = {}, lastTypingKey = '', typingTimer = null;
+            const unsubs = [];
+            const sent = new Map();   // message ref path -> { ref, timer }
+
+            const now = () => Date.now() + offset;
+            const presenceValue = () => ({ name: profile.name, emoji: profile.emoji, color: profile.color, away, since: serverTimestamp() });
+
+            function emitTyping() {
+                const map = {};
+                Object.entries(typingRaw).forEach(([id, v]) => { if (id !== uid && v && now() - (v.t || 0) < 6000) map[id] = v.scope; });
+                const key = JSON.stringify(map);
+                if (key !== lastTypingKey) { lastTypingKey = key; cb.onTyping(map); }
+            }
+
+            function send(targetRef, to, text, kind) {
+                const r = push(targetRef);
+                const msg = { from: uid, name: profile.name, emoji: profile.emoji, color: profile.color, to, text, kind: kind || 'text', t: serverTimestamp() };
+                // The write is sent immediately and is NOT tied to this tab staying open -
+                // once it reaches the server the message stays for its full lifetime even if
+                // this tab is closed right away. ack lets the screen show "sending..." / "not delivered".
+                const ack = set(r, msg);
+                ack.catch((err) => console.warn('Live chat: message was not sent', err));
+                const timer = setTimeout(() => {                 // only removed when its time is up
+                    sent.delete(r.key);
+                    remove(r).catch(() => {});
+                }, MESSAGE_LIFETIME_MS);
+                sent.set(r.key, { timer });
+                return { id: r.key, ...msg, t: now(), ack };
+            }
+
+            return {
+                mode: 'live', uid, now,
+                async connect(p, callbacks) {
+                    profile = p; cb = callbacks;
+
+                    // find out how far this device's clock is from the server's
+                    let stopOffset = null;
+                    await new Promise((resolve) => {
+                        stopOffset = onValue(ref(db, '.info/serverTimeOffset'), (snap) => { offset = snap.val() || 0; resolve(); }, () => resolve());
+                    });
+                    if (stopOffset) stopOffset();
+                    joinedAt = now() - 1500;                     // only conversation from now on
+
+                    unsubs.push(onValue(ref(db, '.info/connected'), (snap) => {
+                        if (snap.val() === true) {
+                            onDisconnect(presenceRef).remove();
+                            onDisconnect(typingRef).remove();
+                            onDisconnect(inboxRef).remove();
+                            set(presenceRef, presenceValue());
+                            cb.onStatus('online');
+                        } else {
+                            cb.onStatus('reconnecting');
+                        }
+                    }));
+                    unsubs.push(onValue(ref(db, DB_ROOT + '/presence'), (snap) => {
+                        const list = [];
+                        snap.forEach((child) => { const v = child.val() || {}; list.push({ uid: child.key, name: v.name, emoji: v.emoji, color: v.color, away: !!v.away }); });
+                        cb.onPresence(list);
+                    }));
+                    unsubs.push(onValue(ref(db, DB_ROOT + '/typing'), (snap) => {
+                        typingRaw = snap.val() || {};
+                        emitTyping();
+                    }));
+                    unsubs.push(onChildAdded(lobbyRef, (snap) => {
+                        const v = snap.val();
+                        if (v && typeof v.t === 'number' && v.t >= joinedAt) cb.onLobby({ id: snap.key, ...v });
+                    }));
+                    unsubs.push(onChildAdded(inboxRef, (snap) => {
+                        const v = snap.val();
+                        if (v && typeof v.t === 'number' && v.t >= joinedAt) cb.onDm({ id: snap.key, ...v });
+                    }));
+                    typingTimer = setInterval(emitTyping, 1500);   // let stale "typing" fade
+                },
+                disconnect() {
+                    clearInterval(typingTimer);
+                    // Messages I already sent are left alone here on purpose - they keep living
+                    // out their normal lifetime for the other person even after I leave/close the tab.
+                    unsubs.splice(0).forEach((u) => { try { u(); } catch (e) { /* ignore */ } });
+                    [presenceRef, typingRef, inboxRef].forEach((r) => { remove(r).catch(() => {}); onDisconnect(r).cancel().catch(() => {}); });
+                    cb = null;
+                },
+                updateProfile(p) { profile = p; update(presenceRef, { name: p.name, emoji: p.emoji, color: p.color }).catch(() => {}); },
+                setAway(v) { away = v; update(presenceRef, { away: v }).catch(() => {}); },
+                setTyping(scope) {
+                    if (scope) set(typingRef, { scope, t: serverTimestamp() }).catch(() => {});
+                    else remove(typingRef).catch(() => {});
+                },
+                sendLobby(text, kind) { return send(lobbyRef, 'lobby', text, kind); },     // arrives back through the lobby stream
+                sendDm(to, text, kind) { return send(ref(db, DB_ROOT + '/dm/' + to), to, text, kind); }
+            };
+        }
+
+        // =====================================================================
+        //  SCREEN
+        // =====================================================================
+        let net = null;
+        let me = null;
+        let notifyOn = false;   // browser notifications for messages arriving while this tab is not the one you're looking at                       // { uid, name, emoji, color }
+        let users = new Map();               // uid -> { uid, name, emoji, color, away } (only people currently here)
+        let knownProfiles = new Map();        // uid -> { name, emoji, color } (remembered even after they leave, for persisted messages)
+        let threads = { lobby: [] };         // 'lobby' or a user's uid -> messages
+        let unread = {};
+        let typingBy = {};
+        let muted = new Set();
+        let active = 'lobby';
+        let presenceReady = false;
+        let lastSendAt = 0;
+        let pendingSends = 0;   // writes that have not yet been confirmed by the server
+        let lastTypingSent = 0, typingTimer = null;
+        let selEmoji = EMOJIS[0], selColor = COLORS[0];
+        let orbEls = new Map();
+        let joining = false;
+
+        function buildJoinPickers() {
+            const grid = lc('lcEmojiGrid');
+            grid.textContent = '';
+            EMOJIS.forEach((em) => {
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'lc-emoji-btn' + (em === selEmoji ? ' selected' : '');
+                b.textContent = em; b.setAttribute('aria-label', 'Avatar ' + em);
+                b.addEventListener('click', () => { selEmoji = em; buildJoinPickers(); });
+                grid.appendChild(b);
+            });
+            const row = lc('lcColorRow');
+            row.textContent = '';
+            COLORS.forEach((c) => {
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'lc-color-btn' + (c === selColor ? ' selected' : '');
+                b.style.background = c; b.setAttribute('aria-label', 'Colour ' + c);
+                b.addEventListener('click', () => { selColor = c; buildJoinPickers(); });
+                row.appendChild(b);
+            });
+        }
+
+        function showJoinView(message) {
+            lc('lcRoom').style.display = 'none';
+            lc('lcJoin').style.display = 'block';
+            const saved = loadProfile();
+            if (validProfile(saved)) { selEmoji = saved.emoji; selColor = saved.color; if (!lc('lcNameInput').value) lc('lcNameInput').value = saved.name; }
+            else if (!lc('lcNameInput').value) { selEmoji = pickOne(EMOJIS); selColor = pickOne(COLORS); lc('lcNameInput').value = randomName(selEmoji); }
+            buildJoinPickers();
+            const banner = lc('lcModeBanner');
+            if (firebaseConfigured()) { banner.style.display = 'none'; }
+            else {
+                banner.style.display = 'block';
+                banner.textContent = 'Demo mode: only tabs open in this browser can see each other. The site owner can switch on live mode so everyone on the site can chat.';
+            }
+            const err = lc('lcJoinError');
+            err.style.display = message ? 'block' : 'none';
+            err.textContent = message || '';
+            setJoinBusy(false);
+            notifyOn = false;
+            window.lcValidateJoin();
+        }
+
+        function setJoinBusy(busy) {
+            joining = busy;
+            const btn = lc('lcJoinBtn');
+            btn.textContent = busy ? 'Connecting...' : 'Join the room';
+            btn.disabled = busy || cleanText(lc('lcNameInput').value).length < 2;
+        }
+
+        window.lcValidateJoin = function () {
+            if (!joining) lc('lcJoinBtn').disabled = cleanText(lc('lcNameInput').value).length < 2;
+        };
+        window.lcRandomName = function () {
+            selEmoji = pickOne(EMOJIS); selColor = pickOne(COLORS);
+            lc('lcNameInput').value = randomName(selEmoji);
+            buildJoinPickers(); window.lcValidateJoin();
+        };
+
+        function resetRoomState() {
+            users = new Map(); knownProfiles = new Map(); threads = { lobby: [] }; unread = {}; typingBy = {};
+            muted = new Set(); active = 'lobby'; presenceReady = false; lastSendAt = 0;
+            orbEls = new Map();
+            lc('lcPresence').textContent = '';
+            lc('lcMessages').textContent = '';
+        }
+
+        window.lcJoin = async function () {
+            if (joining) return;
+            const name = cleanText(lc('lcNameInput').value).slice(0, 20);
+            if (name.length < 2) return;
+            const profile = { name, emoji: selEmoji, color: selColor };
+            saveProfile(profile);
+            setJoinBusy(true);
+            lc('lcJoinError').style.display = 'none';
+            try {
+                net = firebaseConfigured() ? await createFirebaseTransport() : createDemoTransport();
+                resetRoomState();
+                me = { uid: net.uid, ...profile };
+                await net.connect(profile, handlers);
+                showRoom();
+            } catch (err) {
+                console.error('Live chat could not connect', err);
+                if (net) { try { net.disconnect(); } catch (e) { /* ignore */ } }
+                net = null;
+                showJoinView('Could not connect. Check your internet connection and try again.');
+            }
+        };
+
+        function showRoom() {
+            joining = false;
+            lc('lcJoin').style.display = 'none';
+            lc('lcRoom').style.display = 'flex';
+            lc('lcDemoTag').style.display = net.mode === 'demo' ? 'inline-block' : 'none';
+            lc('lcMeChip').textContent = '';
+            const em = document.createElement('span'); em.textContent = me.emoji;
+            const nm = document.createElement('span'); nm.className = 'lc-me-name'; nm.textContent = me.name;
+            lc('lcMeChip').append(em, nm);
+            lc('lcMeChip').style.setProperty('--lc-c', me.color);
+            buildQuickReplies();
+            updateNotifyBtn();
+            renderAll();
+            net.setAway(document.hidden);
+            setTimeout(() => lc('lcInput').focus(), 200);
+        }
+
+        window.lcLeave = function () {
+            leaveRoom();
+            showJoinView();
+        };
+
+        function updateNotifyBtn() {
+            const b = lc('lcNotifyBtn');
+            if (!b) return;
+            b.textContent = notifyOn ? '🔔' : '🔕';
+            b.classList.toggle('on', notifyOn);
+            b.title = notifyOn ? 'Notifications on - tap to turn off' : 'Get notified of new messages';
+        }
+
+        window.lcToggleNotify = async function () {
+            if (!('Notification' in window)) { toast('Notifications are not supported on this device.'); return; }
+            if (notifyOn) { notifyOn = false; updateNotifyBtn(); toast('Notifications off'); return; }
+            if (Notification.permission === 'denied') { toast('Notifications are blocked for this site in your browser settings.'); return; }
+            if (Notification.permission !== 'granted') {
+                let result;
+                try { result = await Notification.requestPermission(); } catch (e) { result = 'denied'; }
+                if (result !== 'granted') { toast('Notifications were not allowed.'); return; }
+            }
+            notifyOn = true; updateNotifyBtn(); toast('Notifications on');
+        };
+
+        function notifyOfMessage(key, m) {
+            if (!notifyOn || m.from === me.uid || !('Notification' in window) || Notification.permission !== 'granted') return;
+            const looking = key === active && !document.hidden && document.hasFocus();
+            if (looking) return;   // already right in front of you, no need to interrupt
+            try {
+                const n = new Notification(m.emoji + ' ' + m.name, {
+                    body: m.kind === 'wave' ? 'sent a wave 👋' : m.text,
+                    tag: 'live-chat-' + key, renotify: true
+                });
+                n.onclick = () => {
+                    window.focus();
+                    const modal = lc('liveChatModal');
+                    if (modal && !modal.classList.contains('page-mode')) modal.classList.add('active');
+                    switchThread(key);
+                    n.close();
+                };
+            } catch (e) { /* some browsers restrict this outside a service worker; safe to ignore */ }
+        }
+
+        function leaveRoom() {
+            stopTyping();
+            if (net) { try { net.disconnect(); } catch (e) { /* ignore */ } net = null; }
+            resetRoomState();
+        }
+
+        window.openLiveChat = function () {
+            const modal = lc('liveChatModal');
+            if (modal && !modal.classList.contains('page-mode')) modal.classList.add('active');
+            if (!net) showJoinView();
+        };
+        window.closeLiveChat = function () {
+            leaveRoom();
+            const modal = lc('liveChatModal');
+            if (modal) modal.classList.remove('active');
+        };
+        window.ccLiveChat = window.openLiveChat;
+
+        // ---------- incoming events
+        const handlers = {
+            onPresence(list) {
+                const next = new Map();
+                list.forEach((u) => { if (u && u.uid && u.name) next.set(u.uid, { uid: u.uid, name: u.name, emoji: u.emoji, color: u.color, away: !!u.away }); });
+                if (presenceReady) {
+                    next.forEach((u, id) => { if (id !== me.uid && !users.has(id)) systemLine('lobby', u.emoji + ' ' + u.name + ' joined'); });
+                    users.forEach((u, id) => { if (id !== me.uid && !next.has(id)) systemLine(id === active ? id : 'lobby', u.emoji + ' ' + u.name + ' left'); });
+                }
+                users = next;
+                presenceReady = true;
+                renderPresence(); renderThreadHead(); renderOnline(); renderEmptyHint();
+                if (active !== 'lobby' && !users.has(active)) setComposerEnabled(false);
+            },
+            onLobby(m) { addMessage('lobby', m); },
+            onDm(m) { addMessage(m.from, m); },
+            onTyping(map) { typingBy = map || {}; renderTyping(); renderPresence(); },
+            onStatus(s) { lc('lcOnline').classList.toggle('lc-reconnecting', s === 'reconnecting'); renderOnline(s); }
+        };
+
+        function systemLine(key, text) {
+            const list = (threads[key] = threads[key] || []);
+            const m = { id: 'sys-' + Date.now() + Math.random().toString(36).slice(2, 6), kind: 'sys', text, t: net ? net.now() : Date.now(), from: 'system' };
+            list.push(m);
+            if (key === active) appendMessageEl(m, MESSAGE_LIFETIME_MS);
+            setTimeout(() => dropMessage(key, m.id), 90 * 1000);
+        }
+
+        function addMessage(key, m) {
+            if (!m || !m.id || !net) return;
+            const list = (threads[key] = threads[key] || []);
+            if (list.some((x) => x.id === m.id)) return;
+            if (m.from !== me.uid && muted.has(m.from)) return;
+            const text = m.kind === 'wave' ? '👋' : cleanText(m.text).slice(0, MAX_TEXT);
+            if (!text) return;
+            const remaining = MESSAGE_LIFETIME_MS - (net.now() - m.t);
+            if (remaining <= 0) return;
+            const msg = { id: m.id, from: m.from, name: cleanText(m.name).slice(0, 20), emoji: EMOJIS.includes(m.emoji) ? m.emoji : '🙂',
+                          color: COLORS.includes(m.color) ? m.color : '#94a3b8', text, kind: m.kind === 'wave' ? 'wave' : 'text', t: m.t };
+            knownProfiles.set(msg.from, { name: msg.name, emoji: msg.emoji, color: msg.color });   // so a persisted DM stays reachable even after they leave
+            list.push(msg);
+            if (key === active) { appendMessageEl(msg, remaining); }
+            else if (msg.from !== me.uid) { unread[key] = (unread[key] || 0) + 1; renderPresence(); }
+            if (msg.kind === 'wave' && msg.from !== me.uid) floatWave(msg);
+            notifyOfMessage(key, msg);
+            setTimeout(() => dropMessage(key, msg.id), remaining);
+            renderEmptyHint();
+        }
+
+        function dropMessage(key, id) {
+            const list = threads[key];
+            if (list) { const i = list.findIndex((x) => x.id === id); if (i >= 0) list.splice(i, 1); }
+            const el = lc('lcMessages') && lc('lcMessages').querySelector('[data-id="' + CSS.escape(id) + '"]');
+            if (el) { el.classList.add('lc-fade-out'); setTimeout(() => { el.remove(); renderEmptyHint(); }, 400); }
+        }
+
+        // ---------- rendering
+        function renderAll() { renderOnline(); renderPresence(); renderThreadHead(); renderMessages(); renderTyping(); renderEmptyHint(); setComposerEnabled(true); updatePlaceholder(); }
+
+        function renderOnline(status) {
+            const n = Math.max(1, users.size);
+            lc('lcOnlineCount').textContent = status === 'reconnecting' ? 'Reconnecting...' : n + ' online';
+        }
+
+        function makeOrb(key) {
+            const b = document.createElement('button');
+            b.type = 'button'; b.className = 'lc-orb';
+            b.addEventListener('click', () => switchThread(key));
+            const face = document.createElement('span'); face.className = 'lc-orb-face';
+            const dots = document.createElement('span'); dots.className = 'lc-orb-typing'; dots.innerHTML = '<i></i><i></i><i></i>';
+            const badge = document.createElement('span'); badge.className = 'lc-orb-badge';
+            const label = document.createElement('span'); label.className = 'lc-orb-label';
+            b.append(face, dots, badge, label);
+            return b;
+        }
+
+        function paintOrb(b, key, u) {
+            b.classList.toggle('current', active === key);
+            b.classList.toggle('away', !!(u && u.away));
+            b.style.setProperty('--lc-c', u ? u.color : '#60a5fa');
+            b.querySelector('.lc-orb-face').textContent = u ? u.emoji : '🌐';
+            b.querySelector('.lc-orb-label').textContent = u ? u.name : 'Lobby';
+            const n = unread[key] || 0;
+            const badge = b.querySelector('.lc-orb-badge');
+            badge.textContent = n > 9 ? '9+' : String(n);
+            badge.style.display = n > 0 ? 'flex' : 'none';
+            const scope = u && !u.left ? typingBy[key] : null;
+            b.classList.toggle('typing', !!scope && (scope === 'lobby' || scope === (me && me.uid)) && !muted.has(key));
+            b.title = u ? u.name + (u.left ? ' (left - message still here)' : u.away ? ' (away)' : '') : 'Everyone here now';
+        }
+
+        function threadStillHasContent(key) {
+            return (threads[key] || []).some((x) => x.kind !== 'sys') || (unread[key] || 0) > 0;
+        }
+
+        function renderPresence() {
+            const box = lc('lcPresence');
+            if (!box || !me) return;
+            if (!orbEls.has('lobby')) { const o = makeOrb('lobby'); orbEls.set('lobby', o); box.appendChild(o); }
+            paintOrb(orbEls.get('lobby'), 'lobby', null);
+            users.forEach((u, id) => {
+                if (id === me.uid) return;
+                let o = orbEls.get(id);
+                if (!o) { o = makeOrb(id); o.classList.add('lc-pop'); orbEls.set(id, o); box.appendChild(o); }
+                paintOrb(o, id, u);
+            });
+            // A private chat someone sent stays reachable even after they leave - their orb
+            // stays (dimmed, marked "left") for as long as the message itself is still here.
+            Object.keys(threads).forEach((key) => {
+                if (key === 'lobby' || users.has(key) || key === me.uid || !threadStillHasContent(key)) return;
+                let o = orbEls.get(key);
+                if (!o) { o = makeOrb(key); o.classList.add('lc-pop'); orbEls.set(key, o); box.appendChild(o); }
+                const prof = knownProfiles.get(key) || { name: 'Someone', emoji: '🙂', color: '#94a3b8' };
+                paintOrb(o, key, { ...prof, away: true, left: true });
+            });
+            orbEls.forEach((o, id) => {
+                if (id === 'lobby' || users.has(id) || threadStillHasContent(id)) return;
+                orbEls.delete(id);
+                o.classList.add('lc-orb-leaving');
+                setTimeout(() => o.remove(), 350);
+            });
+        }
+
+        function renderThreadHead() {
+            const head = lc('lcThreadHead');
+            if (!head) return;
+            head.textContent = '';
+            const left = document.createElement('div'); left.className = 'lc-thread-title';
+            const right = document.createElement('div'); right.className = 'lc-thread-actions';
+            const wave = document.createElement('button'); wave.type = 'button'; wave.className = 'lc-mini-btn'; wave.textContent = '👋 Wave';
+            wave.addEventListener('click', () => sendWave());
+            if (active === 'lobby') {
+                left.textContent = '🌐 Lobby · everyone here now';
+                right.append(wave);
+            } else {
+                const u = users.get(active);
+                left.textContent = u ? u.emoji + ' ' + u.name + ' · private' : 'Private chat';
+                const mute = document.createElement('button'); mute.type = 'button'; mute.className = 'lc-mini-btn';
+                mute.textContent = muted.has(active) ? '🔊 Unmute' : '🔇 Mute';
+                mute.addEventListener('click', () => toggleMute(active));
+                if (u) right.append(wave, mute);
+            }
+            head.append(left, right);
+        }
+
+        function renderMessages() {
+            const box = lc('lcMessages');
+            box.textContent = '';
+            const empty = document.createElement('div'); empty.id = 'lcEmpty'; empty.className = 'lc-empty';
+            box.appendChild(empty);
+            (threads[active] || []).forEach((m) => {
+                if (m.kind !== 'sys' && m.from !== me.uid && muted.has(m.from)) return;
+                const remaining = m.kind === 'sys' ? MESSAGE_LIFETIME_MS : MESSAGE_LIFETIME_MS - (net.now() - m.t);
+                if (remaining > 0) appendMessageEl(m, remaining, true);
+            });
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function appendMessageEl(m, remaining, instant) {
+            const box = lc('lcMessages');
+            const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
+            const mine = m.from === me.uid;
+            const el = document.createElement('div');
+            el.dataset.id = m.id;
+            if (m.kind === 'sys') {
+                el.className = 'lc-sys' + (instant ? '' : ' lc-in');
+                el.textContent = m.text;
+            } else if (m.kind === 'wave') {
+                el.className = 'lc-sys lc-wave-line' + (instant ? '' : ' lc-in');
+                el.textContent = mine ? 'You waved 👋' : m.emoji + ' ' + m.name + ' waved 👋';
+            } else {
+                el.className = 'lc-msg' + (mine ? ' mine' : '') + (instant ? '' : ' lc-in');
+                el.style.setProperty('--lc-c', m.color);
+                if (!mine && active === 'lobby') {
+                    const who = document.createElement('div'); who.className = 'lc-who'; who.textContent = m.emoji + ' ' + m.name;
+                    el.appendChild(who);
+                }
+                const text = document.createElement('div'); text.className = 'lc-text'; text.textContent = m.text;
+                const time = document.createElement('div'); time.className = 'lc-time'; time.textContent = fmtTime(m.t);
+                const life = document.createElement('div'); life.className = 'lc-life';
+                const bar = document.createElement('i');
+                bar.style.animationDuration = MESSAGE_LIFETIME_MS + 'ms';
+                bar.style.animationDelay = '-' + Math.max(0, MESSAGE_LIFETIME_MS - remaining) + 'ms';   // start at the true point in its life
+                life.appendChild(bar);
+                el.append(text, time, life);
+            }
+            box.appendChild(el);
+            if (!instant && (nearBottom || mine)) box.scrollTop = box.scrollHeight;
+            renderEmptyHint();
+        }
+
+        function renderEmptyHint() {
+            const e = lc('lcEmpty'); if (!e || !me) return;
+            const any = lc('lcMessages').querySelectorAll('.lc-msg, .lc-sys').length > 0;
+            e.style.display = any ? 'none' : 'block';
+            if (any) return;
+            if (active === 'lobby') {
+                e.textContent = users.size <= 1
+                    ? "You're the only one here right now. Keep this open. When someone joins they will appear above, instantly."
+                    : 'Say hi 👋 Everyone in the room can see this. Messages vanish after 10 minutes.';
+            } else {
+                const u = users.get(active);
+                e.textContent = u ? 'Private chat with ' + u.name + '. Only the two of you can see it, and it vanishes after 10 minutes.'
+                                  : 'This person has left the chat.';
+            }
+        }
+
+        function typingNames() {
+            const names = [];
+            Object.entries(typingBy).forEach(([id, scope]) => {
+                if (!me || id === me.uid || muted.has(id)) return;
+                const u = users.get(id); if (!u) return;
+                if (active === 'lobby' ? scope === 'lobby' : (id === active && scope === me.uid)) names.push(u.name);
+            });
+            return names;
+        }
+
+        function renderTyping() {
+            const box = lc('lcTyping'); if (!box) return;
+            const names = typingNames();
+            if (!names.length) { box.classList.remove('on'); box.textContent = ''; return; }
+            const label = names.length === 1 ? names[0] + ' is typing' : names.length === 2 ? names[0] + ' and ' + names[1] + ' are typing' : 'Several people are typing';
+            box.textContent = label;
+            const dots = document.createElement('span'); dots.className = 'lc-dots'; dots.innerHTML = '<i></i><i></i><i></i>';
+            box.appendChild(dots);
+            box.classList.add('on');
+        }
+
+        function updatePlaceholder() {
+            const u = users.get(active);
+            lc('lcInput').placeholder = active === 'lobby' ? 'Message everyone...' : (u ? 'Message ' + u.name + '...' : 'This person has left');
+        }
+
+        function setComposerEnabled(on) {
+            lc('lcInput').disabled = !on; lc('lcSend').disabled = !on;
+            if (!on) lc('lcInput').placeholder = 'This person has left the chat';
+            else updatePlaceholder();
+        }
+
+        function buildQuickReplies() {
+            const box = lc('lcQuick'); box.textContent = '';
+            QUICK_REPLIES.forEach(([label, text]) => {
+                const b = document.createElement('button'); b.type = 'button'; b.className = 'lc-chip'; b.textContent = label;
+                b.addEventListener('click', () => sendText(text));
+                box.appendChild(b);
+            });
+        }
+
+        function switchThread(key) {
+            if (key === active || !net) return;
+            stopTyping();
+            active = key; unread[key] = 0;
+            renderPresence(); renderThreadHead(); renderMessages(); renderTyping(); renderEmptyHint();
+            setComposerEnabled(key === 'lobby' || users.has(key));
+            lc('lcInput').focus();
+        }
+
+        function toggleMute(id) {
+            if (muted.has(id)) muted.delete(id); else { muted.add(id); }
+            renderThreadHead(); renderMessages(); renderPresence(); renderEmptyHint();
+            toast(muted.has(id) ? 'Muted. You will not see their messages.' : 'Unmuted.');
+        }
+
+        // ---------- sending
+        function canSend() {
+            const now = Date.now();
+            if (now - lastSendAt < MIN_SEND_GAP_MS) { toast('Slow down a little 🙂'); return false; }
+            lastSendAt = now; return true;
+        }
+
+        function trackAck(sent) {
+            if (!sent || !sent.ack) return;
+            pendingSends++;
+            sent.ack.then(
+                () => { pendingSends = Math.max(0, pendingSends - 1); },
+                () => { pendingSends = Math.max(0, pendingSends - 1); toast('A message could not be sent. Check your connection.'); }
+            );
+        }
+
+        function deliver(text) {
+            stopTyping();
+            if (active === 'lobby') trackAck(net.sendLobby(text, 'text'));
+            else if (users.has(active)) { const sent = net.sendDm(active, text, 'text'); trackAck(sent); addMessage(active, sent); }
+        }
+
+        function sendText(text) {
+            text = cleanText(text).slice(0, MAX_TEXT);
+            if (!text || !net || !canSend()) return;
+            deliver(text);
+        }
+
+        function sendWave() {
+            if (!net || !canSend()) return;
+            if (active === 'lobby') trackAck(net.sendLobby('👋', 'wave'));
+            else if (users.has(active)) { const sent = net.sendDm(active, '👋', 'wave'); trackAck(sent); addMessage(active, sent); }
+        }
+
+        window.lcSend = function () {
+            const input = lc('lcInput');
+            const text = cleanText(input.value).slice(0, MAX_TEXT);
+            if (!text || !net || !canSend()) return;
+            input.value = '';
+            deliver(text);
+        };
+        window.lcKey = function (event) { if (event.key === 'Enter') window.lcSend(); };
+
+        window.lcTypingPing = function () {
+            if (!net) return;
+            if (!lc('lcInput').value) { stopTyping(); return; }
+            const now = Date.now();
+            if (now - lastTypingSent > 1500) { net.setTyping(active); lastTypingSent = now; }
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(stopTyping, 2500);
+        };
+        function stopTyping() {
+            clearTimeout(typingTimer);
+            if (net && lastTypingSent) net.setTyping(null);
+            lastTypingSent = 0;
+        }
+
+        // ---------- little touches
+        let toastTimer = null;
+        function toast(text) {
+            const t = lc('lcToast'); if (!t) return;
+            t.textContent = text; t.classList.add('on');
+            clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 1800);
+        }
+
+        function floatWave(m) {
+            const layer = lc('lcWaveLayer'); if (!layer) return;
+            const w = document.createElement('div');
+            w.className = 'lc-wave-float';
+            w.style.left = (15 + Math.random() * 65) + '%';
+            const em = document.createElement('span'); em.textContent = '👋';
+            const nm = document.createElement('small'); nm.textContent = m.name;
+            w.append(em, nm);
+            layer.appendChild(w);
+            setTimeout(() => w.remove(), 2600);
+        }
+
+        document.addEventListener('visibilitychange', () => { if (net) net.setAway(document.hidden); });
+        window.addEventListener('pagehide', () => { if (net) { try { net.disconnect(); } catch (e) { /* ignore */ } net = null; } });
+        // If a message is still on its way out when the tab is closing, ask first - this gives it
+        // a moment to finish. Once it is written, it is already saved and does not need the tab open.
+        window.addEventListener('beforeunload', (e) => {
+            if (pendingSends > 0) { e.preventDefault(); e.returnValue = ''; }
+        });
+
+        // The standalone page starts on the join screen straight away.
+        if (lc('liveChatModal') && lc('liveChatModal').classList.contains('page-mode')) showJoinView();
+    </script>
+</body>
+</html>
